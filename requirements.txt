@@ -1,0 +1,30 @@
+# Core
+requests
+feedparser
+beautifulsoup4
+lxml
+trafilatura
+tqdm
+python-dotenv
+pandas
+numpy
+
+# NLP / sentence split
+nltk
+spacy
+
+# Models
+transformers
+torch
+huggingface-hub
+scikit-learn
+
+# LLM / VLM clients (pick what you use)
+openai
+pillow
+
+# Analysis / notebooks
+matplotlib
+seaborn
+jupyter
+stopwordsiso

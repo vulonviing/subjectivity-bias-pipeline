@@ -1,0 +1,15 @@
+{
+  "name": "image_annotation",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "vlm_label": {"type": "string", "enum": ["OBJ", "SUBJ"]},
+      "vlm_rationale": {"type": "string", "maxLength": 200},
+      "vlm_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+      "image_description": {"type": "string", "maxLength": 150}
+    },
+    "required": ["vlm_label", "vlm_rationale", "vlm_confidence", "image_description"]
+  }
+}

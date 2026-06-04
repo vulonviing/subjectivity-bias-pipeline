@@ -1,0 +1,36 @@
+article_id: e4938f3a7b5cae43699028f2030dcae1bf3f0f38
+url: https://www.npr.org/2026/06/01/nx-s1-5827041/cancer-vaccine-mrna-melanoma
+title: A cancer vaccine made just for you. mRNA is back and it's fighting melanoma
+source: npr (left)
+topic: general
+============================================================
+A cancer vaccine made just for you. mRNA is back and it's fighting melanoma
+Connie Franciosi, 80, noticed a suspicious spot on her skin and was diagnosed with melanoma in 2020. "It was considered a late diagnosis," she says.
+The skin cancer can be difficult to treat if it's not detected and treated early, and it can spread to other parts of the body. There are approximately 112,000 melanomas diagnosed in the U.S. each year and about 8,500 deaths.
+After Franciosi had surgery to remove the melanoma, she was told she had a high risk of recurrence and was offered a spot in a clinical trial testing a new messenger RNA (mRNA) vaccine combined with Keytruda, an immunotherapy drug.
+At the time, mRNA technology was in the news because of the recently developed Moderna COVID-19 vaccine. This melanoma trial, which included 157 patients in Australia and the U.S., all of whom had surgery to remove their tumors, was set up to test whether the same mRNA technology could be used to create a personalized cancer vaccine, explains Dr. Janice Mehnert. Mehnert is a melanoma specialist and researcher at NYU Langone Health and senior author of a new paper published Monday analyzing the five-year results.
+"This is an incredibly interesting trial because the approach is just so unique," Mehnert says. "It is a personalized immunotherapy strategy," tailored to each patient's tumor.
+Want the latest stories on the science of healthy living? Subscribe to NPR's Health newsletter.
+The results are striking. After five years of follow-up, 68.8% of patients who received the combination therapy remained cancer-free, she says, compared with 49.1% of patients who received Keytruda alone, which amounts to a 49% reduction in risk. "That's pretty exciting," Mehnert says.
+In addition, 92% of patients who received the combination therapy were alive at the five-year mark, compared with 71% of those who only used Keytruda. "I think this is strong evidence that this therapy, when used in combination with immunotherapy, can demonstrably reduce the risk of dying from this disease," she says.
+The results of the study are being presented at the American Society of Clinical Oncology conference today and are published in the Journal of Clinical Oncology.
+Mehnert says that predicting when melanoma will recur is difficult.
+"Sometimes recurrence is easily treated with surgery or radiation, but sometimes it happens in the lungs, the liver or the brain," and then it can be challenging to treat, she says. That's why a preventive approach makes sense. "We're trying to harness the power of the immune system early in a patient's disease course to optimize their outcomes," she says.
+Dr. Sarah Arron, a dermatologist and skin cancer surgeon in the San Francisco Bay Area who was not involved in the research, says the results are significant and demonstrate the potential of mRNA vaccines.
+"I think this is a landmark advance in how we treat these very advanced, high-risk melanomas," she says.
+Arron notes that while Americans became familiar with mRNA technology through the COVID-19 vaccine, this application is fundamentally different.
+"The COVID vaccine was the same RNA fragment given to everybody. Whereas in this case, the antigen itself is not one virus, it's [each] patient's tumor," she says. Since each person's melanoma can differ, each vaccine is tailored. "By matching this RNA treatment to the patient's melanoma, we can really boost the immunotherapy by driving it toward the patient's tumor."
+How the combination works
+Cells in the immune system, known as T cells, are built to find and destroy threats like cancer, but cancer can be sneaky, putting up the equivalent of a "don't attack me" shield that hides them. To simplify, Keytruda works by lifting that shield so T cells can see the cancer again. The personalized mRNA vaccine then amplifies the effect.
+Scientists sequence a patient's tumor to identify up to 34 unique molecular fingerprints called neoantigens and encode them into a custom vaccine. When it's injected, the vaccine trains T cells to recognize and target those specific neoantigens, giving the immune system a blueprint for attacking the cancer. So, each patient's tumor informs the vaccine that they will receive.
+In the trial, side effects were mild, including chills and minor pain at the injection site.
+Arron says that given the reservations and politicization of the COVID-19 vaccine, it's important to understand how this technology works. "This mRNA vaccine is designed towards boosting a tumor response," she says. And the results are "very encouraging" for the use of mRNA.
+Researchers are also studying whether mRNA vaccines can be used to prevent the recurrence of other cancers, including lung cancer.
+The next steps
+"The results are exciting," says Moderna's chief development officer, Dr. David Berman. The company developed the vaccine, which is called intismeran, and is collaborating with Merck, the maker of pembrolizumab, which is marketed under the trade name Keytruda.
+A Phase 3 trial is now underway, which includes nearly 1,000 patients. Once results are analyzed in the coming months, the goal is to seek FDA approval, Berman says.
+Berman has been working on melanoma for many years, before joining Moderna, so he says this feels like a momentous step forward.
+"The degree of benefit was incredible," Berman says, pointing to the significant reduction in risk of recurrence.
+For Connie Franciosi, the results speak for themselves. "I am cancer-free." She says her scans have shown no recurrence. "Life is good."
+She recently celebrated her 80th birthday. Her days are packed with the things she loves, including tending her gardens, staying active with her local library, and gathering with friends and playing golf.
+"I have some good shots and some not-so-good shots, but I just enjoy the game," she says. "I have a very satisfying life."

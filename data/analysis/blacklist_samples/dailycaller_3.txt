@@ -1,0 +1,20 @@
+article_id: 68bde1b8f17ef18742f00b33a9ef74300b1c840e
+url: https://dailycaller.com/2026/06/01/ai-nurse-theft-fentanyl-hospital/
+title: Nurse Pilfered Fentanyl From Hospital For Months And AI Overlooked It
+source: dailycaller (right)
+topic: tech
+============================================================
+An artificial intelligence-powered software failed to notice that a nurse at a Tennessee hospital was stealing fentanyl for several months, CBS News first reported on Monday.
+Anesthesia team members at Erlanger Baroness Hospital in Chattanooga became concerned when a nurse appeared to be slurring his speech and having difficulty staying awake while working in the surgery center in June 2025, CBS News reported, citing a Tennessee Board of Nursing consent order. The order indicates that the nurse later failed a drug test and was removed from his role. (RELATED: AI Is About To Overhaul Entire Health Care Industry—But Is That A Good Thing?)
+The nurse later conceded that he had taken and misused leftover fentanyl from surgeries over the course of several months, in some cases daily, according to CBS News.
+The hospital relies on Sentri7, a medication-monitoring software that utilizes AI and is supposed to detect missing drugs faster than humans can, the outlet reported. Sentri7 was apparently unable to detect missing drugs at Erlanger for several months and also failed to notice other “inconsistencies” that “should have been flagged,” per the consent order.
+André Rebelo, a spokesperson for Wolters Kluwer — the Dutch technology company that created Sentri7 — declined to answer CBS News’ questions about what occurred at Erlanger but maintained that the company is “confident in our software.”
+Wolters Kluwer and Erlanger Baroness each did not respond to the Daily Caller News Foundation’s request for comment.
+U.S. healthcare facilities are notably not required to disclose whether they use this type of AI software or divulge any errors, CBS News reported.
+“The ideal for patients, caregivers, and [hospital] systems would be when an AI is found to be making some type of error, that becomes very transparent and public,” David Rastall, a Johns Hopkins Medicine neurologist and AI researcher, told CBS News.
+Johns Hopkins Hospital and Health System Medication Safety and Quality Director Jacob Smith told the outlet that he does not understand how AI-powered software like Sentri7 could miss the drug diversion that occurred at Erlanger.
+“I’ve never myself seen these technologies be called out in that specific way,” Smith said. “It doesn’t make sense to me how you could miss it.”
+Drug diversion refers to the illegal distribution or abuse of prescription drugs or their use for purposes not intended by the prescriber, according to a Centers for Medicare and Medicaid Services fact sheet. An estimated 10-15% of all healthcare workers will abuse drugs or alcohol while working in the industry, according to Wolters Kluwer. About 10% of medical professionals will divert opioids or other substances at some point during their professional career,
+Fentanyl is currently the primary driver of drug overdose deaths in the U.S., according to the Government Accountability Office.
+The new report comes as the use of AI technology has become more widespread across the U.S. healthcare system in recent years. Experts previously told the DCNF that AI can be a useful tool for things like cancer detection and analyzing medical data.
+All content created by the Daily Caller News Foundation, an independent and nonpartisan newswire service, is available without charge to any legitimate news publisher that can provide a large audience. All republished articles must include our logo, our reporter’s byline and their DCNF affiliation. For any questions about our guidelines or partnering with us, please contact licensing@dailycallernewsfoundation.org.

@@ -1,0 +1,14 @@
+{
+  "name": "sentence_annotation",
+  "strict": true,
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "llm_label": {"type": "string", "enum": ["OBJ", "SUBJ"]},
+      "llm_rationale": {"type": "string", "maxLength": 200},
+      "llm_confidence": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "required": ["llm_label", "llm_rationale", "llm_confidence"]
+  }
+}

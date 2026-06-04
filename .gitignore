@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Env / secrets
+.env
+
+# Notebook cruft
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large raw data (scraped HTML cache and image cache)
+data/raw/html/
+data/raw/images/
+
+# Batch API intermediate input files (large, reproducible from source data)
+data/processed/llm_batch_input.jsonl
+data/processed/vlm_batch_input.jsonl
+data/processed/llm_batch_state.json
+data/processed/vlm_batch_state.json
+data/processed/vlm_download_errors.jsonl

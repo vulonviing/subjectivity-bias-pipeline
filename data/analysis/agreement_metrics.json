@@ -1,0 +1,279 @@
+{
+  "overall": {
+    "n": 8561,
+    "confusion": {
+      "tp": 1012,
+      "fp": 210,
+      "fn": 1052,
+      "tn": 6287
+    },
+    "accuracy": 0.8526,
+    "cohen_kappa": 0.532,
+    "subj_precision": 0.8282,
+    "subj_recall": 0.4903,
+    "subj_f1": 0.6159,
+    "proxy_subj_pct": 14.27,
+    "llm_subj_pct": 24.11,
+    "llm_mean_confidence": 0.9302
+  },
+  "by_block": [
+    {
+      "group_col": "outlet_block",
+      "group_key": "left",
+      "n": 4521,
+      "confusion": {
+        "tp": 472,
+        "fp": 101,
+        "fn": 557,
+        "tn": 3391
+      },
+      "accuracy": 0.8545,
+      "cohen_kappa": 0.5094,
+      "subj_precision": 0.8237,
+      "subj_recall": 0.4587,
+      "subj_f1": 0.5893,
+      "proxy_subj_pct": 12.67,
+      "llm_subj_pct": 22.76,
+      "llm_mean_confidence": 0.9301
+    },
+    {
+      "group_col": "outlet_block",
+      "group_key": "right",
+      "n": 4040,
+      "confusion": {
+        "tp": 540,
+        "fp": 109,
+        "fn": 495,
+        "tn": 2896
+      },
+      "accuracy": 0.8505,
+      "cohen_kappa": 0.5531,
+      "subj_precision": 0.832,
+      "subj_recall": 0.5217,
+      "subj_f1": 0.6413,
+      "proxy_subj_pct": 16.06,
+      "llm_subj_pct": 25.62,
+      "llm_mean_confidence": 0.9304
+    }
+  ],
+  "by_outlet": [
+    {
+      "group_col": "source",
+      "group_key": "dailycaller",
+      "n": 441,
+      "confusion": {
+        "tp": 61,
+        "fp": 4,
+        "fn": 55,
+        "tn": 321
+      },
+      "accuracy": 0.8662,
+      "cohen_kappa": 0.5981,
+      "subj_precision": 0.9385,
+      "subj_recall": 0.5259,
+      "subj_f1": 0.674,
+      "proxy_subj_pct": 14.74,
+      "llm_subj_pct": 26.3,
+      "llm_mean_confidence": 0.9352
+    },
+    {
+      "group_col": "source",
+      "group_key": "foxnews",
+      "n": 1309,
+      "confusion": {
+        "tp": 285,
+        "fp": 61,
+        "fn": 193,
+        "tn": 770
+      },
+      "accuracy": 0.806,
+      "cohen_kappa": 0.5554,
+      "subj_precision": 0.8237,
+      "subj_recall": 0.5962,
+      "subj_f1": 0.6917,
+      "proxy_subj_pct": 26.43,
+      "llm_subj_pct": 36.52,
+      "llm_mean_confidence": 0.9235
+    },
+    {
+      "group_col": "source",
+      "group_key": "huffpost",
+      "n": 1392,
+      "confusion": {
+        "tp": 68,
+        "fp": 12,
+        "fn": 193,
+        "tn": 1119
+      },
+      "accuracy": 0.8527,
+      "cohen_kappa": 0.3408,
+      "subj_precision": 0.85,
+      "subj_recall": 0.2605,
+      "subj_f1": 0.3988,
+      "proxy_subj_pct": 5.75,
+      "llm_subj_pct": 18.75,
+      "llm_mean_confidence": 0.9343
+    },
+    {
+      "group_col": "source",
+      "group_key": "npr",
+      "n": 761,
+      "confusion": {
+        "tp": 39,
+        "fp": 25,
+        "fn": 65,
+        "tn": 632
+      },
+      "accuracy": 0.8817,
+      "cohen_kappa": 0.402,
+      "subj_precision": 0.6094,
+      "subj_recall": 0.375,
+      "subj_f1": 0.4643,
+      "proxy_subj_pct": 8.41,
+      "llm_subj_pct": 13.67,
+      "llm_mean_confidence": 0.9285
+    },
+    {
+      "group_col": "source",
+      "group_key": "nypost",
+      "n": 818,
+      "confusion": {
+        "tp": 46,
+        "fp": 14,
+        "fn": 94,
+        "tn": 664
+      },
+      "accuracy": 0.868,
+      "cohen_kappa": 0.3982,
+      "subj_precision": 0.7667,
+      "subj_recall": 0.3286,
+      "subj_f1": 0.46,
+      "proxy_subj_pct": 7.33,
+      "llm_subj_pct": 17.11,
+      "llm_mean_confidence": 0.9352
+    },
+    {
+      "group_col": "source",
+      "group_key": "theguardian",
+      "n": 2368,
+      "confusion": {
+        "tp": 365,
+        "fp": 64,
+        "fn": 299,
+        "tn": 1640
+      },
+      "accuracy": 0.8467,
+      "cohen_kappa": 0.5741,
+      "subj_precision": 0.8508,
+      "subj_recall": 0.5497,
+      "subj_f1": 0.6679,
+      "proxy_subj_pct": 18.12,
+      "llm_subj_pct": 28.04,
+      "llm_mean_confidence": 0.9282
+    },
+    {
+      "group_col": "source",
+      "group_key": "washingtonexaminer",
+      "n": 651,
+      "confusion": {
+        "tp": 116,
+        "fp": 17,
+        "fn": 87,
+        "tn": 431
+      },
+      "accuracy": 0.8402,
+      "cohen_kappa": 0.589,
+      "subj_precision": 0.8722,
+      "subj_recall": 0.5714,
+      "subj_f1": 0.6905,
+      "proxy_subj_pct": 20.43,
+      "llm_subj_pct": 31.18,
+      "llm_mean_confidence": 0.9234
+    },
+    {
+      "group_col": "source",
+      "group_key": "washingtontimes",
+      "n": 821,
+      "confusion": {
+        "tp": 32,
+        "fp": 13,
+        "fn": 66,
+        "tn": 710
+      },
+      "accuracy": 0.9038,
+      "cohen_kappa": 0.4027,
+      "subj_precision": 0.7111,
+      "subj_recall": 0.3265,
+      "subj_f1": 0.4476,
+      "proxy_subj_pct": 5.48,
+      "llm_subj_pct": 11.94,
+      "llm_mean_confidence": 0.9394
+    }
+  ],
+  "vlm": {
+    "n_articles": 292,
+    "vlm_subj_n": 56,
+    "vlm_subj_pct": 19.18,
+    "vlm_mean_confidence": 0.8672,
+    "by_block": {
+      "left": {
+        "n": 147,
+        "subj_pct": 21.77,
+        "mean_confidence": 0.8669
+      },
+      "right": {
+        "n": 145,
+        "subj_pct": 16.55,
+        "mean_confidence": 0.8674
+      }
+    },
+    "by_outlet": {
+      "dailycaller": {
+        "n": 20,
+        "subj_pct": 15.0,
+        "mean_confidence": 0.8385
+      },
+      "foxnews": {
+        "n": 35,
+        "subj_pct": 11.43,
+        "mean_confidence": 0.8863
+      },
+      "huffpost": {
+        "n": 61,
+        "subj_pct": 24.59,
+        "mean_confidence": 0.8598
+      },
+      "npr": {
+        "n": 22,
+        "subj_pct": 9.09,
+        "mean_confidence": 0.9
+      },
+      "nypost": {
+        "n": 31,
+        "subj_pct": 35.48,
+        "mean_confidence": 0.8545
+      },
+      "theguardian": {
+        "n": 64,
+        "subj_pct": 23.44,
+        "mean_confidence": 0.8622
+      },
+      "washingtonexaminer": {
+        "n": 25,
+        "subj_pct": 8.0,
+        "mean_confidence": 0.8676
+      },
+      "washingtontimes": {
+        "n": 34,
+        "subj_pct": 11.76,
+        "mean_confidence": 0.8768
+      }
+    },
+    "text_vs_image_cross": {
+      "text_subj_majority=False_vlm=OBJ": 218,
+      "text_subj_majority=False_vlm=SUBJ": 47,
+      "text_subj_majority=True_vlm=OBJ": 18,
+      "text_subj_majority=True_vlm=SUBJ": 9
+    }
+  }
+}

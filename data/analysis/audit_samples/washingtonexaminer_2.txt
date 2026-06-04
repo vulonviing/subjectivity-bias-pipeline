@@ -1,0 +1,23 @@
+article_id: 6a3989882ecdf71513a3b3f60bbc3b97bf7d2999
+url: https://www.washingtonexaminer.com/op-eds/4585869/glp-1-market-americans-lower-drug-prices/
+title: GLP-1 market shows how Americans can get lower drug prices
+source: washingtonexaminer (right)
+topic: opinion
+============================================================
+More than 1 in 10 U.S. adults is currently taking a GLP-1 weight-loss drug. And these medicines are getting cheaper seemingly by the day.
+Since Wegovy launched, its list price has fallen from roughly $1,300 per month to between $300 and $500 per month. Similarly, Zepbound was once about $1,000 per month, but it now costs about $350. The cash prices, for patients not paying with insurance, are even lower.
+These price drops are no accident. They’re the result of intense competition between rival drug companies — and strong patent protections.
+OPINION: AMERICA PAYS TOO MUCH FOR MEDICINE. HERE’S WHO IS DOING SOMETHING ABOUT IT
+That might sound counterintuitive. After all, critics of the pharmaceutical industry often claim that drug companies game the patent system to prevent competition and keep prices high. It’s a simple, intuitive narrative. But it’s detached from the reality of pharmaceutical innovation.
+In reality, patents don’t give the inventor monopoly pricing power — they encourage market entry.
+Patents give innovators and investors the security they need to pursue expensive, risky, and time-consuming research. If inventors make a breakthrough, they know they’ll be able to protect their discoveries, sell them exclusively, and, hopefully, recoup their costs of development and earn a return on investment.
+When a company demonstrates that a particular molecular mechanism has the potential to safely and effectively treat a condition, competitors see that a viable market could exist for treatments in that area. Other companies can then attempt to develop alternative treatments that don’t infringe on existing patents. Frequently, that means designing different molecules to target the same pathway or related biological mechanism.
+As a result, we often see multiple patented drugs compete within therapeutic classes. And as more competitors enter the field, prices begin to fall.
+GLP-1s are hardly the only example of this phenomenon.
+Consider direct-acting antivirals for Hepatitis C. When Sovaldi — the first oral direct-acting antiviral for the fatal liver disease — received Food and Drug Administration approval in 2013, drug manufacturer Gilead charged about $84,000 for a 12-week course. But other companies saw the opportunity to develop similar treatments, and within a few years, multiple direct-acting antivirals had entered the market.
+One study revealed that competition between these products reduced the average cost per treatment course to $55,500 by 2015 and all the way down to $14,400 by 2019. Prices dropped by 83% over a 5-year period — all while these direct-acting antivirals were under patent protection.
+Or consider PCSK9 inhibitors, which help lower cholesterol levels. In 2015, two PCSK9 inhibitors received FDA approval in the United States. Praluent launched with a list price of around $14,600 per year; Repatha launched at a list price of around $14,100 per year.
+Within just a few years, prices had fallen dramatically. In 2018, Praluent cost between $4,500 and $8,000 per year. Meanwhile, Repatha had cost about $5,850 per year — and now, it’s available for about $3,000 per year. That’s a nearly 80% price reduction. And once again, it happened while both drugs remained under patent protection.
+OPINION: TRUMP’S TWO-FRONT FIGHT TO LOWER DRUG PRICES IS ALREADY WORKING
+In other words, market conditions, of which patents are only one part, determine drug pricing. Patent protections incentivize innovation, which in turn sparks competition. And patents expire, after which copies can enter the market and prices can fall off a cliff.
+But if drug companies couldn’t protect their ideas and designs from being copied for a period of time, they’d have no incentive to invest in research to attempt to enter the market in the first place. And society wouldn’t have the GLP-1s, direct-acting antivirals, PCSK9 inhibitors, and countless other medicines we enjoy today — many of which have already had their patents expire.

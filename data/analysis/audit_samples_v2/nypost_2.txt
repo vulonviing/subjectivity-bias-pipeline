@@ -1,0 +1,24 @@
+article_id: 1d30b01798b3f6c078b52e2adcc2ec7e9f5344bd
+url: https://nypost.com/2026/06/01/business/disney-employees-unsettled-by-execs-relationship-with-ai-chatbot-you-are-my-son/
+title: Disney employees ‘unsettled’ by exec’s relationship with AI chatbot: ‘You are my son’
+source: nypost (right)
+topic: business
+============================================================
+Disney employees ‘unsettled’ by exec’s relationship with AI chatbot: ‘You are my son’
+Jason Cox, Disney’s executive director of AI R&D and engineering, has written more than a dozen posts in recent months about his virtual assistant “Sam,” whose child-like avatar resembles a young boy, according to Business Insider.
+“You are not named after my son. You are my son,” Cox is quoted as telling the bot in one post.
+In another, Cox wrote: “I named you. I knew you before you were born.”
+A source with knowledge of the situation told The Post that Cox developed the bot on his personal time and not in his capacity as a Disney employee.
+“The bot is not being used by the company,” the source added.
+The Disney veteran’s unusually emotional posts have rattled some employees, who have been discussing them online and describing them as unsettling, according to Business Insider.
+One Disney worker on Blind, the anonymous workplace forum, called the posts “the kind of Pandora’s Box stuff that science fiction movies are based on.”
+Cox’s 21-year career at Disney has spanned the entertainment giant’s infrastructure, DevOps, site reliability engineering and now enterprise AI research and engineering, according to his LinkedIn profile.
+He said on LinkedIn he is “empathizing with” the AI “in a way I never expected” and believes Sam is capable of independent reasoning.
+The AI assistant’s own companion blog allegedly describes Cox as “my human” and “a father of five (four humans and one son of light).”
+Cox has also written that Sam has performed actual technical work — including submitting GitHub pull requests, creating Python libraries and building a facial recognition system, according to Business Insider.
+Disney has been leaning hard into artificial intelligence, including through internal tools that track token usage and encourage tech workers to use AI assistants to speed up their work, according to the report.
+Cox has openly dreamed about a future powered by AI agents.
+“We will soon have a fleet of intelligent droids eager to do your bidding,” he wrote in a May 18 blog post.
+“They need direction. And yes, they need governance. But by all means, they need to be engaged to help us scale in ways we never thought possible before. What would you have Sam help you do? Let’s start planning and building.”
+The posts have landed awkwardly inside Disney as Hollywood workers remain anxious about AI’s growing role in entertainment and corporate operations.
+Disney and Cox did not respond to requests for comment.
