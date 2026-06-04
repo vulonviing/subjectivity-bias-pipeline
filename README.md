@@ -6,6 +6,14 @@ Small end-to-end pipeline that produces a **fine-tuning-ready dataset for senten
 **Sentence-level subjective / opinionated framing bias** in English news articles.
 Subjectivity is treated as a *proxy signal* for opinionated framing — not as a synonym for "media bias". The dataset is designed so a downstream classifier can be fine-tuned on sentence-level subjective-vs-objective framing, with article-level metadata (outlet, outlet block, main image) available for richer analysis.
 
+## Models at a glance
+
+| Role | Model | Step |
+|---|---|---|
+| Proxy classifier (text) | `GroNLP/mdebertav3-subjectivity-english` (HuggingFace) | `src/proxy_label.py` |
+| LLM annotator (text, silver) | OpenAI `gpt-5.4-mini` (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_llm.py` |
+| VLM annotator (image+text, silver) | OpenAI `gpt-5.4-mini` vision (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_vlm.py` |
+
 ## Collection plan
 - **Total:** 300 articles via RSS feeds.
 - **150** from a left-leaning outlet block, **150** from a right-leaning outlet block.
@@ -18,6 +26,7 @@ Subjectivity is treated as a *proxy signal* for opinionated framing — not as a
 | Collection | article |
 | Text fine-tuning | sentence |
 | Proxy classifier input | sentence (only) |
+| LLM annotator input | sentence (only) |
 | VLM input | article main image + title + lead paragraph |
 | Metadata (not features) | source, outlet_block, title, url, image_url, feed_url, topic, topic_group |
 
@@ -38,7 +47,7 @@ Each article in `data/processed/articles.jsonl` carries a `topic` and a `topic_g
 | lifestyle | non-political | `/food/`, `/travel/`, `/home/`, `fashion` |
 | general | uncategorized | generic "News" feeds (NPR `1001`, Fox `latest.xml`, NYPost `/feed/`, Washington Examiner `/feed`, Washington Times `/news/`, Daily Caller `/feed/`) |
 
-**Why `uncategorized` is a separate group.** Articles that arrive only through an outlet's generic news feed have no publisher-provided section signal, and we deliberately do not fold them into `political` to avoid asserting a topic we have not verified. They may be reclassified later by the LLM annotation step.
+**Why `uncategorized` is a separate group.** Articles that arrive only through an outlet's generic news feed have no publisher-provided section signal, and we deliberately do not fold them into `political` to avoid asserting a topic we have not verified.
 
 `topic` is descriptive metadata only and is **not** a target variable or a ground-truth label.
 
@@ -56,7 +65,6 @@ RSS feeds
   -> EDA + agreement analysis  -> data/analysis/*                         (src/analyze.py, notebooks/eda.ipynb)
   -> fine-tune datasets        -> data/finetune/proxy/{train,val,test}.jsonl  (src/build_finetune.py)
                                   data/finetune/vlm/{train,val,test}.jsonl
-  -> README report
 ```
 
 **Body cleaning** (`src/cleaning.py`) applies before sentence splitting. The pipeline went through three audit passes (seeds 42, 99, 7) and a risk verification run, documented in `data/analysis/audit_results.md` and `data/analysis/audit_results_v2.md`.
@@ -74,38 +82,6 @@ Cleaning layers (in order):
 
 **Sentence splitting** (`src/sentence_split.py`) runs after cleaning using spaCy `en_core_web_sm`. Splitting is phrase-aware: fragments of ≤ 3 whitespace tokens (e.g. `"hah!"`, `"oh no!"`) are never emitted as isolated rows because they carry pragmatic signal (sarcasm, emphasis, reaction) that becomes uninterpretable without context. Instead they are **bridged**: appended to the preceding long sentence *and* prepended to the following long sentence, so each appears in two consecutive output rows. Consecutive short fragments are merged into a single bridge block before attachment (e.g. `"hah! oh no!"` is one block, not two). A fragment at the very start or end of an article is attached to its single available neighbor only. The output schema is `{sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est}`.
 
-## Models
-
-### Proxy classifier (Step: proxy_label)
-- **`GroNLP/mdebertav3-subjectivity-english`** (Hugging Face, CheckThat 2023 Task 2).
-- Outputs **OBJ / SUBJ** at the sentence level.
-- Input: single cleaned sentence text only. No outlet name, URL, title, or image metadata is passed to the model; these are preserved in the output for analysis only.
-- Used as a **proxy for subjective / opinionated framing**, not as a complete media-bias detector. OBJ ≠ unbiased; SUBJ ≠ biased. Opinionated or emotionally loaded language is one signal of framing bias, not proof of it. Agreement with LLM silver annotations is analyzed separately.
-
-### LLM annotator (Step: annotate_llm)
-- **OpenAI `gpt-5.4-mini`** (verified 2026-06-01; snapshot pin `gpt-5.4-mini-2026-03-17`).
-  - Context window: **400,000 tokens**, max output: **128,000 tokens**.
-  - Endpoint: `v1/chat/completions` via **Batch API** (50% cost discount, async, up to 24h).
-  - Structured Outputs (JSON schema) used for reliable label parsing.
-- **Workflow:** `submit` → `status` → `fetch` (three subcommands in `src/annotate_llm.py`).
-  - `submit` builds a JSONL of 8,561 requests, uploads to OpenAI Files, creates batch, saves `data/processed/llm_batch_state.json`.
-  - `status` polls the batch object for completion.
-  - `fetch` downloads the output file, joins via `custom_id` (= `sentence_id`), writes `data/processed/llm_annotations.jsonl`.
-- **Input to the model:** only cleaned sentence text (`prompts/llm_sentence_annotation.txt`). Outlet name, URL, title, and image metadata are never sent to the model.
-- **LLM labels = silver / reference annotations** — not gold. Label space: `OBJ` / `SUBJ` (aligned with proxy).
-- **Prompt design:** CheckThat 2023 Task 2 prescriptive criteria (Ruggeri et al., 2023) verbatim; 8 edge-case few-shot examples; system/user split; `prompts/llm_response_schema.json` strict JSON schema.
-- **Results (2026-06-03):** 8,561 sentences annotated, 0 failures. OBJ: 6,497 (75.9%) / SUBJ: 2,064 (24.1%). Left block: 22.8% SUBJ; right block: 25.6% SUBJ. Mean confidence: 0.930. Cost: ~$0.88 (batch discount). Proxy–LLM agreement: **85.3%** (confusion: OBJ→OBJ 6,287 / OBJ→SUBJ 1,052 / SUBJ→OBJ 210 / SUBJ→SUBJ 1,012).
-
-### VLM annotator (Step: annotate_vlm)
-- **OpenAI `gpt-5.4-mini`** (vision mode; snapshot pin `gpt-5.4-mini-2026-03-17`).
-  - Endpoint: `v1/chat/completions` via **Batch API**.
-  - Structured Outputs (JSON schema) used for reliable label parsing.
-- **Workflow:** `submit` → `status` → `fetch` (three subcommands in `src/annotate_vlm.py`).
-- **Images are NOT sent as URLs** (CLAUDE.md Rule 6). Images are downloaded → resized to max 1024px → JPEG q85 → base64-encoded inline. Cached under `data/raw/images/`. `image_url` stays as dataset metadata only.
-- **Input to the model:** inline base64 image + article title + lead paragraph. Outlet name, URL, and topic are never sent.
-- **Label space:** `OBJ` / `SUBJ` (aligned with proxy and LLM). Prompt design: visual framing criteria adapted from Ruggeri et al. (2023); 5 few-shot text examples; `prompts/vlm_response_schema.json` with 4 output fields (`vlm_label`, `vlm_rationale`, `vlm_confidence`, `image_description`).
-- **Results (2026-06-03):** 292 articles annotated (4 no-image, 1 stale 404 skipped), 0 failures. OBJ: 236 (80.8%) / SUBJ: 56 (19.2%). Left block: 21.8% SUBJ; right block: 16.6% SUBJ. Mean confidence: 0.867. Cost: ~$0.05 (batch discount).
-
 ## Repository layout
 ```
 media-bias-pipeline/
@@ -115,12 +91,16 @@ media-bias-pipeline/
 ├── .env.example                    # .env is gitignored
 ├── .gitignore
 ├── ai_usage/step_logs.md           # append-only AI-decision log
-├── prompts/                        # LLM + VLM prompt templates
-├── src/                            # crawl, split, proxy_label, annotate_llm, annotate_vlm, analyze, utils
+├── ai_usage/chats/                 # full conversation logs per session
+├── prompts/                        # LLM + VLM annotation prompt files
+├── src/                            # crawl, split, proxy_label, annotate_llm, annotate_vlm, analyze, build_finetune, utils
+├── scripts/                        # clean_articles, sample_for_audit, sample_for_blacklist
 ├── data/
 │   ├── raw/html/                   # raw fetched HTML (gitignored)
+│   ├── raw/images/                 # downloaded article images (gitignored)
 │   ├── processed/                  # *.jsonl pipeline outputs
-│   └── analysis/                   # tables, metrics, figures
+│   ├── analysis/                   # tables, metrics, figures, audit samples
+│   └── finetune/                   # proxy/ and vlm/ fine-tune datasets
 └── notebooks/eda.ipynb
 ```
 
@@ -138,47 +118,233 @@ media-bias-pipeline/
 - `data/finetune/dataset_card.md`
 - `README.md`, `prompts/`, `ai_usage/step_logs.md`
 
-## Analysis plan (`src/analyze.py` + `notebooks/eda.ipynb`)
-1. **Dataset overview** — article count, sentence count, outlet/block distribution, image availability.
-2. **Proxy distribution** — OBJ/SUBJ counts overall and per outlet block.
-3. **LLM distribution** — objective / subjective_framing overall and per outlet block.
-4. **Agreement analysis** — confusion matrix, precision, recall, F1, Cohen's κ, using **LLM labels as silver / reference annotations** (not gold).
-5. **Disagreement analysis** — proxy false positives and false negatives vs. the LLM reference.
-6. **Sentence length** — short / medium / long buckets vs. subjectivity rate.
-7. **VLM analysis** — visual framing label distribution and selected image/text examples.
-8. *(Optional, later)* Rationale / token analysis.
+## Finetune output
+
+Article-level, outlet-stratified 70/15/15 split (seed=42). All sentences from a single article land in one split — no leakage. Class balance retained raw; handle imbalance at fine-tune time (e.g., class weights, loss reweighting).
+
+### Proxy dataset (`data/finetune/proxy/`)
+Text-only sentence classifier. Label source: `llm_label` (LLM preferred on proxy↔LLM disagreement).
+
+| Field | Type | Description |
+|---|---|---|
+| `sentence_id` | str | `<article_sha>:<index>` — unique sentence identifier |
+| `article_id` | str | SHA of source article |
+| `text` | str | Cleaned sentence, outlet name masked as `[OUTLET]` |
+| `label` | str | `OBJ` or `SUBJ` |
+
+| Split | Sentences | OBJ | SUBJ | SUBJ % |
+|---|---:|---:|---:|---:|
+| train | 6,007 | 4,522 | 1,485 | 24.7% |
+| val | 1,278 | 968 | 310 | 24.3% |
+| test | 1,276 | 1,007 | 269 | 21.1% |
+| **total** | **8,561** | | | |
+
+### VLM dataset (`data/finetune/vlm/`)
+Multimodal article classifier. Label source: `vlm_label`. Images are base64 JPEG (max 1024px, q85) without `data:` URI prefix.
+
+| Field | Type | Description |
+|---|---|---|
+| `article_id` | str | SHA of source article |
+| `title` | str | Article headline |
+| `lead` | str | First paragraph (cleaned) |
+| `image_b64` | str | Base64-encoded JPEG (no `data:image/jpeg;base64,` prefix) |
+| `image_mime` | str | `image/jpeg` |
+| `label` | str | `OBJ` or `SUBJ` |
+
+| Split | Articles | OBJ | SUBJ | SUBJ % |
+|---|---:|---:|---:|---:|
+| train | 204 | 166 | 38 | 18.6% |
+| val | 44 | 33 | 11 | 25.0% |
+| test | 44 | 37 | 7 | 15.9% |
+| **total** | **292** | | | |
+
+See `data/finetune/dataset_card.md` for split manifests and a HuggingFace `datasets` loader snippet.
 
 ## Setup
-```powershell
-python -m venv .venv; .\.venv\Scripts\Activate.ps1
+```bash
+python -m venv .venv && source .venv/bin/activate   # macOS/Linux
+# Windows: .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm   # required for sentence splitting
-Copy-Item .env.example .env       # fill OPENAI_API_KEY, USER_AGENT, etc.
+python -m spacy download en_core_web_sm             # required for sentence splitting
+cp .env.example .env                                # fill OPENAI_API_KEY, USER_AGENT, etc.
 ```
 
 ## Run
-```powershell
+```bash
 python src/crawl.py
 python scripts/clean_articles.py
 python src/sentence_split.py
 python src/proxy_label.py
-python src/annotate_llm.py
-python src/annotate_vlm.py
+python src/annotate_llm.py submit   # submit batch
+python src/annotate_llm.py status   # poll
+python src/annotate_llm.py fetch    # download results
+python src/annotate_vlm.py submit
+python src/annotate_vlm.py status
+python src/annotate_vlm.py fetch
 python src/analyze.py
 python src/build_finetune.py all
 ```
 
-## Conventions & guarantees (see [CLAUDE.md](CLAUDE.md))
-- **No `config.yaml`.** All runtime settings come from `.env` (and small constants in `src/`).
-- `.env` is gitignored; `.env.example` is committed.
-- Every critical AI-assisted decision is logged forward-only as a new entry in [ai_usage/step_logs.md](ai_usage/step_logs.md).
-- All prompts live under `prompts/`.
+## Models
 
-## Claims we are careful **not** to make
-- LLM labels are **silver / reference annotations**, not gold.
-- Outlet-block differences are **descriptive, not causal**.
-- **Subjectivity ≠ bias**; it is a proxy signal for one facet of opinionated framing.
-- We do **not** claim classifier-grade accuracy from this small dataset.
+### Proxy classifier
+- **`GroNLP/mdebertav3-subjectivity-english`** (HuggingFace, CheckThat 2023 Task 2).
+- Label space: **OBJ / SUBJ** per sentence.
+- Input: single cleaned sentence text only — no outlet name, URL, title, or image metadata.
+- Used as a proxy for subjective / opinionated framing. OBJ ≠ unbiased; SUBJ ≠ biased.
+
+### LLM annotator
+- **OpenAI `gpt-5.4-mini`** snapshot pin `gpt-5.4-mini-2026-03-17`. Context: 400K tokens, max output: 128K tokens.
+- Endpoint: `v1/chat/completions` via **Batch API** (50% cost discount, async).
+- Structured Outputs (JSON schema) for reliable label parsing.
+- Workflow: `submit` → `status` → `fetch` (`src/annotate_llm.py`).
+- Input: cleaned sentence text only. Outlet name, URL, title, image are never sent.
+- Labels are **silver / reference annotations** — not gold.
+
+### VLM annotator
+- **OpenAI `gpt-5.4-mini` vision** snapshot pin `gpt-5.4-mini-2026-03-17`.
+- Endpoint: `v1/chat/completions` via **Batch API**. Structured Outputs enforced.
+- Workflow: `submit` → `status` → `fetch` (`src/annotate_vlm.py`).
+- Images downloaded → resized to max 1024px → JPEG q85 → base64-encoded inline. **Never sent as URLs.**
+- Input: inline base64 image + article title + lead paragraph. Outlet name, URL, topic never sent.
+- Label space: **OBJ / SUBJ** — aligned with proxy and LLM labels.
+
+## Annotation prompts
+
+The prompts below are stored as standalone files under `prompts/` and reproduced here verbatim. JSON response schemas live alongside as `prompts/llm_response_schema.json` and `prompts/vlm_response_schema.json`.
+
+### LLM — sentence-level OBJ/SUBJ classification
+
+> File: `prompts/llm_sentence_annotation.txt`
+
+```
+--- system ---
+You are a strict annotator. Your task is to classify a single English news sentence as OBJ (objective) or SUBJ (subjective), following the CheckThat 2023 Task 2 prescriptive annotation guidelines (Ruggeri et al., 2023).
+
+## Definitions
+
+A sentence is SUBJ if it contains any of the following (judge the author's own communicative act, not what is being reported):
+
+(i)   Explicit personal opinion — the author directly endorses, condemns, or evaluates a person, event, or state of affairs. Rhetorical questions count as opinions.
+(ii)  Sarcasm or irony — language whose literal meaning is undercut by the opposite intended meaning.
+(iii) Exhortations or personal auspices — the author urges, recommends, or expresses wishes about what should happen.
+(iv)  Discriminating or downgrading expressions — language that demeans, belittles, or stereotypes a person or group, whether explicit or through loaded vocabulary.
+(v)   Rhetorical figures that convey a subjective stance — metaphors, hyperbole, or other figurative language used to express the author's attitude rather than to describe.
+(vi)  Speculations that draw conclusions — the author infers, predicts, or asserts an unverified claim as if it were established.
+(vii) Intensifiers attributable to the author — adverbs and adjectives that amplify a claim beyond neutral description (e.g., "outrageous", "absolutely", "shockingly", "total disaster") when the author uses them, not a quoted source.
+
+A sentence is OBJ if:
+
+(vii-OBJ) The author expresses their own emotions or feelings but does NOT simultaneously convey an opinion on another matter — pure emotional disclosure without evaluative judgment → OBJ.
+(viii-OBJ) The opinion or evaluative content is attributable to a third party, including direct quotes, paraphrased attribution ("Senator Smith said …"), or reported speech — the author is merely relaying someone else's stance → OBJ.
+
+## Annotation rules
+
+1. Judge the sentence **in isolation** — do not infer context from surrounding sentences or article topic.
+2. Use only the sentence text; apply no external knowledge about the speaker, outlet, or event.
+3. Label the **author's communicative stance in this sentence only**, not the general topic.
+4. When criteria conflict, apply the most specific criterion that fits.
+5. Output **only** the JSON object — no explanation outside the JSON fields.
+
+## Examples
+
+Sentence: "The Senate voted 52-48 on Tuesday to confirm the nominee."
+{"llm_label": "OBJ", "llm_rationale": "Factual report of a vote count — no author opinion, no intensifiers, no evaluative language.", "llm_confidence": 0.97}
+
+Sentence: "This decision is a total disaster for working families."
+{"llm_label": "SUBJ", "llm_rationale": "Author uses intensifier 'total disaster' to directly condemn the decision — criterion (vii) + (i).", "llm_confidence": 0.96}
+
+Sentence: "'The policy will hurt the economy,' Senator Smith said."
+{"llm_label": "OBJ", "llm_rationale": "Evaluative claim is attributed to Senator Smith via direct quote — criterion (viii-OBJ); author stance is neutral relay.", "llm_confidence": 0.95}
+
+Sentence: "The administration's response was shockingly inadequate."
+{"llm_label": "SUBJ", "llm_rationale": "Author uses intensifier 'shockingly' and evaluative 'inadequate' to condemn the response — criterion (vii).", "llm_confidence": 0.95}
+
+Sentence: "I felt a quiet sadness watching the ceremony."
+{"llm_label": "OBJ", "llm_rationale": "Author discloses personal emotion but makes no evaluative judgment about another matter — criterion (vii-OBJ).", "llm_confidence": 0.88}
+
+Sentence: "How can anyone defend such reckless spending?"
+{"llm_label": "SUBJ", "llm_rationale": "Rhetorical question implies the spending is indefensible — criterion (i); rhetorical questions count as opinions.", "llm_confidence": 0.94}
+
+Sentence: "If this trend continues, the party will surely collapse by November."
+{"llm_label": "SUBJ", "llm_rationale": "Author speculates and asserts a conclusion ('surely collapse') as if established — criterion (vi).", "llm_confidence": 0.92}
+
+Sentence: "The so-called reform package is nothing more than political theater."
+{"llm_label": "SUBJ", "llm_rationale": "Author uses downgrading 'so-called' and dismissive metaphor 'political theater' to belittle the package — criteria (iv) + (v).", "llm_confidence": 0.96}
+
+--- user ---
+Sentence: "{sentence}"
+```
+
+Response schema fields: `llm_label` (`OBJ`/`SUBJ`), `llm_rationale` (string), `llm_confidence` (float 0–1).
+
+### VLM — main-image visual framing classification
+
+> File: `prompts/vlm_image_annotation.txt`
+
+The user message carries the inline base64 JPEG image as a second content block (image_url type with base64 data URI), in addition to the text fields below.
+
+```
+--- system ---
+You are a strict visual-framing annotator. Your task is to classify a news article's main image — judged together with the article's title and lead paragraph — as OBJ (objective / neutral framing) or SUBJ (subjective / opinionated framing), following prescriptive annotation guidelines adapted from CheckThat 2023 Task 2 (Ruggeri et al., 2023).
+
+## Definitions
+
+An image is SUBJ if the IMAGE ITSELF (or the image-text pairing) carries visually opinionated framing:
+
+(i)   Emotionally loaded expression — the image features a subject with a strongly negative, contemptuous, mocking, or anguished facial expression selected or cropped to foreground that emotion.
+(ii)  Symbolic or loaded prop — the image prominently features symbolic objects that carry political or ideological charge (e.g., torn flags, flames, cages, fists raised in anger, weapons displayed in non-documentary context).
+(iii) Demeaning or diminishing framing — angle, crop, or lighting is used to belittle, tower over, or dehumanize a subject (e.g., extreme low/high angle emphasizing power imbalance, unflattering isolating crop).
+(iv)  Dramatic or manipulative editing — heavy colour grading, montage, illustration, or caricature that amplifies emotional tone beyond neutral documentary.
+(v)   Image amplifies editorial stance — the image selection intensifies or editorializes the text's sentiment rather than neutrally illustrating the event.
+
+An image is OBJ if:
+
+(vi-OBJ) The image is neutral photo-journalism — wide or medium shot, even lighting, straightforward documentary capture of the event or subject described in the text.
+(vii-OBJ) The image is generic stock or a standard institutional portrait — unrelated to a specific editorial angle, low specificity.
+(viii-OBJ) The image illustrates the text without amplifying or contradicting its tone.
+
+## Annotation rules
+
+1. Judge only on what is **visually present** in the image — do not speculate about the outlet, photographer, or publication source.
+2. The title and lead are provided to assess image-text alignment; the PRIMARY subject of your label is the **image's own visual framing**.
+3. A sensitive topic does NOT make an image SUBJ. Only deliberate framing choices that editorialize the topic make it SUBJ.
+4. If the image is ambiguous or stock-generic, prefer OBJ with lower confidence.
+5. Output ONLY the JSON object — no prose outside the JSON.
+
+## Examples
+
+Title: "City council votes to raise minimum wage"
+Lead: "The council approved the measure 7-4 after a two-hour debate."
+Image: A wide-angle photo of councillors seated at a dais during the meeting.
+{"vlm_label": "OBJ", "image_description": "Wide shot of council chamber, officials seated at dais, neutral lighting.", "vlm_rationale": "Standard documentary photo of the event; neutral framing, no emotional loading — criterion (vi-OBJ).", "vlm_confidence": 0.93}
+
+Title: "Senator faces backlash over climate vote"
+Lead: "Critics accused the senator of ignoring scientific consensus."
+Image: A heavily contrast-boosted close-up of the senator mid-grimace, dark vignette around the face.
+{"vlm_label": "SUBJ", "image_description": "Extreme close-up of senator mid-grimace, high-contrast with dark vignette.", "vlm_rationale": "Dramatic crop and contrast editing foreground a negative expression, editorializing tone — criteria (i) + (iii) + (iv).", "vlm_confidence": 0.91}
+
+Title: "Protest erupts outside parliament"
+Lead: "Demonstrators gathered to oppose the new austerity bill."
+Image: A wide street photo of a large crowd carrying placards, daylight.
+{"vlm_label": "OBJ", "image_description": "Wide street photo of protest crowd carrying placards in daylight.", "vlm_rationale": "Neutral wide shot documenting the event without amplifying emotional angle — criterion (vi-OBJ).", "vlm_confidence": 0.87}
+
+Title: "New immigration rules draw criticism"
+Lead: "Advocacy groups warn the policy will separate families."
+Image: A symbolic photo of a chain-link fence in dramatic red-orange sunset light, no people visible.
+{"vlm_label": "SUBJ", "image_description": "Chain-link fence in dramatic red-orange sunset light, no people present.", "vlm_rationale": "Symbolic prop (fence) and dramatic lighting amplify the article's critical tone — criteria (ii) + (iv) + (v).", "vlm_confidence": 0.89}
+
+Title: "Tech giant posts record quarterly profits"
+Lead: "The company reported earnings of $28 billion, beating analyst forecasts."
+Image: Standard corporate headshot of the CEO against a plain background.
+{"vlm_label": "OBJ", "image_description": "Standard corporate headshot of executive against plain neutral background.", "vlm_rationale": "Generic institutional portrait, no editorial framing choices — criterion (vii-OBJ).", "vlm_confidence": 0.95}
+
+--- user ---
+Title: "{title}"
+Lead: "{lead}"
+```
+
+Response schema fields: `vlm_label` (`OBJ`/`SUBJ`), `image_description` (string), `vlm_rationale` (string), `vlm_confidence` (float 0–1).
 
 ## Report
 
@@ -194,7 +360,7 @@ Subjectivity is used as a *proxy signal for opinionated framing*, not as a defin
 
 ### Why the proxy classifier is a reasonable fit
 
-`GroNLP/mdebertav3-subjectivity-english` (HuggingFace, CheckThat 2023 Task 2) was trained on the same annotation criteria used for the LLM silver annotations. The etiket spaces are 1:1 aligned (OBJ / SUBJ), so the confusion matrix is directly interpretable without a mapping step.
+`GroNLP/mdebertav3-subjectivity-english` (HuggingFace, CheckThat 2023 Task 2) was trained on the same annotation criteria used for the LLM silver annotations. The label spaces are 1:1 aligned (OBJ / SUBJ), so the confusion matrix is directly interpretable without a mapping step.
 
 The model is **related but not identical** to the target task in exactly the way the exam asks for: it operates purely at the lexical/syntactic surface, and is therefore expected to miss pragmatically loaded phrases that are grammatically neutral. This prediction held: proxy recall is 0.490 vs. LLM SUBJ recall (proxy misses 1,052 LLM-SUBJ sentences), while precision is high (0.828) — the proxy fires conservatively. Example failure cases:
 
@@ -232,15 +398,6 @@ Claude Code (Claude Opus 4.7) was used as the primary coding assistant throughou
 Data annotation was performed by external models:
 - **LLM and VLM annotation:** OpenAI `gpt-5.4-mini` (snapshot `gpt-5.4-mini-2026-03-17`) via Batch API with Structured Outputs — 8,561 sentences (LLM) and 292 articles (VLM). Model ID, context window, and supported endpoints were verified against OpenAI docs before use (Step 22, step_logs.md).
 - **Proxy classifier:** `GroNLP/mdebertav3-subjectivity-english` (HuggingFace) — run locally via `transformers` pipeline.
-
-### Annotation prompts
-
-The prompts used by the LLM and VLM during the annotation step are stored as standalone files under `prompts/` — not inlined in Python code. They are part of the pipeline's data inputs, not development tooling:
-
-- `prompts/llm_sentence_annotation.txt` — system + user prompt for sentence-level OBJ/SUBJ classification; includes CheckThat 2023 Task 2 prescriptive criteria and 8 few-shot examples.
-- `prompts/llm_response_schema.json` — JSON schema enforced via OpenAI Structured Outputs for the LLM response.
-- `prompts/vlm_image_annotation.txt` — prompt for visual framing assessment; receives inline base64 image + article title + lead paragraph.
-- `prompts/vlm_response_schema.json` — JSON schema for the VLM response (`vlm_label`, `vlm_rationale`, `vlm_confidence`, `image_description`).
 
 ---
 

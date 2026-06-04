@@ -485,3 +485,10 @@ Append-only log. See [CLAUDE.md](../CLAUDE.md) for the rule.
 - **Prompt / model:** Claude Opus 4.7 — "projeyi oku ve anla, PDF taskta istendiği gibi rapor oluştur README.md'de."
 - **Outcome:** README.md artık PDF'nin Report — Required listesinin tüm maddelerini açık başlıklar altında karşılıyor: task + why (text/image measurability), pipeline overview (mevcut diyagram), proxy fit rationale + failure examples, shortcuts list, risks list, AI usage summary.
 - **Notes:** LLM labels silver (not gold), block differences descriptive (not causal), subjectivity ≠ bias — CLAUDE.md disclaimers yeni bölüme taşınmadı; mevcut "Claims we are careful not to make" bölümü yeterli.
+
+## Step 38 — README major restructure — 2026-06-04
+- **Goal:** README'yi kullanıcı isteklerine göre yeniden yapılandır: model overview tablosu en üste, Unit choices'a LLM input satırı, Finetune output bölümü (schema + split sizes), Models bölümünü kısalt (results kaldır), Annotation prompts'i birebir quote et, Repo layout + Required outputs + Setup + Run'ı Pipeline'ın hemen altına taşı, Conventions & guarantees + Analysis plan + Claims bölümlerini sil.
+- **Action:** README.md tamamen yeniden yazıldı. Eklenen: `## Models at a glance` tablo, `## Finetune output` (proxy + VLM schema + split sizes), Unit choices'a LLM input satırı, `## Annotation prompts`'e llm_sentence_annotation.txt ve vlm_image_annotation.txt birebir quote. Kısaltılan: `## Models` (results/distribution rakamları kaldırıldı, kısa bullet). Silinen: Conventions & guarantees, Analysis plan, Claims we are careful not to make. Taşınan: Repo layout, Required outputs, Setup, Run → Pipeline'ın hemen altına.
+- **Prompt / model:** Claude Opus 4.7 — kullanıcı çok madde liste yönlendirmesi.
+- **Outcome:** README.md ~480 satır; tüm PDF Report gereksinimleri karşılanıyor; topic taxonomy ve cleaning layers koda karşı doğrulandı (uyumlu).
+- **Notes:** Findings §1-4 sayısal değerleri dokunulmadı. Silinen 3 bölümdeki bilgi ya CLAUDE.md'de (Conventions) ya Report > Risks'de (Claims) ya da Findings'de (Analysis plan) zaten mevcut.
