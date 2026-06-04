@@ -2,6 +2,53 @@
 
 Small end-to-end pipeline that produces a **fine-tuning-ready dataset for sentence-level media bias detection** from English news articles. Built as a PhD technical-exam deliverable (~4–6h scope).
 
+## Repository layout
+```
+media-bias-pipeline/
+├── CLAUDE.md                       # project rules (logging, conventions)
+├── README.md
+├── requirements.txt
+├── .env.example                    # .env is gitignored
+├── .gitignore
+├── ai_usage/step_logs.md           # append-only AI-decision log
+├── ai_usage/chats/                 # full conversation logs per session
+├── prompts/                        # LLM + VLM annotation prompt files
+├── src/                            # crawl, split, proxy_label, annotate_llm, annotate_vlm, analyze, build_finetune, utils
+├── scripts/                        # clean_articles, sample_for_audit, sample_for_blacklist
+├── data/
+│   ├── raw/html/                   # raw fetched HTML (gitignored)
+│   ├── raw/images/                 # downloaded article images (gitignored)
+│   ├── processed/                  # *.jsonl pipeline outputs
+│   ├── analysis/                   # tables, metrics, figures, audit samples
+│   └── finetune/                   # proxy/ and vlm/ fine-tune datasets
+└── notebooks/eda.ipynb
+```
+
+## Setup
+```bash
+python -m venv .venv && source .venv/bin/activate   # macOS/Linux
+# Windows: .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm             # required for sentence splitting
+cp .env.example .env                                # fill OPENAI_API_KEY, USER_AGENT, etc.
+```
+
+## Run
+```bash
+python src/crawl.py
+python scripts/clean_articles.py
+python src/sentence_split.py
+python src/proxy_label.py
+python src/annotate_llm.py submit   # submit batch
+python src/annotate_llm.py status   # poll
+python src/annotate_llm.py fetch    # download results
+python src/annotate_vlm.py submit
+python src/annotate_vlm.py status
+python src/annotate_vlm.py fetch
+python src/analyze.py
+python src/build_finetune.py all
+```
+
 ## Chosen sub-task
 **Sentence-level subjective / opinionated framing bias** in English news articles.
 Subjectivity is treated as a *proxy signal* for opinionated framing — not as a synonym for "media bias". The dataset is designed so a downstream classifier can be fine-tuned on sentence-level subjective-vs-objective framing, with article-level metadata (outlet, outlet block, main image) available for richer analysis.
@@ -82,28 +129,6 @@ Cleaning layers (in order):
 
 **Sentence splitting** (`src/sentence_split.py`) runs after cleaning using spaCy `en_core_web_sm`. Splitting is phrase-aware: fragments of ≤ 3 whitespace tokens (e.g. `"hah!"`, `"oh no!"`) are never emitted as isolated rows because they carry pragmatic signal (sarcasm, emphasis, reaction) that becomes uninterpretable without context. Instead they are **bridged**: appended to the preceding long sentence *and* prepended to the following long sentence, so each appears in two consecutive output rows. Consecutive short fragments are merged into a single bridge block before attachment (e.g. `"hah! oh no!"` is one block, not two). A fragment at the very start or end of an article is attached to its single available neighbor only. The output schema is `{sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est}`.
 
-## Repository layout
-```
-media-bias-pipeline/
-├── CLAUDE.md                       # project rules (logging, conventions)
-├── README.md
-├── requirements.txt
-├── .env.example                    # .env is gitignored
-├── .gitignore
-├── ai_usage/step_logs.md           # append-only AI-decision log
-├── ai_usage/chats/                 # full conversation logs per session
-├── prompts/                        # LLM + VLM annotation prompt files
-├── src/                            # crawl, split, proxy_label, annotate_llm, annotate_vlm, analyze, build_finetune, utils
-├── scripts/                        # clean_articles, sample_for_audit, sample_for_blacklist
-├── data/
-│   ├── raw/html/                   # raw fetched HTML (gitignored)
-│   ├── raw/images/                 # downloaded article images (gitignored)
-│   ├── processed/                  # *.jsonl pipeline outputs
-│   ├── analysis/                   # tables, metrics, figures, audit samples
-│   └── finetune/                   # proxy/ and vlm/ fine-tune datasets
-└── notebooks/eda.ipynb
-```
-
 ## Required outputs
 - `data/processed/articles.jsonl`
 - `data/processed/articles_clean.jsonl`
@@ -117,73 +142,6 @@ media-bias-pipeline/
 - `data/finetune/vlm/{train,val,test}.jsonl` + `splits_manifest.json`
 - `data/finetune/dataset_card.md`
 - `README.md`, `prompts/`, `ai_usage/step_logs.md`
-
-## Finetune output
-
-Article-level, outlet-stratified 70/15/15 split (seed=42). All sentences from a single article land in one split — no leakage. Class balance retained raw; handle imbalance at fine-tune time (e.g., class weights, loss reweighting).
-
-### Proxy dataset (`data/finetune/proxy/`)
-Text-only sentence classifier. Label source: `llm_label` (LLM preferred on proxy↔LLM disagreement).
-
-| Field | Type | Description |
-|---|---|---|
-| `sentence_id` | str | `<article_sha>:<index>` — unique sentence identifier |
-| `article_id` | str | SHA of source article |
-| `text` | str | Cleaned sentence, outlet name masked as `[OUTLET]` |
-| `label` | str | `OBJ` or `SUBJ` |
-
-| Split | Sentences | OBJ | SUBJ | SUBJ % |
-|---|---:|---:|---:|---:|
-| train | 6,007 | 4,522 | 1,485 | 24.7% |
-| val | 1,278 | 968 | 310 | 24.3% |
-| test | 1,276 | 1,007 | 269 | 21.1% |
-| **total** | **8,561** | | | |
-
-### VLM dataset (`data/finetune/vlm/`)
-Multimodal article classifier. Label source: `vlm_label`. Images are base64 JPEG (max 1024px, q85) without `data:` URI prefix.
-
-| Field | Type | Description |
-|---|---|---|
-| `article_id` | str | SHA of source article |
-| `title` | str | Article headline |
-| `lead` | str | First paragraph (cleaned) |
-| `image_b64` | str | Base64-encoded JPEG (no `data:image/jpeg;base64,` prefix) |
-| `image_mime` | str | `image/jpeg` |
-| `label` | str | `OBJ` or `SUBJ` |
-
-| Split | Articles | OBJ | SUBJ | SUBJ % |
-|---|---:|---:|---:|---:|
-| train | 204 | 166 | 38 | 18.6% |
-| val | 44 | 33 | 11 | 25.0% |
-| test | 44 | 37 | 7 | 15.9% |
-| **total** | **292** | | | |
-
-See `data/finetune/dataset_card.md` for split manifests and a HuggingFace `datasets` loader snippet.
-
-## Setup
-```bash
-python -m venv .venv && source .venv/bin/activate   # macOS/Linux
-# Windows: .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python -m spacy download en_core_web_sm             # required for sentence splitting
-cp .env.example .env                                # fill OPENAI_API_KEY, USER_AGENT, etc.
-```
-
-## Run
-```bash
-python src/crawl.py
-python scripts/clean_articles.py
-python src/sentence_split.py
-python src/proxy_label.py
-python src/annotate_llm.py submit   # submit batch
-python src/annotate_llm.py status   # poll
-python src/annotate_llm.py fetch    # download results
-python src/annotate_vlm.py submit
-python src/annotate_vlm.py status
-python src/annotate_vlm.py fetch
-python src/analyze.py
-python src/build_finetune.py all
-```
 
 ## Models
 
@@ -345,6 +303,48 @@ Lead: "{lead}"
 ```
 
 Response schema fields: `vlm_label` (`OBJ`/`SUBJ`), `image_description` (string), `vlm_rationale` (string), `vlm_confidence` (float 0–1).
+
+## Finetune output
+
+Article-level, outlet-stratified 70/15/15 split (seed=42). All sentences from a single article land in one split — no leakage. Class balance retained raw; handle imbalance at fine-tune time (e.g., class weights, loss reweighting).
+
+### Proxy dataset (`data/finetune/proxy/`)
+Text-only sentence classifier. Label source: `llm_label` (LLM preferred on proxy↔LLM disagreement).
+
+| Field | Type | Description |
+|---|---|---|
+| `sentence_id` | str | `<article_sha>:<index>` — unique sentence identifier |
+| `article_id` | str | SHA of source article |
+| `text` | str | Cleaned sentence, outlet name masked as `[OUTLET]` |
+| `label` | str | `OBJ` or `SUBJ` |
+
+| Split | Sentences | OBJ | SUBJ | SUBJ % |
+|---|---:|---:|---:|---:|
+| train | 6,007 | 4,522 | 1,485 | 24.7% |
+| val | 1,278 | 968 | 310 | 24.3% |
+| test | 1,276 | 1,007 | 269 | 21.1% |
+| **total** | **8,561** | | | |
+
+### VLM dataset (`data/finetune/vlm/`)
+Multimodal article classifier. Label source: `vlm_label`. Images are base64 JPEG (max 1024px, q85) without `data:` URI prefix.
+
+| Field | Type | Description |
+|---|---|---|
+| `article_id` | str | SHA of source article |
+| `title` | str | Article headline |
+| `lead` | str | First paragraph (cleaned) |
+| `image_b64` | str | Base64-encoded JPEG (no `data:image/jpeg;base64,` prefix) |
+| `image_mime` | str | `image/jpeg` |
+| `label` | str | `OBJ` or `SUBJ` |
+
+| Split | Articles | OBJ | SUBJ | SUBJ % |
+|---|---:|---:|---:|---:|
+| train | 204 | 166 | 38 | 18.6% |
+| val | 44 | 33 | 11 | 25.0% |
+| test | 44 | 37 | 7 | 15.9% |
+| **total** | **292** | | | |
+
+See `data/finetune/dataset_card.md` for split manifests and a HuggingFace `datasets` loader snippet.
 
 ## Report
 
