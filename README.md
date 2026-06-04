@@ -225,15 +225,22 @@ Where disagreement is expected to be highest: stylistically loaded outlets (Fox 
 - **VLM image context is partial.** The model receives only the hero image + article title + lead paragraph. Caption text, image source credit, and article body context are absent — the VLM may mis-assess framing intent when the image is generic stock photography.
 - **Cross-outlet references as confound.** Outlet names are masked but cross-outlet criticism (e.g., one outlet naming another) is deliberately retained as a bias-relevant signal (cleaning layer 7). This could also act as a topical confound if certain outlets are disproportionately cited.
 
-### AI usage
+### AI usage during development
 
-Claude Code (Claude Opus 4.7) was used as the primary coding assistant throughout this project. Every discrete action — scaffold decisions, script writing, cleaning audit passes, model verification, analysis design — was logged forward-only in [`ai_usage/step_logs.md`](ai_usage/step_logs.md) (36 steps, ~480 lines), as required by CLAUDE.md Rule 1. Agent plans are recorded in the chat logs under `ai_usage/chats/`.
+Claude Code (Claude Opus 4.7) was used as the primary coding assistant throughout this project. Every discrete action — scaffold decisions, script writing, cleaning audit passes, model verification, analysis design — was logged forward-only in [`ai_usage/step_logs.md`](ai_usage/step_logs.md) (36 steps, ~480 lines), as required by CLAUDE.md Rule 1. Full conversation logs are under `ai_usage/chats/`.
 
 Data annotation was performed by external models:
 - **LLM and VLM annotation:** OpenAI `gpt-5.4-mini` (snapshot `gpt-5.4-mini-2026-03-17`) via Batch API with Structured Outputs — 8,561 sentences (LLM) and 292 articles (VLM). Model ID, context window, and supported endpoints were verified against OpenAI docs before use (Step 22, step_logs.md).
 - **Proxy classifier:** `GroNLP/mdebertav3-subjectivity-english` (HuggingFace) — run locally via `transformers` pipeline.
 
-All prompts are stored as files under `prompts/` (not inlined in Python), per CLAUDE.md Rule 4. No prompt text is embedded inside source code.
+### Annotation prompts
+
+The prompts used by the LLM and VLM during the annotation step are stored as standalone files under `prompts/` — not inlined in Python code. They are part of the pipeline's data inputs, not development tooling:
+
+- `prompts/llm_sentence_annotation.txt` — system + user prompt for sentence-level OBJ/SUBJ classification; includes CheckThat 2023 Task 2 prescriptive criteria and 8 few-shot examples.
+- `prompts/llm_response_schema.json` — JSON schema enforced via OpenAI Structured Outputs for the LLM response.
+- `prompts/vlm_image_annotation.txt` — prompt for visual framing assessment; receives inline base64 image + article title + lead paragraph.
+- `prompts/vlm_response_schema.json` — JSON schema for the VLM response (`vlm_label`, `vlm_rationale`, `vlm_confidence`, `image_description`).
 
 ---
 
