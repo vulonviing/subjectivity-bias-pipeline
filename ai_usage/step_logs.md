@@ -492,3 +492,90 @@ Append-only log. See [CLAUDE.md](../CLAUDE.md) for the rule.
 - **Prompt / model:** Claude Opus 4.7 — kullanıcı çok madde liste yönlendirmesi.
 - **Outcome:** README.md ~480 satır; tüm PDF Report gereksinimleri karşılanıyor; topic taxonomy ve cleaning layers koda karşı doğrulandı (uyumlu).
 - **Notes:** Findings §1-4 sayısal değerleri dokunulmadı. Silinen 3 bölümdeki bilgi ya CLAUDE.md'de (Conventions) ya Report > Risks'de (Claims) ya da Findings'de (Analysis plan) zaten mevcut.
+
+## Step 43 — Output integrity check — 2026-06-04
+- **Goal:** Verify that every required output listed in README and shown in `notebooks/eda.ipynb` actually exists on disk and that all quoted numbers match the underlying artifacts.
+- **Action:** Read-only pass across all pipeline outputs. Checked file existence (21 required files), row counts (`wc -l` on all JSONL), headline metrics (README §Findings vs. `agreement_metrics.json`), split label distributions (recomputed from disk vs. dataset_card / README tables), EDA notebook cell outputs vs. README / summary_tables.csv, schema of 5 sample rows, and `disagreement_examples.csv` row count (1,262 = FN+FP). Produced `REVIEW_NOTES.md` at repo root with 7-section reconciliation table.
+- **Prompt / model:** Claude Opus 4.7 — user instruction: "check whether README and EDA outputs match real on-disk outputs; manual control."
+- **Outcome:** All 21 required files present. All row counts, metric values, split label distributions, and EDA numbers reconcile exactly with on-disk artifacts. One minor narrative omission flagged in README §4 (the 18 SUBJ-text/OBJ-image cell not named in prose, though it is present in JSON and EDA). No data errors. `REVIEW_NOTES.md` written.
+- **Notes:** No pipeline stages re-run; no files edited. EDA notebook self-verifies cross-modality table against `agreement_metrics.json` in cell [86].
+
+## Step 44 — README §4 cross-table narrative fix — 2026-06-04
+- **Goal:** Add the missing 18 SUBJ-text / OBJ-image cell to the text×image cross-table description in README §Findings §4.
+- **Action:** Edited one sentence in README.md. Added the 18-article count, total=292 check, and a clarifying sentence (of 27 SUBJ-text articles, only 9 = 33% also have SUBJ image) to strengthen the independence argument.
+- **Prompt / model:** Claude Opus 4.7 — user instruction: "README'de o 18'i ekle."
+- **Outcome:** README.md updated; no other files touched.
+- **Notes:** Flagged in Step 43 (REVIEW_NOTES.md §7) as a minor narrative gap.
+
+## Step 45 — EDA markdown-claim audit — 2026-06-04
+- **Goal:** Verify every substantive claim in EDA notebook markdown cells against source code, on-disk data, and referenced code-cell outputs.
+- **Action:** Catalogued 40 claims across Stage 1–4 EDA markdown cells. Checked each against `src/crawl.py`, `src/cleaning.py`, `scripts/clean_articles.py`, `src/sentence_split.py`, `src/proxy_label.py`, `src/annotate_llm.py`, `src/annotate_vlm.py`, JSONL files, `agreement_metrics.json`, and referenced EDA cell outputs. Appended §8 (40-row table + findings summary) to `REVIEW_NOTES.md`.
+- **Prompt / model:** Claude Opus 4.7 — user instruction: "eda markdownlarında bahsedilen birtakım stepler var. bunlar gerçekten yapılmış mı? hepsini madde madde ve tek tek kontrol et."
+- **Outcome:** 35/40 claims fully verified ✓. 5 ⚠ imprecisions flagged: (13) Stage 2 Takeaway "median ~5–15% reduction" vs actual overall median 1.6%; (15) WashExaminer bio_delta=0.0% in layer attribution; (16) [OUTLET] masking described as "removal" but can be net addition; (36) proxy confidence at FP points (0.638) not clearly "high"; (39) "effectively uncorrelated" overstated — κ=0.105, ρ=0.134, p=0.022. No ✗ outright contradictions found.
+- **Notes:** No code or EDA files edited. Largest actionable item: Stage 2 Takeaway median claim (#13) should be corrected to match its own cell's printed output.
+
+## Step 46 — EDA markdown discrepancy fixes — 2026-06-04
+- **Goal:** Fix the 5 ⚠ discrepancies flagged in §8 of REVIEW_NOTES.md (Step 45) in the EDA notebook markdown cells.
+- **Action:** Edited `notebooks/eda.ipynb` cells [46] (Stage 2 Takeaway) and [93] (Stage 4 Takeaway). Changes: (13) "median ~5–15%" → "median 1.6% overall (per-outlet range 0%–23%), DailyCaller outlier at 23%"; (15) removed Washington Examiner from trailing-bio claim, added explanation about OUTLET_BLACKLIST path; (16) "≤1% character removal" → "≤1% net character change, bidirectional"; (36) split proxy/LLM confidence figures at disagreement points (LLM 0.900 vs proxy 0.638); (39) "effectively uncorrelated (κ ≈ 0)" → "very weak positive correlation (κ=0.105, ρ=0.134, p=0.022)".
+- **Prompt / model:** Claude Opus 4.7 — user instruction: "bu uyumsuzlukları fixle."
+- **Outcome:** `notebooks/eda.ipynb` updated. No other files changed.
+- **Notes:** All 5 fixes are narrative-only; no pipeline outputs or metrics changed.
+
+## Step 47 — EDA plot refinements (8 items) — 2026-06-04
+- **Goal:** Improve readability of 8 EDA plots via broken axes, y-axis rescaling, figure splitting, and metric definitions.
+- **Action:** Edited `notebooks/eda.ipynb` cells [37], [39], [57], [60], [73], [78]; inserted new markdown cell [77].
+  1. Cell [37] `stage2_layer_attribution.png` — broken y-axis at 50% (0–50 uncompressed, 50–110 compressed) using two-subplot manual approach.
+  2. Cell [39] `stage2_boilerplate_hits.png` — switched metric from `mean_bp_rate` (%) to `mean_bp_lines` (count per article) for comparability with 2.7.
+  3. Cell [57] `stage3_llm_confidence_per_outlet.png` — set y-axis `ylim(0.5, 1.0)`; added print of lowest-confidence outlier sentence.
+  4. Cell [60] — split single 2-subplot figure into two independent figures: `stage3_llm_rationale_length.png` and `stage3_llm_rationale_terms.png`.
+  5. Cell [60] rationale length histogram — extended x-axis to 99th-percentile character length via `quantile(0.99)`.
+  6. Cell [73] `stage4_joint_label_bar.png` — broken y-axis at 3,000 so small joint cells (proxy_FN, proxy_FP, SUBJ-SUBJ) are legible alongside OBJ-OBJ (~7,000).
+  7. New markdown cell [77] — added non-technical definitions table for Accuracy, Cohen's κ, Precision (SUBJ), Recall (SUBJ).
+  8. Cell [78] `stage4_length_agreement.png` — broken y-axis at 40%: bottom 0–40 compressed (1/4 height), top 40–102 expanded (3/4 height).
+- **Prompt / model:** Claude Opus 4.7 — user enumerated 8 plot changes; items 1 & 2 approach chosen via AskUserQuestion (break at 50%, count-per-article scale).
+- **Outcome:** All 8 modifications applied; notebook JSON saved (95 cells total, +1 new markdown cell). PNG filenames preserved except rationale plot split into two files (`stage3_llm_rationale_length.png` + `stage3_llm_rationale_terms.png`).
+- **Notes:** Cells cleared of prior outputs; re-run required to regenerate PNGs. Cross-outlet references (CNN, NYT etc.) remain unmasked per design (CLAUDE.md Rule 4 / TODO_IF_I_HAD_TIME.md).
+
+## Step 48 — EDA plot refinements round 2 — 2026-06-04
+- **Goal:** Apply further polish: value labels on bars, KDE peak markers, y-axis cap for NPR outliers, new slash-cut broken-axis style, answer rationale-length data question.
+- **Action:** Edited `notebooks/eda.ipynb` cells [18], [21], [32], [37], [60], [73], [76], [78].
+  1. Cell [18] `stage1_pub_timeline.png` — added per-bar count labels above each bar (fontsize=6).
+  2. Cell [21] `stage1_body_length.png` — tracked KDE line handles, found argmax in 0–15000 range, placed dot + annotated peak x-value per outlet.
+  3. Cell [32] `stage2_reduction_pct.png` — capped y-axis at 99th-percentile reduction%; added clip-count note in corner.
+  4. Cell [37] `stage2_layer_attribution.png` — moved break from 50%→30/100 (0–30 bottom panel, 100–112 top), height_ratios=[1,5]; added white diagonal slash marks through each bar at Y=30.
+  5. Cell [60] `stage3_llm_rationale_length.png` — added note: rationale length capped at 200 chars by prompt schema (verified: max=200, 0 rows above 200 in data).
+  6. Cell [73] `stage4_joint_label_bar.png` — slash-cut, bottom dominant: height_ratios=[1,6]; slash marks on OBJ-OBJ bar at y=3000 in bottom panel.
+  7. Cell [76] `stage4_outlet_metrics.png` — added rotated value labels (fontsize=5.5) above each bar; raised ylim to 1.25 to make room.
+  8. Cell [78] `stage4_length_agreement.png` — slash-cut, top dominant: height_ratios=[6,1], top ylim=50–102, bottom ylim=0–50; slash marks through all bars at y=50 in bottom panel.
+- **Prompt / model:** Claude Opus 4.7 — user provided 8 inline-code snippets with Turkish inline instructions; item 5 included a data question answered by reading llm_annotations.jsonl.
+- **Outcome:** All 8 cells updated; notebook saved (95 cells). Re-run needed to regenerate PNGs.
+- **Notes:** Rationale-length 200-char hard cap is by design (structured-output schema); no fix needed for that item.
+
+## Step 49 — EDA plot refinements round 3 — 2026-06-04
+- **Goal:** Five targeted fixes from user review: KDE leader-line callouts, revert reduction boxplot, fix layer_attribution broken-axis style, bigger bolder bar labels on outlet metrics, widen break gap on length_agreement.
+- **Action:** Edited `notebooks/eda.ipynb` cells [21], [32], [37], [76], [78].
+  1. Cell [21] — replaced tight annotate offsets with arrowprops leader lines, two-column staggered label positions (x≈10000/12500), sorted by peak density descending.
+  2. Cell [32] — reverted to original source (no ylim cap, no clip note); user found the cap made it worse.
+  3. Cell [37] — restyled to match cell [73] (reference): height_ratios=[1,6], ax_top.ylim=(30,102), ax_bot.ylim=(0,30); top panel now shows compressed green "Retained" band; slash marks at y=30.
+  4. Cell [76] — per-bar labels: h+0.025, fontsize=7.5, fontweight='bold'; ylim raised to 1.35.
+  5. Cell [78] — break gap changed 50→60: ax_top.ylim=(60,102), ax_bot.ylim=(0,50); title updated.
+- **Prompt / model:** Claude Opus 4.7 — user gave inline Turkish instructions; reference: "llm proxy joint tam olarak istediğim gibi."
+- **Outcome:** All 5 cells updated; notebook saved. Re-run required to regenerate PNGs.
+- **Notes:** Cell [32] revert confirms original auto-scale was preferable for the NPR outlier story.
+
+## Step 50 — EDA plot refinements round 4 — 2026-06-04
+- **Goal:** Three targeted fixes: pull KDE callout labels left, widen layer_attribution break to 25→100, widen joint_label_bar break to 1500→6000.
+- **Action:** Edited `notebooks/eda.ipynb` cells [21], [37], [73].
+  1. Cell [21] — moved col_xs from [10000, 12500] to [6000, 8500]; arrows now land closer to the plot centre.
+  2. Cell [37] — split BREAK into BREAK_BOT=25 / BREAK_TOP=100: bottom panel 0–25 dominant, top panel 100–102 (thin cap strip showing "bars reach 100%"); slash marks updated to y=25.
+  3. Cell [73] — BOT_MAX=1500, TOP_MIN=6000: bottom panel 0–1500 showing all three small bars; top panel 6000–Y_TOP_MAX showing OBJ-OBJ tail; slash marks at y=1500; value-label routing updated (n_cnt >= TOP_MIN).
+- **Prompt / model:** Claude Opus 4.7 — user gave three inline instructions with one reference image.
+- **Outcome:** All 3 cells updated; notebook saved. Re-run required to regenerate PNGs.
+
+## Step 51 — EDA plot refinements round 5 — 2026-06-04
+- **Goal:** Widen layer_attribution top panel to 80–102 (show compressed Retained band); halve slash-mark x-width on all three broken-axis plots.
+- **Action:** Edited `notebooks/eda.ipynb` cells [37], [73], [78].
+  1. Cell [37] — BREAK_TOP changed 100→80: top panel now (80, 102), shows top of green Retained region compressed; title updated to "break: 25% → 80%".
+  2. Cells [37], [73], [78] — slash x-extent `[x0 ± 0.07]` → `[x0 ± 0.035]` (half width, all break marks narrower).
+- **Prompt / model:** Claude Opus 4.7 — two inline Turkish instructions.
+- **Outcome:** All 3 cells updated; notebook saved. Re-run required to regenerate PNGs.
