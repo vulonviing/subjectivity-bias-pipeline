@@ -49,33 +49,29 @@ python src/analyze.py
 python src/build_finetune.py all
 ```
 
+## Required outputs
+- `data/processed/articles.jsonl`
+- `data/processed/articles_clean.jsonl`
+- `data/processed/sentences.jsonl`
+- `data/processed/proxy_predictions.jsonl`
+- `data/processed/llm_annotations.jsonl`
+- `data/processed/vlm_annotations.jsonl`
+- `data/analysis/agreement_metrics.json`
+- `data/analysis/disagreement_examples.csv`
+- `data/finetune/proxy/{train,val,test}.jsonl` + `splits_manifest.json`
+- `data/finetune/vlm/{train,val,test}.jsonl` + `splits_manifest.json`
+- `data/finetune/dataset_card.md`
+- `README.md`, `prompts/`, `ai_usage/step_logs.md`
+
 ## Chosen sub-task
 **Sentence-level subjective / opinionated framing bias** in English news articles.
 Subjectivity is treated as a *proxy signal* for opinionated framing — not as a synonym for "media bias". The dataset is designed so a downstream classifier can be fine-tuned on sentence-level subjective-vs-objective framing, with article-level metadata (outlet, outlet block, main image) available for richer analysis.
-
-## Models at a glance
-
-| Role | Model | Step |
-|---|---|---|
-| Proxy classifier (text) | `GroNLP/mdebertav3-subjectivity-english` (HuggingFace) | `src/proxy_label.py` |
-| LLM annotator (text, silver) | OpenAI `gpt-5.4-mini` (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_llm.py` |
-| VLM annotator (image+text, silver) | OpenAI `gpt-5.4-mini` vision (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_vlm.py` |
 
 ## Collection plan
 - **Total:** 300 articles via RSS feeds.
 - **150** from a left-leaning outlet block, **150** from a right-leaning outlet block.
 - Concrete outlet list is chosen and documented in `src/crawl.py` (and logged in `ai_usage/step_logs.md`).
 - **`outlet_block ∈ {left, right}` is exploratory metadata only**, not a ground-truth ideology label and not the target variable. Block-level differences are descriptive, never causal.
-
-## Unit choices
-| Concern | Unit |
-|---|---|
-| Collection | article |
-| Text fine-tuning | sentence |
-| Proxy classifier input | sentence (only) |
-| LLM annotator input | sentence (only) |
-| VLM input | article main image + title + lead paragraph |
-| Metadata (not features) | source, outlet_block, title, url, image_url, feed_url, topic, topic_group |
 
 ## Topic taxonomy
 Each article in `data/processed/articles.jsonl` carries a `topic` and a `topic_group`. Topics are assigned by a deterministic, first-match-wins keyword rule (see `assign_topic()` in `src/crawl.py`) that scans the article URL path first, then the originating RSS feed URL as fallback for outlets whose URLs do not expose a section (HuffPost, NPR, Washington Times, Daily Caller).
@@ -97,6 +93,24 @@ Each article in `data/processed/articles.jsonl` carries a `topic` and a `topic_g
 **Why `uncategorized` is a separate group.** Articles that arrive only through an outlet's generic news feed have no publisher-provided section signal, and we deliberately do not fold them into `political` to avoid asserting a topic we have not verified.
 
 `topic` is descriptive metadata only and is **not** a target variable or a ground-truth label.
+
+## Models at a glance
+
+| Role | Model | Step |
+|---|---|---|
+| Proxy classifier (text) | `GroNLP/mdebertav3-subjectivity-english` (HuggingFace) | `src/proxy_label.py` |
+| LLM annotator (text, silver) | OpenAI `gpt-5.4-mini` (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_llm.py` |
+| VLM annotator (image+text, silver) | OpenAI `gpt-5.4-mini` vision (`gpt-5.4-mini-2026-03-17`) — Batch API + Structured Outputs | `src/annotate_vlm.py` |
+
+## Unit choices
+| Concern | Unit |
+|---|---|
+| Collection | article |
+| Text fine-tuning | sentence |
+| Proxy classifier input | sentence (only) |
+| LLM annotator input | sentence (only) |
+| VLM input | article main image + title + lead paragraph |
+| Metadata (not features) | source, outlet_block, title, url, image_url, feed_url, topic, topic_group |
 
 ## Pipeline
 
@@ -128,20 +142,6 @@ Cleaning layers (in order):
 7. **Cross-outlet references deliberately kept** — mentions of non-corpus outlets (Washington Post, NYT, CNN, MSNBC, etc.) are *not* masked. When an outlet references or criticizes another outlet by name, that is itself a bias-relevant editorial signal. See `TODO_IF_I_HAD_TIME.md` for full rationale.
 
 **Sentence splitting** (`src/sentence_split.py`) runs after cleaning using spaCy `en_core_web_sm`. Splitting is phrase-aware: fragments of ≤ 3 whitespace tokens (e.g. `"hah!"`, `"oh no!"`) are never emitted as isolated rows because they carry pragmatic signal (sarcasm, emphasis, reaction) that becomes uninterpretable without context. Instead they are **bridged**: appended to the preceding long sentence *and* prepended to the following long sentence, so each appears in two consecutive output rows. Consecutive short fragments are merged into a single bridge block before attachment (e.g. `"hah! oh no!"` is one block, not two). A fragment at the very start or end of an article is attached to its single available neighbor only. The output schema is `{sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est}`.
-
-## Required outputs
-- `data/processed/articles.jsonl`
-- `data/processed/articles_clean.jsonl`
-- `data/processed/sentences.jsonl`
-- `data/processed/proxy_predictions.jsonl`
-- `data/processed/llm_annotations.jsonl`
-- `data/processed/vlm_annotations.jsonl`
-- `data/analysis/agreement_metrics.json`
-- `data/analysis/disagreement_examples.csv`
-- `data/finetune/proxy/{train,val,test}.jsonl` + `splits_manifest.json`
-- `data/finetune/vlm/{train,val,test}.jsonl` + `splits_manifest.json`
-- `data/finetune/dataset_card.md`
-- `README.md`, `prompts/`, `ai_usage/step_logs.md`
 
 ## Models
 
