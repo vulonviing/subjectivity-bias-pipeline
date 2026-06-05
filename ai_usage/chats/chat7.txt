@@ -1,0 +1,1008 @@
+codex --yolo resume 019e8a23-3591-7612-8e50-67150a850ab6
+
+
+  DailyCaller
+  Tweet embed kalıntıları var:
+
+  https://t.co/... — The Wall Street Journal (@WSJ) May 30, 2026
+
+  Bunlar kaynak/embedded tweet artığı. Haber cümlesi gibi kullanılmamalı.
+
+  HuffPost
+  Genelde iyi. Ama bir AP footer kalmış:
+
+  Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/...
+
+  Bu da haber değil, link yönlendirmesi.
+
+  Guardian / Washington Examiner
+  Bunlar görece temiz. Bazı uzun cümleler ve quote’lar var ama çoğu gerçek haber içeriği. Otomatik “gereksiz” demek doğru olmaz.
+
+  Washington Times
+  Bir menü/footer kalıntısı var:
+
+  - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  Bu net biçimde haber değil.
+
+  Sonuç
+  Veri tamamen kötü değil. Asıl haber cümlelerinin çoğu düzgün. Ama annotation/model aşamasından önce küçük bir “sentence-level temizlik” şart.
+
+  Özellikle çıkarılması gerekenler:
+
+  - NPR transkript dipnotları.
+  - URL ve tweet embed kalıntıları.
+  - Subscribe / sign up / Google’a ekle tarzı promo satırları.
+  - CyberGuy gibi branded promo article/cümleleri.
+  - Menü/footer kalıntıları.
+  - Bölüm başlıklarının iki cümleye yapıştığı durumlar.
+
+  Bu yapılırsa veri çok daha güvenilir olur. Şu haliyle model, haber dilindeki taraflılığı öğrenmek yerine bazı outlet’lerin web sayfası kalıntılarını da sinyal sanabilir.
+
+
+› patternerlin outlet by outlet yakabileceğine inanıyorum. bütün outletleri bana bir sıralasana kullanılan.
+
+
+• Kullanılan outlet’ler:
+
+  1. dailycaller
+  2. foxnews
+  3. huffpost
+  4. npr
+  5. nypost
+  6. theguardian
+  7. washingtonexaminer
+  8. washingtontimes
+
+  Bloklara göre:
+
+  Left block
+
+  - huffpost
+  - npr
+  - theguardian
+
+  Right block
+
+  - dailycaller
+  - foxnews
+  - nypost
+  - washingtonexaminer
+  - washingtontimes
+
+
+› şimdi sadece huffpost için fazla teknik olmayacak şekilde 10 adet sample olarak kapsamlı bir audit yapma ve sonra bunu bana yeniden teknik olmayacak şekilde örneklerle rapor
+  olarak sunma planı hazırla.
+
+
+• Aşağıdaki plan sadece huffpost için 10 sample üzerinden yapılacak, teknik olmayan ama titiz bir sentence audit planı.
+
+  Amaç
+  HuffPost’tan çıkan cümlelerin gerçekten haber cümlesi olup olmadığını kontrol etmek. Özellikle şunlara bakılacak:
+
+  - Gereksiz web sitesi artığı var mı?
+  - Cümleler mantıklı yerde bölünmüş mü?
+  - Quote’lar yanlış parçalanmış mı?
+  - AP/wire service kalıntısı var mı?
+  - Çok kısa veya çok uzun cümleler modele yanlış sinyal verir mi?
+  - HuffPost’a özel tekrar eden temizlik problemi var mı?
+
+  Sample Seçimi
+  10 HuffPost article seçilecek. Bunlar rastgele olmayacak; daha anlamlı bir karışım yapılacak:
+
+  1. 3 normal görünümlü article
+     Ortalama uzunlukta, belirgin sorun sinyali olmayan haberler.
+
+  2. 2 çok kısa article
+     Az sentence üreten haberlerde “haber gerçekten kısa mı, yoksa body eksik mi?” kontrol edilecek.
+
+  3. 2 çok uzun article
+     Çok fazla sentence çıkan haberlerde live update, tekrar, quote yoğunluğu veya gereksiz parçalar aranacak.
+
+  4. 2 şüpheli pattern içeren article
+     Örneğin URL, AP footer, quote bölünmesi, lowercase başlangıç gibi sinyaller taşıyanlar.
+
+  5. 1 duplicate veya syndicated içerik şüphesi olan article
+     Başka outlet’lerle aynı cümleleri paylaşıyor mu, bu kabul edilebilir mi diye bakılacak.
+
+  Her Article’da Bakılacak Şeyler
+  Her sample için şu sırayla kontrol yapılacak:
+
+  1. Article başı
+     İlk 5 cümleye bakılacak. Başlık, dateline, AP etiketi, site chrome’u haber metnine yapışmış mı?
+
+  2. Article ortası
+     Rastgele değil, şüpheli cümlelerin çevresi incelenecek. Mesela çok uzun quote, çok kısa cümle veya garip başlayan cümle varsa önceki/sonraki cümleyle birlikte okunacak.
+
+  3. Article sonu
+     Son 5 cümlede footer, AP coverage link’i, author bio, “follow coverage”, subscribe gibi haber dışı kalıntılar aranacak.
+
+  4. Sentence boundary
+     Cümleler anlamlı yerde mi kesilmiş? Örneğin:
+      - he said. tek başına kalmış mı?
+      - Quote’un başı bir cümlede, devamı başka cümlede garip mi ayrılmış?
+      - Başlık gibi duran parça haber cümlesine yapışmış mı?
+
+  5. Gereksiz cümle kararı
+     Her sorunlu cümle için basit bir karar verilecek:
+      - Tutulabilir: Haber içeriği.
+      - Şüpheli: Belki tutulabilir ama modele gürültü verebilir.
+      - Çıkarılmalı: Haber değil; footer, URL, CTA, teknik kalıntı.
+      - Boundary sorunu: Cümle yanlış bölünmüş veya yanlış yapışmış.
+
+  Örneklerle Raporlama Şekli
+  Son rapor teknik olmayacak. Her bulgu şöyle anlatılacak:
+
+  Problem: AP takip linki haber cümlesi gibi kalmış.
+
+  Örnek:
+  "___ Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/..."
+
+  Neden sorun?
+  Bu haberin parçası değil. Okura yönlendirme linki. Model bunu haber dili gibi öğrenmemeli.
+
+  Karar:
+  Çıkarılmalı.
+
+  Başka örnek tipi:
+
+  Problem: Quote bölünmesi biraz garip ama kabul edilebilir.
+
+  Örnek:
+  "he said. “So I think it works.”"
+
+  Neden sorun olabilir?
+  Cümle küçük bir konuşma parçasıyla başlıyor. Ama quote bağlamı hâlâ anlaşılır.
+
+  Karar:
+  Tutulabilir, düşük risk.
+
+  Rapor Bölümleri
+  Rapor şu formatta sunulacak:
+
+  1. Kısa hüküm
+     HuffPost sentence output’u genel olarak temiz mi, annotation için hazır mı?
+
+  2. 10 sample özeti
+     Her sample için:
+      - Article kısa adı veya ID
+      - Genel kalite
+      - Bulunan sorun sayısı
+      - En önemli örnek
+
+  3. Tekrarlayan pattern’ler
+     HuffPost’a özel sık görülen sorunlar:
+      - AP footer/link
+      - Wire service/byline kalıntısı
+      - Quote parçalanması
+      - Çok kısa haber/body eksikliği
+      - Duplicate syndicated cümleler
+
+  4. Gereksiz cümle listesi
+     Çıkarılması gereken net örnekler.
+
+  5. Sınırda kalan örnekler
+     Çıkarılması şart olmayan ama dikkat edilmesi gereken cümleler.
+
+  6. Son karar
+     HuffPost için:
+      - “Genel olarak kullanılabilir”
+      - “Küçük sentence-level temizlik gerekli”
+      - “Şu pattern’ler temizlenmeden annotation’a geçilmemeli”
+
+  Başarı Kriteri
+  Bu audit sonunda şu sorular net cevaplanmış olacak:
+
+  - HuffPost cümleleri genel olarak güvenilir mi?
+  - Hangi cümleler kesin gereksiz?
+  - Hangi sorunlar tekil, hangileri pattern?
+  - HuffPost için outlet-specific cleanup gerekiyor mu?
+  - Annotation öncesi ne kadar risk kalıyor?
+
+
+› uygula
+
+
+• HuffPost için 10 örnek seçip her birinde baş, son ve şüpheli cümle çevrelerini okuyacağım. Çıktı sadece rapor olacak; dosya yazmayacağım veya temizlik yapmayacağım.
+
+• Ran python3 - <<'PY'
+  │ import json, collections
+  │
+  │ … +15 lines
+  └ HuffPost duplicate groups
+
+    count 2 text '“Unless I am free to do what I do better than anyone else, bring this Institution back, physically, financially, and artistically, I have no interest in
+    continuing what could only be a hopeless journey into ‘NEVER NEVER LAND,’”'
+    ids ['42a26737008fc9925795b35366946d5a3eda8ae1:1', '79c16c2e819baef266c00873f74c93e4f783659d:15']
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re, statistics, random
+  │
+  │ … +34 lines
+  └ HUFFPOST total articles 63 total sentences 1400
+
+    … +45 lines (ctrl + t to view transcript)
+    40 f39bcb90a5d9aae8658ca71dd50981171b6479da Next Week’s Democratic Primaries Are A Major Test Of Progressive Power
+    37 b726675f0bdf3bba4a4fdfad2770e9e3a655a030 Louisiana’s Legislature Passes New Congressional Map To Give GOP Another Seat
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Örnek havuzu hazır. Şimdi 10 makaleyi planladığımız karışıma göre sabitliyorum: normal, çok kısa, çok uzun, şüpheli pattern ve duplicate/tekrar şüphesi. Her biri için cümleleri
+  ve sorunlu çevreleri okuyacağım.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +33 lines
+  └
+    ==========================================================================================
+    … +406 lines (ctrl + t to view transcript)
+    16 tok=019 House Minority Leader Hakeem Jeffries (D-N.Y.) also characterized Trump’s move to overhaul the center without Congressional approval as illegal.
+    17 tok=022 “The Kennedy Center Board has no authority to actually rename the Kennedy Center in the absence of legislative action,” he told reporters.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re, random
+  │
+  │ … +24 lines
+  └ Normal-ish candidates (15-25 sentences score 0)
+    16 13dec691acc307a6ca9a9bca55e366f64cb0a79c Mamdani Fires Back After Warning From Trump DHS Chief: 'We Will Not Be Threatened'
+    … +24 lines (ctrl + t to view transcript)
+    1 20 e77c0b792a4dcd7aecc82b76092b9d50747ab1f6 Trump Floats Fill-In For Performers Who Bailed On Freedom 250 — And You Can Probably Guess Who It Is
+    1 24 eaf52ff13c62ad0c363a166cf4686ab147f52970 Comedian And Harvard Speaker Rips Into AI: 'It's Stupid'
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Uzun makalelerin tam çıktısı kısaldığı için şimdi sadece sorunlu bölgeleri ve article sonlarını çıkarıyorum. Böylece raporda yanlışlıkla iyi cümleyi sorunlu gibi göstermemiş
+  olurum.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +23 lines
+  └ HUFFPOST bridge/overlap examples
+
+    … +65 lines (ctrl + t to view transcript)
+     A: It just worked out that way. When is Manhattanhenge?
+     B: When is Manhattanhenge? Manhattanhenge does not take place on the summer solstice itself, which is June 21 this year.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +32 lines
+  └
+    ================================================================================
+    … +164 lines (ctrl + t to view transcript)
+    16 tok=019            House Minority Leader Hakeem Jeffries (D-N.Y.) also characterized Trump’s move to overhaul the center without Congressional approval as illegal.
+    17 tok=022            “The Kennedy Center Board has no authority to actually rename the Kennedy Center in the absence of legislative action,” he told reporters.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• HuffPost için 10 sample audit’i yaptım. Hiçbir dosyayı değiştirmedim; sadece mevcut article ve sentence çıktılarından örnekleri okuyup değerlendirdim.
+
+  Kısa Sonuç
+  HuffPost genel olarak diğer bazı outlet’lere göre temiz. Cümlelerin büyük kısmı gerçekten haber cümlesi. Ama 3 tip sorun var:
+
+  1. Bazı haberlerde AP/link/footer kalıntısı kalmış.
+  2. Bazı bölüm başlıkları cümlelere yapışmış.
+  3. Quote içindeki kısa parçalar bazen iki cümlede tekrar ediyor.
+
+  Bunlar HuffPost’u tamamen sorunlu yapmıyor. Ama annotation’a geçmeden önce küçük bir sentence-level temizlik iyi olur.
+
+  İncelenen 10 Sample
+  Seçilen 10 sample karışık tutuldu:
+
+  - 3 normal/temiz görünen haber
+  - 2 çok kısa haber
+  - 2 uzun haber
+  - 2 şüpheli pattern içeren haber
+  - 1 duplicate/tekrar şüphesi olan haber
+
+  1. He Saved Tammy Duckworth's Life...
+  Genel kalite: iyi.
+
+  Bu haberin cümleleri büyük ölçüde düzgün. Haber akışı net, gereksiz footer veya web kalıntısı yok.
+
+  Dikkat çeken örnek:
+
+  “I’ve seen the horrors of war.
+  When I went to Palestine, that was not a war,” said Hamawy.
+
+  Burada quote iki cümleye bölünmüş. Bu teknik olarak biraz parçalı duruyor ama anlam bozulmuyor. Tutulabilir.
+
+  Bir uzun cümle var:
+
+  The attacks have two prongs: A Wall Street Journal op-ed...
+
+  Uzun ama haber içeriği. Gereksiz değil.
+
+  Karar: tutulabilir. Büyük temizlik ihtiyacı yok.
+
+  2. Pam Bondi Throws Todd Blanche Under The Bus...
+  Genel kalite: iyi.
+
+  Cümleler haber olarak kullanılabilir. Kısa quote parçaları var ama sorun değil.
+
+  Örnek:
+
+  “Talk with Todd Blanche.
+  I don’t know anything about it,” Bondi said repeatedly...
+
+  Bu ikiye bölünmüş ama quote mantığı korunuyor. Model açısından çok büyük bir problem değil.
+
+  Başka kısa cümle:
+
+  (The allegation has not been substantiated.)
+
+  Bu kısa ama önemli açıklama. Çıkarılmamalı.
+
+  Karar: tutulabilir. Quote bölünmeleri düşük risk.
+
+  3. Comedian And Harvard Speaker Rips Into AI
+  Genel kalite: orta-iyi.
+
+  Bu haber çok fazla kısa quote içeriyor. Bazıları doğal, bazıları biraz tekrar gibi duruyor.
+
+  Örnek:
+
+  “Can I just say, fuck AI? Fuck AI.
+  Fuck AI. Fuck AI,” Chieng said...
+
+  Burada sistem kısa parçaları ayırmış. Aslında konuşmanın tarzını yansıtıyor, bu yüzden tutulabilir.
+
+  Daha sınırda örnek:
+
+  It’s always wrong. ...
+
+  Bu tek başına biraz kırık görünüyor. Ama konuşma alıntısından geldiği için tamamen gereksiz değil.
+
+  Başka örnek:
+
+  Kill it.” “The creating is the fun part,” Chieng...
+
+  Burada quote geçişi biraz garip. Cümle olarak okunuyor ama daha temiz bölünebilirdi.
+
+  Karar: tutulabilir, ama quote-heavy haberlerde cümle bölme kalitesi biraz dalgalı.
+
+  4. White House Releases Memo On Donald Trump’s Physical Exam
+  Genel kalite: çok iyi.
+
+  Sadece 3 cümle var. İlk bakışta “body eksik mi?” diye kontrol edilmesi gereken kısa bir haber gibi duruyor, ama mevcut cümlelerin hepsi gerçek haber içeriği.
+
+  Örnek:
+
+  After his visit to Walter Reed National Military Medical Center...
+
+  Still, recent photographs showing a blotchy neck rash...
+
+  Bunlar normal haber cümleleri.
+
+  Karar: kısa ama temiz. Gereksiz cümle yok.
+
+  5. U.S. Says It Struck Another Vessel...
+  Genel kalite: iyi.
+
+  4 cümlelik kısa haber. Quote iki parçaya bölünmüş:
+
+  “Three male narco-terrorists were killed during this action.
+  No U.S. military forces were harmed,” it said.
+
+  Bu bölünme ideal değil ama anlam bozulmuyor. İki cümle de haber değeri taşıyor.
+
+  Karar: kısa ama kullanılabilir. Gereksiz pattern yok.
+
+  6. For Donald Trump’s Birthday, There Will Be Blood On The South Lawn
+  Genel kalite: içerik olarak güçlü, cümle bölme açısından birkaç sorunlu nokta var.
+
+  Bu uzun bir opinion/framing-heavy haber. Model için değerli olabilir çünkü subjektif/sert dil içeriyor. Ama bölüm başlıkları cümlelere yapışmış.
+
+  Sorunlu örnek:
+
+  “The fact he continually uses it to normalize and encourage violence...” ‘Human cockfighting’
+
+  Sonra hemen ardından:
+
+  ‘Human cockfighting’ UFC holds a near-monopoly...
+
+  Burada Human cockfighting başlığı hem önceki cümlenin sonuna yapışmış hem sonraki cümlenin başına gelmiş. Bu gereksiz tekrar.
+
+  Benzer şekilde:
+
+  ‘Red meat for the rubes’
+
+  Bu kısa başlık tek başına kalmış. Haber içeriğiyle ilişkili ama cümle gibi değerlendirilmesi tartışmalı.
+
+  İyi taraf: Uzun ve sert cümlelerin çoğu gerçek editorial framing içeriyor. Bunlar çıkarılmamalı.
+
+  Karar: haber değerli, ama başlık/ara başlık yapışmaları temizlenmeli.
+
+  7. U.S. And Iran Exchange New Round Of Attacks... Live Updates
+  Genel kalite: karışık.
+
+  Bu bir live updates tarzı haber. Farklı konular bir araya geliyor. Bu yüzden sentence dataset için riskli.
+
+  Örnek:
+
+  Jimmy Kimmel: Late-Night TV Is Being ‘Poisoned;’ Colbert’s End May Be ‘My Own’
+
+  Bu bir bölüm başlığı gibi. Cümle değil ama dataset’e cümle olarak girmiş.
+
+  Başka örnek:
+
+  Moderna Partners With Global Health Coalition To Develop Bundibugyo Ebola Vaccine
+
+  Bu da başlık gibi.
+
+  Sonda şu var:
+
+  Read Schumer's letter in full here.
+
+  Bu haber cümlesi değil; okura link yönlendirmesi. Çıkarılmalı.
+
+  Karar: live update formatı sentence dataset için riskli. Bu article’da başlık ve yönlendirme satırları ayrıca temizlenmeli.
+
+  8. Pro-Trump Candidate Pulls Ahead In Colombia Presidential Vote...
+  Genel kalite: çoğunlukla iyi, ama sonda net bir kalıntı var.
+
+  Haber cümlelerinin çoğu düzgün. Ancak son iki cümlede AP footer kalmış:
+
+  “The danger here is that we return to the times where everyone is saying that the only way to solve our problems is with bullets and more war.” ___
+
+  Buradaki ___ haberin parçası değil.
+
+  Ardından:
+
+  ___ Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/hub/latin-america
+
+  Bu kesinlikle çıkarılmalı. Haber değil, AP takip linki.
+
+  Karar: article’ın ana gövdesi iyi; son footer temizlenmeli.
+
+  9. Trump Plans To Appeal Order Allowing All Importers...
+  Genel kalite: orta.
+
+  Bu haberde bölüm başlıkları cümlelere yapışıyor.
+
+  Örnek:
+
+  “If the government can freeze the refund machinery...” Appleton said. Price cuts promised
+
+  Sonraki cümle:
+
+  Price cuts promised Some national retail chains said...
+
+  Burada Price cuts promised başlığı iki kere görünüyor. İlki önceki cümlenin sonuna yapışmış, ikincisi sonraki cümlenin başına yapışmış.
+
+  Başka bölüm başlığı:
+
+  Refunds coming in phases
+
+  Bu tek başına kısa başlık. Tamamen gereksiz değil ama sentence annotation için cümle gibi davranması doğru değil.
+
+  Sondaki örnek:
+
+  “Our choices were bad and worse: raise prices and lose customers, or keep prices the same and not make any money.” ___
+
+  Buradaki ___ temizlenmeli.
+
+  Karar: haber içeriği iyi; bölüm başlıkları ve ___ kalıntıları sorunlu.
+
+  10. Trump Loses It After Judge Rules He Can't Slap His Name On Kennedy Center
+  Genel kalite: iyi.
+
+  Bu duplicate/tekrar şüphesi nedeniyle seçildi. İçindeki bir uzun Trump quote’u başka HuffPost article’ında da geçiyor. Ama bu tek başına hata değil; aynı haber gelişmesinin
+  farklı yazılarda alıntılanması normal olabilir.
+
+  Örnek:
+
+  “Unless I am free to do what I do better than anyone else...”
+
+  Bu uzun ama gerçek quote. Çıkarılmamalı.
+
+  Cümleler genel olarak düzgün, footer yok, link kalıntısı yok.
+
+  Karar: duplicate şüphesi düşük risk. Kullanılabilir.
+
+  Tekrarlayan HuffPost Pattern’leri
+  HuffPost’ta en net tekrar eden sorunlar şunlar:
+
+  AP / link footer kalıntısı
+  En açık problem bu.
+
+  ___ Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/...
+
+  Karar: çıkarılmalı.
+
+  Üç alt çizgi / separator kalıntısı
+  Bazı haberlerin sonunda quote’a yapışıyor:
+
+  ... bullets and more war.” ___
+
+  Karar: ___ temizlenmeli. Cümlenin kendisi tutulabilir.
+
+  Bölüm başlıklarının cümleye yapışması
+  Örnekler:
+
+  Price cuts promised
+
+  Human cockfighting
+
+  Refunds coming in phases
+
+  Bunlar başlık. Cümle gibi annotate edilirse modelin kafasını karıştırabilir.
+
+  Karar: başlıklar ya ayrı metadata gibi görülmeli ya da sentence dataset’ten çıkarılmalı. Önceki/sonraki cümleye yapışması özellikle sorunlu.
+
+  Quote parçalanmaları
+  Örnek:
+
+  “Talk with Todd Blanche.
+  I don’t know anything about it,” Bondi said...
+
+  veya:
+
+  Fuck AI.
+  Fuck AI.
+
+  Bu her zaman hata değil. HuffPost’ta quote-heavy haberlerde doğal olarak çok oluyor. Genelde tutulabilir.
+
+  Karar: otomatik çıkarma yapılmamalı. Sadece çok garip quote geçişleri review edilebilir.
+
+  Live update başlıkları
+  Örnek:
+
+  Moderna Partners With Global Health Coalition To Develop Bundibugyo Ebola Vaccine
+
+  Bu bir haber başlığı gibi, normal cümle değil.
+
+  Karar: live update article’larında özel dikkat gerekli.
+
+  Net Çıkarılmalı Dediğim Örnekler
+  Bunlar haber cümlesi değil:
+
+  ___ Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/hub/latin-america
+
+  Read Schumer's letter in full here.
+
+  Şunlarda ise cümle tutulabilir ama sonundaki kalıntı temizlenmeli:
+
+  “The danger here is that we return to the times where everyone is saying that the only way to solve our problems is with bullets and more war.” ___
+
+  “Our choices were bad and worse: raise prices and lose customers, or keep prices the same and not make any money.” ___
+
+  Sınırda Kalanlar
+  Bunlar tamamen gereksiz değil ama cümle gibi annotate edilmesi tartışmalı:
+
+  Price cuts promised
+
+  Refunds coming in phases
+
+  ‘Human cockfighting’
+
+  ‘Red meat for the rubes’
+
+  Bunlar haberin yapısını gösteriyor ama sentence-level subjectivity annotation için tek başına zayıf birimler.
+
+  Son Karar
+  HuffPost için genel hüküm: kullanılabilir ama küçük temizlik gerekli.
+
+  En ciddi sorunlar outlet genelinde yaygın değil; daha çok belirli article formatlarında ortaya çıkıyor:
+
+  - AP syndication/footer içeren haberler.
+  - Live update tarzı haberler.
+  - Bölüm başlıklı uzun analiz/opinion haberleri.
+  - Çok quote-heavy haberler.
+
+  HuffPost’u komple dışlamak gerekmiyor. Ama annotation öncesi şu kurallar HuffPost için önemli olur:
+
+  - ___ temizle.
+  - AP follow/link satırlarını çıkar.
+  - Read ... in full here gibi okura yönlendirme cümlelerini çıkar.
+  - Bölüm başlıklarının önceki/sonraki cümleye yapışmasını kontrol et.
+  - Quote parçalanmalarını genel olarak tut, çünkü çoğu gerçek haber/framing sinyali taşıyor.
+
+─ Worked for 2m 15s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+
+› her şeyi mükemmel yapamayız. must olarak temizlenmesi gerek olarak gördüğün, cleaning adımında, yöntemleri planla ve bunları bir prompt olarak bana ver. fakat gerçekleştirme,
+  gerçekleştirme işlemini ben yapacağım. cleaningde temizledikten sonra yeniden sentence böleriz.
+
+
+• Önce mevcut cleaning kurallarını ve şu an sentence audit’te “must-clean” diye gördüğümüz artıkların mevcut kodda yakalanıp yakalanmadığını hızlıca kontrol edeceğim. Uygulama
+  yapmayacağım; sadece promptu doğru hedeflere oturtmak için okuyorum.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +23 lines
+  └
+     npr_transcript_footer rows 24 articles 4 sources {'npr': 24}
+    … +53 lines (ctrl + t to view transcript)
+      61b2fe584042e1a868c06bd6cfc1477b95ef05be:28 '- Capitol Hill Show'
+      61b2fe584042e1a868c06bd6cfc1477b95ef05be:30 '- ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In'
+
+• Proposed Plan
+
+
+  # Must-Clean Plan + Implementation Prompt
+
+  ## Summary
+
+  Amaç: Mükemmel temizlik değil, annotation öncesi kesin temizlenmesi gereken düşük-riskli kalıntıları cleaning.py aşamasında yakalamak. Sonra articles_clean.jsonl yeniden
+  üretilecek ve ardından sentences.jsonl yeniden bölünecek.
+
+  Must-clean kapsamı:
+
+  - NPR transcript/footer kalıntıları.
+  - URL / shortlink / tweet attribution artıkları.
+  - HuffPost AP footer ve ___ separator kalıntıları.
+  - NYPost California Post / Google / newsletter chrome.
+  - Fox CyberGuy promo/CTA kalıntıları.
+  - Washington Times nav/menu/footer satırları.
+  - Genel Read ... in full here tipi yönlendirme cümleleri.
+
+  Kapsam dışı:
+
+  - Normal quote parçalanmaları.
+  - Uzun ama gerçek haber cümleleri.
+  - Bölüm başlıklarının tamamını silmek. Bunlar sentence split sonrası ayrıca değerlendirilecek.
+
+  ## Cleaning Changes
+
+  - Global line preprocessing ekle:
+      - URL’leri line içinden sil; line boşalırsa drop et.
+      - ___ separator’larını line içinden sil; line boşalırsa drop et.
+      - URL silindikten sonra sadece tweet attribution kalırsa drop et.
+
+  - Global regex ekle:
+      - http(s)://, www., t.co URL temizliği.
+      - em dash veya hyphen ile başlayan standalone tweet attribution: — Name (@handle) Month DD, YYYY.
+      - ^read .{0,100} in full here\\.?$.
+
+  - NPR-specific:
+      - Copyright © ... NPR, All rights reserved, Visit our website terms of use, Accuracy and availability, Transcript text may be revised, Audio on NPR.org, authoritative
+        record of NPR's programming drop/trim.
+
+      - Accessibility links token’ını line içinden sil, tüm line’ı otomatik drop etme.
+
+  - HuffPost-specific/global:
+      - Follow AP’s coverage line’ını drop et.
+      - ___ sadece separator olarak temizlensin; yanındaki gerçek quote korunmalı.
+
+  - NYPost-specific:
+      - Add The California Post on Google prefix’ini line içinden sil, kalan haber cümlesini koru.
+      - California Post Newsletters, Sign up here chrome line’larını drop et.
+
+  - Fox-specific:
+      - CyberGuyLive.com, Sign up for my FREE CyberGuy Report, Register here: CyberGuyLive.com, Copyright 2026 CyberGuy.com, visit CyberGuy.com promo line’larını drop et.
+      - CyberGuy source-restricted alias olarak maskelenebilir; bütün article otomatik drop edilmesin.
+
+  - Washington Times-specific:
+      - Capitol Hill Show, ForAmerica, Games - Subscribe - Sign In, Washington Times Weekly gibi nav/menu satırlarını drop et.
+
+  ## Verification
+
+  Temizlikten sonra şunlar 0 olmalı:
+
+  - Accuracy and availability
+  - Transcript text may be revised
+  - Audio on [OUTLET].org veya Audio on NPR.org
+  - authoritative record
+  - Accessibility links
+  - Follow AP’s coverage
+  - ___
+  - Add The California Post on Google
+  - California Post Newsletters
+  - CyberGuyLive.com
+  - Sign up for my FREE CyberGuy Report
+  - Subscribe - Sign In
+  - standalone — ... (@handle) Month DD, YYYY
+  - raw https://, www., t.co
+
+  Spot-check yapılacak:
+
+  - DailyCaller URL içeren haber cümlesinde URL silinmeli ama haber cümlesi korunmalı.
+  - HuffPost quote sonunda ___ varsa quote korunmalı, sadece separator gitmeli.
+  - NYPost Add The California Post on Google... prefix’i silinmeli, kalan haber cümlesi durmalı.
+  - NPR copyright footerları gitmeli; gerçek transcript konuşmaları topluca silinmemeli.
+  - Fox CyberGuy article komple silinmemeli; sadece promo/CTA/brand footer satırları temizlenmeli.
+
+  ## Implementation Prompt
+
+  Aşağıdaki promptu uygulama için kullan:
+
+  Repo: /Users/emrecanulu/Documents/media-bias-pipeline
+
+  Görev:
+  Sadece must-clean seviyesinde body cleaning iyileştirmesi yap. Mükemmel temizlik hedefleme. Sentence split’e veya annotation koduna dokunma. Önce `src/cleaning.py` içinde
+  düşük-riskli boilerplate/chrome temizliği ekle, sonra `articles_clean.jsonl` ve `sentences.jsonl` yeniden üretilecek.
+
+  Kapsam:
+  1. `src/cleaning.py` içinde line-level preprocessing ekle:
+     - URL/shortlink temizle: `http(s)://...`, `www...`, `t.co/...`.
+     - `___` separator token’ını line içinden kaldır.
+     - Bu işlemlerden sonra line boşsa drop et.
+     - URL temizlendikten sonra line sadece tweet attribution ise drop et.
+
+  2. Global regex/blacklist ekle:
+     - standalone tweet attribution hem hyphen hem em dash ile yakalansın:
+       `— Name (@handle) Month DD, YYYY`
+       `- Name (@handle) Month DD, YYYY`
+     - `Read ... in full here.` gibi okura yönlendirme satırlarını drop et.
+     - `Follow AP’s coverage` satırlarını drop et.
+
+  3. NPR için:
+     - Transcript footer kalıntılarını drop/trim et:
+       `Copyright © ... NPR`
+       `All rights reserved`
+       `Visit our website terms of use`
+       `Accuracy and availability`
+       `Transcript text may be revised`
+       `Audio on NPR.org`
+       `authoritative record of NPR's programming`
+     - `Accessibility links` sadece token olarak silinsin; aynı line’daki gerçek haber cümlesi korunmaya çalışılsın.
+
+  4. NYPost için:
+     - `Add The California Post on Google` prefix’ini sil, kalan haber cümlesini koru.
+     - `California Post Newsletters`, `Sign up here` gibi California Post chrome satırlarını drop et.
+
+  5. Fox için:
+     - CyberGuy promo/CTA satırlarını drop et:
+       `CyberGuyLive.com`
+       `Register here: CyberGuyLive.com`
+       `Sign up for my FREE CyberGuy Report`
+       `visit CyberGuy.com`
+       `Copyright 2026 CyberGuy.com`
+     - `CyberGuy` kelimesini Fox source-restricted alias olarak `[OUTLET]` ile maskeleyebilirsin.
+     - Article’ı komple drop etme.
+
+  6. Washington Times için:
+     - nav/menu satırlarını drop et:
+       `Capitol Hill Show`
+       `ForAmerica`
+       `Games - Subscribe - Sign In`
+       `Washington Times Weekly`
+
+  Sınırlar:
+  - Gerçek haber cümlelerini yalnızca URL veya `___` taşıdığı için komple silme; mümkünse sadece kalıntıyı temizle.
+  - Normal quote parçalarını silme.
+  - Uzun cümleleri silme.
+  - Bölüm başlıklarını genel kural ile silme.
+  - Cross-outlet referanslarını maskeleme veya silme.
+
+  Sonra çalıştır:
+  - `python3 scripts/clean_articles.py`
+  - `python3 src/sentence_split.py`
+
+  Doğrulama:
+  Aşağıdaki pattern’lerin yeni `sentences.jsonl` içinde 0 olduğundan emin ol:
+  `Accuracy and availability`
+  `Transcript text may be revised`
+  `Audio on NPR.org`
+  `Audio on [OUTLET].org`
+  `authoritative record`
+  `Accessibility links`
+  `Follow AP’s coverage`
+  `___`
+  `Add The California Post on Google`
+  `California Post Newsletters`
+  `CyberGuyLive.com`
+  `Sign up for my FREE CyberGuy Report`
+  `Subscribe - Sign In`
+  `https://`
+  `www.`
+  `t.co`
+
+  Ayrıca spot-check yap:
+  - HuffPost AP footer satırı silinmiş mi?
+  - HuffPost quote + `___` örneklerinde quote korunmuş mu?
+  - NYPost California Post prefix’i silinip haber cümlesi korunmuş mu?
+  - NPR transcript footerları gitmiş mi?
+  - DailyCaller tweet attribution satırları gitmiş mi?
+  - CyberGuy promo satırları gitmiş mi?
+
+  Project rule:
+  Yaptığın implementation için `ai_usage/step_logs.md` dosyasına yeni bir forward-only log entry ekle.
+
+  ## Assumptions
+
+  - Article drop yapılmayacak; sadece body cleaning uygulanacak.
+  - Public schema değişmeyecek.
+  - articles_clean.jsonl ve sentences.jsonl yeniden üretilecek.
+  - Bu plan must-clean odaklıdır; daha tartışmalı heading/quote boundary sorunları sonraki sentence-split audit aşamasına bırakılır.
+
+
+─ Worked for 1m 41s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+
+› Implement the plan.
+
+
+• Must-clean değişikliklerini uyguluyorum: sadece src/cleaning.py içinde düşük riskli chrome/boilerplate temizliği, sonra clean articles ve sentence split yeniden üretimi,
+  ardından pattern doğrulama.
+
+• Explored
+  └ Read cleaning.py, clean_articles.py
+
+• Ran tail -80 ai_usage/step_logs.md
+  └ - **Goal:** (A) Verify the 3 Step-5 risks matured vs. stayed hypothetical; (B) third independent audit pass with seed=7 on cleaned corpus.
+    - **Action:**
+    … +83 lines (ctrl + t to view transcript)
+    - **Notes:** Broad all-caps removal, all short-sentence removal, all `[OUTLET]` sentence removal, cross-outlet reference cleanup, and section-heading bridge cleanup remain
+    intentionally out of scope.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Çalışma alanında must-clean değişikliklerinin büyük kısmı zaten mevcut görünüyor ve step log’da Step 10/11 kayıtları var. Yine de isteği tamamlamak için kodu doğrulayıp planla
+  eksik kalan noktaları kapatacağım; özellikle ___ inline temizliği ve URL genel temizliği mevcut davranışa gerçekten yansıyor mu bakacağım.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 -m py_compile src/cleaning.py src/sentence_split.py scripts/clean_articles.py
+  └ (no output)
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +32 lines
+  └ Accuracy and availability 0 {}
+    Transcript text may be revised 0 {}
+    … +17 lines (ctrl + t to view transcript)
+    standalone tweet attr 0 {}
+    articles 300 sentences 8833 short bodies 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Doğrulamada tek açık kalan must-clean hedefi ___: 10 HuffPost cümlesinde gerçek quote’un sonuna yapışmış. Şimdi sadece bu separator’ı line içinden temizleyen dar bir değişiklik
+  ekleyeceğim; cümlenin kendisini silmeyeceğim.
+
+• Edited src/cleaning.py (+3 -0)
+    177  _NYPOST_CALIFORNIA_PREFIX = re.compile(r"^add the california post on google\s*", re.I)
+    178 +_INLINE_SEPARATOR = re.compile(r"\s*_{3,}\s*")
+    179 +_READ_IN_FULL = re.compile(r"^read .{0,100} in full here\.?$", re.I)
+    180
+        ⋮
+    284      line = _TRAILING_SHORTLINK.sub("", line).strip()
+    285 +    line = _INLINE_SEPARATOR.sub(" ", line).strip()
+    286      if source == "nypost":
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Ayrıca yönlendirme tipi Read ... in full here satırını da must-clean kapsamına alıyorum; bunun için eklediğim regex’i whole-line boilerplate kontrolüne bağlayacağım.
+
+• Edited src/cleaning.py (+2 -0)
+    275              return True
+    276 +    if _READ_IN_FULL.search(line):
+    277 +        return True
+    278      for pat in _OUTLET_REGEX.get(source, []):
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Kod değişikliği dar kaldı: ___ sadece satır içinden siliniyor, haber cümlesi korunuyor; Read ... in full here satırı ise komple boilerplate sayılıyor. Şimdi clean ve sentence
+  çıktısını yeniden üreteceğim.
+
+• Ran python3 -m py_compile src/cleaning.py src/sentence_split.py scripts/clean_articles.py
+  └ (no output)
+
+• Ran python3 scripts/clean_articles.py
+  └
+    Wrote 300 articles to /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/articles_clean.jsonl
+    … +11 lines (ctrl + t to view transcript)
+    -----------------------------------------------------------------------------------
+    TOTAL                       300     1,211,515    1,164,438        3.9%             183
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Clean article üretimi tamamlandı; 300 article korundu ve kısa body uyarısı yok. Şimdi sentence split’i yeniden çalıştırıp must-clean pattern doğrulamasını yapacağım.
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +33 lines
+  └ Accuracy and availability: 0 {}
+    Transcript text may be revised: 0 {}
+    … +19 lines (ctrl + t to view transcript)
+      5600f2c2b19a509740aeed90ea640433da3c04a1:67 "Read Schumer's letter in full here."
+    articles 300 sentences 8833 short_bodies 0
+
+• Ran python3 -m src.sentence_split
+  └ articles=300  sentences=8832  avg=29.4/article  bridge_groups=320
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Doğrulama komutu split ile paralel çalıştığı için eski sentences.jsonl’yi okumuş olabilir; split 8,832 cümleyle bitti, doğrulamada 8,833 görünmesi bunu gösteriyor. Şimdi
+  doğrulamayı tek başına tekrar çalıştırıyorum.
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +35 lines
+  └ Accuracy and availability: 0 {}
+    Transcript text may be revised: 0 {}
+    … +15 lines (ctrl + t to view transcript)
+    read full here: 0 {}
+    articles 300 sentences 8832 short_bodies 0 any_hits False
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Tek başına doğrulamada tüm must-clean pattern’leri 0’a indi; yeni sentence sayısı 8,832. Şimdi birkaç hedef örneği spot-check edip log kaydını ekleyeceğim.
+
+• Ran python3 - <<'PY'
+  │ import json, collections
+  │
+  │ … +27 lines
+  └
+    ## huffpost_ap_footer_removed huffpost Pro-Trump Candidate Pulls Ahead In Colombia Presidential Vote As Ruling Party Sows Doubt In Results
+    … +43 lines (ctrl + t to view transcript)
+
+    ## washingtontimes_nav_removed washingtontimes DOJ reportedly subpoenas X, Reddit for data on users critical of immigration efforts
+
+• Ran python3 - <<'PY'
+  │ import json, collections
+  │
+  │ … +12 lines
+  └ article_count 300
+    sentence_count 8832
+    short_bodies_lt_200 0
+    empty_bodies 0
+    sentences_by_source {'theguardian': 2375, 'npr': 915, 'huffpost': 1398, 'foxnews': 1372, 'nypost': 835, 'washingtonexaminer': 671, 'washingtontimes': 833, 'dailycaller': 433}
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Spot-check’ler iyi: URL ve AP footer cümlesi kaldırıldı, ___ temizlendi, California Post prefix’i silinip haber cümlesi korundu, NPR footer ve DailyCaller tweet attribution
+  gitti. Son olarak project log’una forward-only kayıt ekliyorum.
+
+• Edited ai_usage/step_logs.md (+7 -0)
+    296  - **Notes:** Broad all-caps removal, all short-sentence removal, all `[OUTLET]` sentence removal, cross-outlet reference cleanup, and section-heading bridge cleanup rema
+         in intentionally out of scope.
+    297 +
+    298 +## Step 12 — Inline separator and read-through cleanup verification — 2026-06-03
+    299 +- **Goal:** Complete the user-requested must-clean implementation by removing the remaining inline `___` separator artifacts and `Read ... in full here` CTA rows while p
+         reserving real news sentences.
+    300 +- **Action:** Updated `src/cleaning.py` with conservative inline separator stripping (`_{3,}`) before line-drop checks and a narrow whole-line `Read ... in full here` bo
+         ilerplate regex. Regenerated `data/processed/articles_clean.jsonl` with `python3 scripts/clean_articles.py` and `data/processed/sentences.jsonl` with `python3 -m src.sen
+         tence_split`.
+    301 +- **Prompt / model:** GPT-5 Codex — implement the must-clean cleaning plan, then regenerate clean articles and sentence splits.
+    302 +- **Outcome:** Rebuild succeeded: 300 articles, 0 empty bodies, 0 bodies under 200 chars, 8,832 sentences. Verification returned 0 hits for NPR transcript/footer phrases
+         , `Accessibility links`, AP follow footer, inline `___`, California Post chrome, CyberGuy/CyberGuyLive/CTA text, `Subscribe - Sign In`, raw URLs/shortlinks, standalone t
+         weet attribution, and `Read ... in full here`. Spot-checks confirmed HuffPost quotes were preserved while `___` was removed, NYPost California Post prefixes were strippe
+         d while article text remained, NPR footers were removed, DailyCaller tweet artifacts were removed, and Fox CyberGuy promo rows were removed.
+    303 +- **Notes:** Scope remained must-clean only. Quote-heavy sentences, long real news sentences, section-heading bridge behavior, cross-outlet references, and `[OUTLET]` at
+         tribution sentences remain intentionally unchanged for later sentence-methodology review.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Implemented the must-clean pass.
+
+  Changed src/cleaning.py:176 to remove remaining inline ___ separators while preserving the actual sentence, and to drop narrow Read ... in full here CTA rows. Then regenerated:
+
+  - data/processed/articles_clean.jsonl
+  - data/processed/sentences.jsonl
+
+  Also added the required forward-only log entry in ai_usage/step_logs.md.
+
+  Verification passed:
+
+  - 300 articles
+  - 0 empty bodies
+  - 0 bodies under 200 chars
+  - 8,832 sentences
+  - 0 hits for NPR transcript footers, Accessibility links, AP follow footer, ___, California Post chrome, CyberGuy promo text, raw URLs/shortlinks, standalone tweet attribution,
+    and Read ... in full here
+
+  Spot-checks confirmed the intended behavior: HuffPost quotes were preserved while ___ was removed, NYPost California Post prefixes were stripped while article text remained,
+  NPR footers were removed, DailyCaller tweet artifacts were removed, and Fox CyberGuy promo rows were removed.
+
+─ Worked for 2m 43s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ 
+› loga ekle
+ 
+  gpt-5.5 medium · ~/Documents/media-bias-pipeline

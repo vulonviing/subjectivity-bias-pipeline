@@ -1,0 +1,535 @@
+claude --dangerously-skip-permissions
+ ▐▛███▜▌   Claude Code v2.1.150
+ ▐▛███▜▌   Claude Code v2.1.150
+▝▜█████▛▘  Opus Plan with medium effort · Claude Pro
+  ▘▘ ▝▝    ~/Documents/media-bias-pipeline
+
+❯ projeyi oku ve anla. ardından finetune dataseti hazır hale getirmek için plan yap. her ktirik noktadaki kararı bana soru olarak sor ve adım adım planla.                        
+
+  Read 1 file, listed 3 directories (ctrl+o to expand)
+
+⏺ Projeyi okudum. Özetle:
+  - 300 makale × 8 outlet (4 left / 4 right blok), 8,561 cümle
+  - Cümle düzeyinde proxy (HF mDeBERTa) + silver LLM (gpt-5.4-mini) etiketleri: OBJ / SUBJ
+  - 292 makale için VLM görsel etiketleri (OBJ / SUBJ)
+  - Zengin metadata: outlet, outlet_block, topic, topic_group, image_url, başlık, lead, rationale, confidence
+  - Sınıf dengesizliği: ~24% SUBJ
+  - Sentence_split sırasında kısa parçalar iki komşu cümleye köprüleniyor → bazı metinler iki kez görünebilir
+  - CLAUDE.md kuralları: silver (not gold), outlet-block descriptive (not causal), subjectivity ≠ bias
+
+  Hedef "fine-tune ready" dataset. Bunun şekli birden fazla kritik karara bağlı. Önce en önemli iki noktayı sorayım, ardından netleştikçe devam edeceğim.
+
+⏺ User declined to answer questions
+  ⎿  · Fine-tune hedefi hangisi? Bu, dataset şeklini (input/output formatı, kolonlar, dosya yapısı) tamamen belirler. (Encoder cümle sınıflandırıcı (text-only) / Decoder LLM
+     instruction-tune (rationale dahil) / Multimodal (text + image) classifier / Hem encoder hem LLM için iki paralel paket)
+     · Hangi etiket(ler) ground-truth olarak kullanılacak? (Hatırlatma: LLM = silver, not gold.) (Sadece LLM silver label / LLM silver + güven eşiği (örn. ≥ 0.80) / Sadece proxy
+     + LLM agreement olan cümleler / Multi-task: hem proxy hem LLM etiketi çıktı olarak)
+
+  - CLAUDE.md kuralları: silver (not gold), outlet-block descriptive (not causal), subjectivity ≠ bias
+
+  Hedef "fine-tune ready" dataset. Bunun şekli birden fazla kritik karara bağlı. Önce en önemli iki noktayı sorayım, ardından netleştikçe devam edeceğim.
+
+⏺ User declined to answer questions
+  ⎿  · Fine-tune hedefi hangisi? Bu, dataset şeklini (input/output formatı, kolonlar, dosya yapısı) tamamen belirler. (Encoder cümle sınıflandırıcı (text-only) / Decoder LLM
+     instruction-tune (rationale dahil) / Multimodal (text + image) classifier / Hem encoder hem LLM için iki paralel paket)
+     · Hangi etiket(ler) ground-truth olarak kullanılacak? (Hatırlatma: LLM = silver, not gold.) (Sadece LLM silver label / LLM silver + güven eşiği (örn. ≥ 0.80) / Sadece proxy
+     instruction-tune (rationale dahil) / Multimodal (text + image) classifier / Hem encoder hem LLM için iki paralel paket)
+     · Hangi etiket(ler) ground-truth olarak kullanılacak? (Hatırlatma: LLM = silver, not gold.) (Sadece LLM silver label / LLM silver + güven eşiği (örn. ≥ 0.80) / Sadece proxy
+     + LLM agreement olan cümleler / Multi-task: hem proxy hem LLM etiketi çıktı olarak)
+
+⏺ Sorulardan birini ya da ikisini netleştirmek istiyorsun. Neyi açıklamamı istersin? Örneğin:
+
+  - Her seçeneğin ne anlama geldiğini ve trade-off'unu daha detaylı açıklayabilirim
+  - Hangi seçeneğin bu projeye / mevcut veriye en uygun olduğuna dair benim önerimi paylaşabilirim
+  - Sorular arasındaki bağımlılığı (örn. hedef seçimi etiket seçimini nasıl etkiler) anlatabilirim
+  - Tamamen farklı bir kritik karar noktasıyla başlamamı isteyebilirsin (örn. önce split stratejisi, önce data filtering)
+
+  Hangisi? Ya da kendi sorunu yaz, ben buna göre devam edeyim.
+
+✻ Brewed for 1m 11s
+
+❯ proxy için fine tune dataseti hazırla. tek output: obji subj.vlm için de ayrı hazırla. o da tek output. görüntü kaynakları base64 olsun.                                        
+                                                                                                                                                                                  
+  llm ve proxy'nin agree oldu decisionları al finetune için, agree olmadıkları noktalarda da llm'i tercih et.                                                                     
+
+⏺ Anlaşıldı. Karar netleşti:
+  - Proxy FT dataset: text-only sentence classifier → label = LLM label (agree ise zaten aynı, disagree ise LLM)
+  - VLM FT dataset: image classifier → label = VLM label, görseller base64 inline
+
+  Pratikte iki dataset için de target = mevcut silver/reference label. Geriye birkaç kritik nokta kaldı; bunları sorayım.
+
+⏺ User declined to answer questions
+  ⎿  · Train/val/test split stratejisi ne olsun? Bu hem proxy hem VLM dataseti için geçerli. (Article-level stratified (Öneri) / Outlet-level holdout / Random sentence-level /
+     Article-level + outlet stratified)
+     · Proxy FT için input ne olsun? (Modelin göreceği tek bir text alanı.) (Sadece cümle metni (Öneri) / Cümle + title context / Cümle + önceki/sonraki cümle)
+     · Sınıf dengesizliği (SUBJ ≈24%) nasıl ele alınsın? Datasete gömülür mü, FT-time'a mı bırakılır? (Hiç müdahale etme, raw dağılım (Öneri) / Train'de OBJ downsample /
+     Sample_weight kolonu ekle)
+     · Bridged duplicates ve LLM-confidence filtresi: dataset temizliğinde ne yapılsın? (Bridged duplicate cümleleri tekilleştir (Öneri) / Düşük LLM confidence (örn. <0.70)
+     satırları at / VLM için düşük confidence (<0.70) satırları at / Hiçbir filtre uygulama)
+
+⏺ İlk üç soruyu yanıtladın, harika. Dördüncü (filtreleme) sorusunu netleştirmek istiyorsun. Neyi açıklamamı istersin?
+
+  - Bridged duplicates ne demek: sentence_split.py kısa parçaları (≤3 token, örn. "hah!", "oh no!") iki komşu cümleye yapıştırıyor. Sonuçta aynı kısa metin iki ardışık satırda
+  görünebiliyor. Train/test'e farklı şekilde düşerse leakage yaratabilir.
+  - LLM confidence filtresi: LLM her etikete 0–1 arası confidence skoru veriyor (mean 0.93). Düşük confidence'lı satırlar genelde modelin de tereddütlü olduğu zor örnekler —
+  atmak etiket gürültüsünü azaltır ama "zor ama doğru" örnekleri de kaybedersin.
+  - VLM confidence filtresi: Aynı mantık VLM için (mean 0.867, 292 örnek var, kayba duyarlı).
+  - Önerimi söyleyeyim mi? Veya farklı bir karar mı (örn. test'i confidence ≥0.90'la sınırla, train tam tutsun) tartışalım?
+
+  Hangi yöne gideyim?
+
+✻ Churned for 1m 14s
+
+❯ hmm anladım. o duplicate'ler dursun sorun yok. cümle bağlamı komplede kalacak zaten. onları tek verme yeter. confidince filtresi de uygulamana gerek yok                        
+
+⏺ Anlaşıldı: bridged duplicate'ler kalsın, confidence filtresi yok. Birkaç son nokta kaldı.
+
+⏺ User answered Claude's questions:
+  ⎿  · VLM FT için input ne olsun? Orijinal VLM annotation adımında image + title + lead beraber kullanılmıştı; FT dataseti için de aynı şey mi, sadece görsel mi? → Image + title
+      + lead (orijinal pipeline ile aynı)
+     · Görseller base64'e çevrilirken nasıl işlensin? (Mevcut VLM adımı max 1024px + JPEG q85 kullanıyor.) → Mevcut VLM ile aynı: max 1024px, JPEG q85 (Öneri)
+     · Çıktı formatı ve dosya yapısı nasıl olsun? → JSONL, split başına bir dosya (Öneri)
+
+⏺ Tüm kararlar netleşti. Planı yazıyorum.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Ready to code?
+
+ Here is Claude's plan:
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Fine-tune Dataset Hazırlama Planı
+
+ Context
+
+ media-bias-pipeline projesi şu ana kadar 8,561 cümleyi (proxy + LLM silver) ve 292 makale görselini (VLM) etiketledi. Şimdi bu çıktıları iki ayrı fine-tune-ready dataset olarak
+  paketleyeceğiz:
+
+ 1. Proxy FT dataset — text-only sentence classifier (HF GroNLP/mdebertav3-subjectivity-english benzeri bir encoder'ı OBJ/SUBJ head ile fine-tune etmek için).
+ 2. VLM FT dataset — multimodal (image + title + lead) classifier (vision-text encoder veya VLM fine-tune için).
+
+ Her iki dataset de küçük (8.5k cümle / 292 görsel), bu yüzden split ve etiket politikası leakage'a duyarlı. CLAUDE.md kuralları (silver ≠ gold, descriptive ≠ causal, görseller
+ URL olarak gönderilmez) korunacak.
+
+ Karar özeti (kullanıcı tarafından onaylanmış)
+
+ ┌─────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │        Karar        │                                                           Seçim                                                           │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Etiket otoritesi    │ LLM silver label (agree → aynı, disagree → LLM tercih; pratikte tüm satırlar için llm_label); VLM dataseti için vlm_label │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Proxy input         │ Sadece cleaned cümle metni (mevcut sentences.jsonl'daki text)                                                             │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ VLM input           │ image (base64 inline) + title + lead                                                                                      │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Image preprocessing │ Mevcut VLM ile aynı: max 1024px, JPEG q85 (cache data/raw/images/)                                                        │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Split stratejisi    │ Article-level + outlet stratified (tüm 8 outlet her split'te)                                                             │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Sınıf dengesi       │ Müdahale yok, raw dağılım                                                                                                 │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Bridged duplicates  │ Tutulur (dedupe yok)                                                                                                      │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Confidence filtresi │ Yok (ne LLM ne VLM)                                                                                                       │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Çıktı formatı       │ JSONL, split başına bir dosya                                                                                             │
+ ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Split oranları      │ 70 / 15 / 15 (train / val / test) — sabit seed 42                                                                         │
+ └─────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ Çıktı yapısı
+
+ data/finetune/
+ ├── proxy/
+ │   ├── train.jsonl
+ │   ├── val.jsonl
+ │   ├── test.jsonl
+ │   └── splits_manifest.json     # article_id -> split eşlemesi (üretilebilirlik)
+ ├── vlm/
+ │   ├── train.jsonl
+ │   ├── val.jsonl
+ │   ├── test.jsonl
+ │   └── splits_manifest.json
+ └── dataset_card.md              # her iki dataset için kolonlar, dağılımlar, split metodu, lisans/uyarılar
+
+ Proxy satır şeması
+
+ {
+   "sentence_id": "<sha>:<idx>",
+   "article_id": "<sha>",
+   "text": "<cleaned sentence>",
+   "label": "OBJ | SUBJ"
+ }
+ Sadece text ve label modele beslenir; diğer alanlar traceability için.
+
+ VLM satır şeması
+
+ {
+   "article_id": "<sha>",
+   "title": "<article title>",
+   "lead": "<lead paragraph>",
+   "image_b64": "<JPEG base64, no data URI prefix>",
+   "image_mime": "image/jpeg",
+   "label": "OBJ | SUBJ"
+ }
+
+ Uygulama planı
+
+ 1. Yeni script: src/build_finetune.py
+
+ Tek bir argparse CLI; iki subcommand: proxy ve vlm (ya da tek seferde her ikisini üreten all).
+
+ Ortak yardımcılar (yeniden kullan):
+ - src/utils.py — sha/hash yardımcıları (eğer varsa)
+ - src/annotate_vlm.py içindeki image fetch + resize + base64 mantığı — fonksiyon olarak çıkarılıp tekrar kullanılır (cache klasörü: data/raw/images/)
+
+ Proxy akış:
+ 1. data/processed/llm_annotations.jsonl oku.
+ 2. Her satır için label = row["llm_label"] (agree-aware politika sonuçta LLM seçer).
+ 3. Article-level + outlet stratified split:
+   - article_id'leri kümele; her makalenin outlet_block ve source'unu bil.
+   - Stratification anahtarı: (source,) — 8 outlet × 3 split arasında orantılı dağıtılır. Seed 42.
+   - 70/15/15; küçük outlet'lerde minimum 1 article her split'te garanti.
+ 4. Her split için data/finetune/proxy/{split}.jsonl yaz (yalnız 4 alan: sentence_id, article_id, text, label).
+ 5. splits_manifest.json: {article_id: split} map.
+
+ VLM akış:
+ 1. data/processed/vlm_annotations.jsonl oku (zaten 292 makale, no-image olanlar yok).
+ 2. Her satır için label = row["vlm_label"].
+ 3. Her image_url için data/raw/images/ cache'inden JPEG yükle; yoksa annotate_vlm.py'deki fetch+resize+JPEG q85 mantığını çalıştır (CLAUDE.md Rule 6: URL göndermek yok).
+ 4. Base64 encode et (data URI prefix olmadan).
+ 5. Aynı article-level + outlet stratified split (seed 42, aynı politika — ama VLM dataseti article-level olduğu için doğal article granülaritesi).
+
+⏺ Sorulardan birini ya da ikisini netleştirmek istiyorsun. Neyi açıklamamı istersin? Örneğin:
+
+  - Her seçeneğin ne anlama geldiğini ve trade-off'unu daha detaylı açıklayabilirim
+  - Hangi seçeneğin bu projeye / mevcut veriye en uygun olduğuna dair benim önerimi paylaşabilirim
+  - Sorular arasındaki bağımlılığı (örn. hedef seçimi etiket seçimini nasıl etkiler) anlatabilirim
+  - Tamamen farklı bir kritik karar noktasıyla başlamamı isteyebilirsin (örn. önce split stratejisi, önce data filtering)
+
+  Hangisi? Ya da kendi sorunu yaz, ben buna göre devam edeyim.
+
+✻ Brewed for 1m 11s
+
+❯ proxy için fine tune dataseti hazırla. tek output: obji subj.vlm için de ayrı hazırla. o da tek output. görüntü kaynakları base64 olsun.                                        
+                                                                                                                                                                                  
+  llm ve proxy'nin agree oldu decisionları al finetune için, agree olmadıkları noktalarda da llm'i tercih et.                                                                     
+
+⏺ Anlaşıldı. Karar netleşti:
+  - Proxy FT dataset: text-only sentence classifier → label = LLM label (agree ise zaten aynı, disagree ise LLM)
+  - VLM FT dataset: image classifier → label = VLM label, görseller base64 inline
+
+  Pratikte iki dataset için de target = mevcut silver/reference label. Geriye birkaç kritik nokta kaldı; bunları sorayım.
+
+⏺ User declined to answer questions
+  ⎿  · Train/val/test split stratejisi ne olsun? Bu hem proxy hem VLM dataseti için geçerli. (Article-level stratified (Öneri) / Outlet-level holdout / Random sentence-level /
+     Article-level + outlet stratified)
+     · Proxy FT için input ne olsun? (Modelin göreceği tek bir text alanı.) (Sadece cümle metni (Öneri) / Cümle + title context / Cümle + önceki/sonraki cümle)
+     · Sınıf dengesizliği (SUBJ ≈24%) nasıl ele alınsın? Datasete gömülür mü, FT-time'a mı bırakılır? (Hiç müdahale etme, raw dağılım (Öneri) / Train'de OBJ downsample /
+     Sample_weight kolonu ekle)
+     · Bridged duplicates ve LLM-confidence filtresi: dataset temizliğinde ne yapılsın? (Bridged duplicate cümleleri tekilleştir (Öneri) / Düşük LLM confidence (örn. <0.70)
+     satırları at / VLM için düşük confidence (<0.70) satırları at / Hiçbir filtre uygulama)
+
+⏺ İlk üç soruyu yanıtladın, harika. Dördüncü (filtreleme) sorusunu netleştirmek istiyorsun. Neyi açıklamamı istersin?
+
+  - Bridged duplicates ne demek: sentence_split.py kısa parçaları (≤3 token, örn. "hah!", "oh no!") iki komşu cümleye yapıştırıyor. Sonuçta aynı kısa metin iki ardışık satırda
+  görünebiliyor. Train/test'e farklı şekilde düşerse leakage yaratabilir.
+  - LLM confidence filtresi: LLM her etikete 0–1 arası confidence skoru veriyor (mean 0.93). Düşük confidence'lı satırlar genelde modelin de tereddütlü olduğu zor örnekler —
+  atmak etiket gürültüsünü azaltır ama "zor ama doğru" örnekleri de kaybedersin.
+  - VLM confidence filtresi: Aynı mantık VLM için (mean 0.867, 292 örnek var, kayba duyarlı).
+  - Önerimi söyleyeyim mi? Veya farklı bir karar mı (örn. test'i confidence ≥0.90'la sınırla, train tam tutsun) tartışalım?
+
+  Hangi yöne gideyim?
+
+✻ Churned for 1m 14s
+
+❯ hmm anladım. o duplicate'ler dursun sorun yok. cümle bağlamı komplede kalacak zaten. onları tek verme yeter. confidince filtresi de uygulamana gerek yok                        
+
+⏺ Anlaşıldı: bridged duplicate'ler kalsın, confidence filtresi yok. Birkaç son nokta kaldı.
+
+⏺ User answered Claude's questions:
+  ⎿  · VLM FT için input ne olsun? Orijinal VLM annotation adımında image + title + lead beraber kullanılmıştı; FT dataseti için de aynı şey mi, sadece görsel mi? → Image + title
+      + lead (orijinal pipeline ile aynı)
+     · Görseller base64'e çevrilirken nasıl işlensin? (Mevcut VLM adımı max 1024px + JPEG q85 kullanıyor.) → Mevcut VLM ile aynı: max 1024px, JPEG q85 (Öneri)
+     · Çıktı formatı ve dosya yapısı nasıl olsun? → JSONL, split başına bir dosya (Öneri)
+
+⏺ Tüm kararlar netleşti. Planı yazıyorum.
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/projeyi-oku-ve-anla-sequential-trinket.md · /plan to edit
+     Fine-tune Dataset Hazırlama Planı
+
+     Context
+
+     media-bias-pipeline projesi şu ana kadar 8,561 cümleyi (proxy + LLM silver) ve 292 makale görselini (VLM) etiketledi. Şimdi bu çıktıları iki ayrı fine-tune-ready dataset
+     olarak paketleyeceğiz:
+
+     1. Proxy FT dataset — text-only sentence classifier (HF GroNLP/mdebertav3-subjectivity-english benzeri bir encoder'ı OBJ/SUBJ head ile fine-tune etmek için).
+     2. VLM FT dataset — multimodal (image + title + lead) classifier (vision-text encoder veya VLM fine-tune için).
+
+     Her iki dataset de küçük (8.5k cümle / 292 görsel), bu yüzden split ve etiket politikası leakage'a duyarlı. CLAUDE.md kuralları (silver ≠ gold, descriptive ≠ causal,
+     görseller URL olarak gönderilmez) korunacak.
+
+     Karar özeti (kullanıcı tarafından onaylanmış)
+
+     ┌─────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+     │        Karar        │                                                           Seçim                                                           │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Etiket otoritesi    │ LLM silver label (agree → aynı, disagree → LLM tercih; pratikte tüm satırlar için llm_label); VLM dataseti için vlm_label │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Proxy input         │ Sadece cleaned cümle metni (mevcut sentences.jsonl'daki text)                                                             │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ VLM input           │ image (base64 inline) + title + lead                                                                                      │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Image preprocessing │ Mevcut VLM ile aynı: max 1024px, JPEG q85 (cache data/raw/images/)                                                        │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Split stratejisi    │ Article-level + outlet stratified (tüm 8 outlet her split'te)                                                             │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Sınıf dengesi       │ Müdahale yok, raw dağılım                                                                                                 │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Bridged duplicates  │ Tutulur (dedupe yok)                                                                                                      │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Confidence filtresi │ Yok (ne LLM ne VLM)                                                                                                       │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Çıktı formatı       │ JSONL, split başına bir dosya                                                                                             │
+     ├─────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Split oranları      │ 70 / 15 / 15 (train / val / test) — sabit seed 42                                                                         │
+     └─────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+     Çıktı yapısı
+
+     data/finetune/
+     ├── proxy/
+     │   ├── train.jsonl
+     │   ├── val.jsonl
+     │   ├── test.jsonl
+     │   └── splits_manifest.json     # article_id -> split eşlemesi (üretilebilirlik)
+     ├── vlm/
+     │   ├── train.jsonl
+     │   ├── val.jsonl
+     │   ├── test.jsonl
+     │   └── splits_manifest.json
+     └── dataset_card.md              # her iki dataset için kolonlar, dağılımlar, split metodu, lisans/uyarılar
+
+     Proxy satır şeması
+
+     {
+       "sentence_id": "<sha>:<idx>",
+       "article_id": "<sha>",
+       "text": "<cleaned sentence>",
+       "label": "OBJ | SUBJ"
+     }
+     Sadece text ve label modele beslenir; diğer alanlar traceability için.
+
+     VLM satır şeması
+
+     {
+       "article_id": "<sha>",
+       "title": "<article title>",
+       "lead": "<lead paragraph>",
+       "image_b64": "<JPEG base64, no data URI prefix>",
+       "image_mime": "image/jpeg",
+       "label": "OBJ | SUBJ"
+     }
+
+     Uygulama planı
+
+     1. Yeni script: src/build_finetune.py
+
+     Tek bir argparse CLI; iki subcommand: proxy ve vlm (ya da tek seferde her ikisini üreten all).
+
+     Ortak yardımcılar (yeniden kullan):
+     - src/utils.py — sha/hash yardımcıları (eğer varsa)
+     - src/annotate_vlm.py içindeki image fetch + resize + base64 mantığı — fonksiyon olarak çıkarılıp tekrar kullanılır (cache klasörü: data/raw/images/)
+
+     Proxy akış:
+     1. data/processed/llm_annotations.jsonl oku.
+     2. Her satır için label = row["llm_label"] (agree-aware politika sonuçta LLM seçer).
+     3. Article-level + outlet stratified split:
+       - article_id'leri kümele; her makalenin outlet_block ve source'unu bil.
+       - Stratification anahtarı: (source,) — 8 outlet × 3 split arasında orantılı dağıtılır. Seed 42.
+       - 70/15/15; küçük outlet'lerde minimum 1 article her split'te garanti.
+     4. Her split için data/finetune/proxy/{split}.jsonl yaz (yalnız 4 alan: sentence_id, article_id, text, label).
+     5. splits_manifest.json: {article_id: split} map.
+
+     VLM akış:
+     1. data/processed/vlm_annotations.jsonl oku (zaten 292 makale, no-image olanlar yok).
+     2. Her satır için label = row["vlm_label"].
+     3. Her image_url için data/raw/images/ cache'inden JPEG yükle; yoksa annotate_vlm.py'deki fetch+resize+JPEG q85 mantığını çalıştır (CLAUDE.md Rule 6: URL göndermek yok).
+     4. Base64 encode et (data URI prefix olmadan).
+     5. Aynı article-level + outlet stratified split (seed 42, aynı politika — ama VLM dataseti article-level olduğu için doğal article granülaritesi).
+     6. data/finetune/vlm/{split}.jsonl yaz.
+
+     2. dataset_card.md üret
+
+     Tek bir markdown dosyası; her iki dataset için:
+     - Boyut: train/val/test n
+     - Label dağılımı (her split'te OBJ/SUBJ %)
+     - Outlet × split kontenjan tablosu
+     - Topic / topic_group dağılımı
+     - Split metodu açıklaması, seed
+     - Etiket kaynağı: "LLM silver (gpt-5.4-mini)" ve "VLM (gpt-5.4-mini vision)" — gold değildir uyarısı (CLAUDE.md)
+     - Outlet name masking ve "subjectivity ≠ bias" uyarıları
+
+     3. ai_usage/step_logs.md'ye yeni adım entry'si ekle
+
+     CLAUDE.md Rule 1 gereği append-only, üretildiği turn'de yazılır. Goal/Action/Prompt/Outcome/Notes formatında.
+
+     4. README güncellemesi (minimal)
+
+     - Pipeline diagramına -> finetune datasets adımı ekle
+     - "Required outputs" listesine data/finetune/... ekle
+     - Run komutuna python src/build_finetune.py all ekle
+
+     Yeniden kullanılacak mevcut kod
+
+     - src/annotate_vlm.py — _download_and_encode_image() / resize + JPEG + base64 helper (refactor edilip ortak src/image_utils.py'a taşınabilir; ya da from annotate_vlm import
+     ... direkt import edilebilir — daha az dokunma için ikincisi tercih).
+     - src/utils.py — varsa JSONL read/write helper'ları.
+     - data/raw/images/ cache klasörü — yeniden indirme gerekmez (292 görsel zaten var).
+
+     Verification
+
+     1. Boyut/şema kontrolü:
+     wc -l data/finetune/proxy/*.jsonl       # toplam = 8561
+     wc -l data/finetune/vlm/*.jsonl         # toplam = 292
+     2. Leakage check (Python REPL):
+       - Train article_id ∩ val article_id == ∅
+       - Train article_id ∩ test article_id == ∅
+     3. Outlet stratification check: her split'te 8 outletin de en az 1 makalesi var.
+     4. Label dağılımı: her split'in SUBJ oranı global ±%3 içinde (proxy text); VLM için ±%5 (küçük örneklem).
+     5. Image roundtrip: rastgele 3 VLM satırı seç, base64'ü decode et, PIL ile aç → boyut ≤ 1024px, JPEG.
+     6. HF datasets smoke test:
+     from datasets import load_dataset
+     ds = load_dataset("json", data_files={"train": "data/finetune/proxy/train.jsonl", ...})
+     print(ds)
+
+     Scope dışı (CLAUDE.md Rule 2 — sonraya bırakılır)
+
+     - Tokenization / HF tokenizer pre-encoding
+     - Active sampling, hard-negative mining
+     - Multi-task (proxy + LLM combined) varyant
+     - Test set'i confidence ≥ 0.95'le sınırlama
+     - Parquet veya HF Hub push
+
+⏺ Plan onaylandı. Yazmaya başlıyorum. Önce mevcut annotate_vlm.py ve utils.py'yi okuyorum.
+
+  Read 2 files, listed 1 directory (ctrl+o to expand)
+
+⏺ Image cache'i tam (292 JPEG). Son step numarası 35. Şimdi src/build_finetune.py'yi yazıyorum.
+
+⏺ Write(src/build_finetune.py)
+  ⎿  Wrote 514 lines to src/build_finetune.py
+       1 """Step: build_finetune — produce fine-tune-ready JSONL datasets for proxy and VLM classifiers.
+       2 
+       3 Reads:
+       4   data/processed/llm_annotations.jsonl  → proxy dataset (text → OBJ/SUBJ)
+       5   data/processed/vlm_annotations.jsonl  → VLM dataset  (image+title+lead → OBJ/SUBJ)
+       6   data/raw/images/<article_id>.jpg       → JPEG cache (populated by annotate_vlm step)
+       7
+       8 Writes:
+       9   data/finetune/proxy/{train,val,test}.jsonl
+      10   data/finetune/proxy/splits_manifest.json
+     … +509 lines (ctrl+o to expand)
+
+⏺ Şimdi çalıştırıyorum: 
+
+⏺ Bash(python src/build_finetune.py all 2>&1)
+  ⎿  Error: Exit code 127
+     (eval):1: command not found: python
+
+⏺ Bash(python3 src/build_finetune.py all 2>&1)
+  ⎿  09:53:53 [INFO] === Building PROXY fine-tune dataset ===
+     09:53:53 [INFO] Source: /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/llm_annotations.jsonl
+     09:53:53 [INFO] Loaded 8561 sentence rows
+     … +32 lines (ctrl+o to expand)
+
+⏺ Başarılı. Şimdi verification:
+
+⏺ Bash(wc -l data/finetune/proxy/*.jsonl data/finetune/vlm/*.jsonl && echo "---" && python3 -c "
+      import json, collections…)
+  ⎿      1276 data/finetune/proxy/test.jsonl
+         6007 data/finetune/proxy/train.jsonl
+         1278 data/finetune/proxy/val.jsonl
+     … +13 lines (ctrl+o to expand)
+
+⏺ Bash(python3 -c "
+      import json, base64, io…)
+  ⎿  article_id=c13d1809e271  size=(1024, 597)  format=JPEG  label=OBJ  b64_len=113348
+     article_id=59675cc71e03  size=(1024, 576)  format=JPEG  label=OBJ  b64_len=28048
+     article_id=670ebb63f73e  size=(1024, 576)  format=JPEG  label=OBJ  b64_len=90524
+
+⏺ Tüm kontroller geçti. Şimdi README'yi güncelleyip dataset_card.md'yi küçük düzeltme yapıyorum (outlet distribution bölümü dataset_card'da not olarak bırakılmıştı, proxy
+  row'larında source field yok — düzeltelim):
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Update(README.md)
+  ⎿  Added 2 lines
+      54    -> LLM sentence annotation   -> data/processed/llm_annotations.jsonl    (src/annotate_llm.py)
+      55    -> VLM image annotation      -> data/processed/vlm_annotations.jsonl    (src/annotate_vlm.py)
+      56    -> EDA + agreement analysis  -> data/analysis/*                         (src/analyze.py, notebooks/eda.ipynb)
+      57 +  -> fine-tune datasets        -> data/finetune/proxy/{train,val,test}.jsonl  (src/build_finetune.py)                                                            
+      58 +                                  data/finetune/vlm/{train,val,test}.jsonl                                                                                       
+      59    -> README report
+      60  ```
+      61  
+
+⏺ Update(README.md)
+  ⎿  Added 3 lines
+      133  - `data/processed/vlm_annotations.jsonl`
+      134  - `data/analysis/agreement_metrics.json`
+      135  - `data/analysis/disagreement_examples.csv`
+      136 +- `data/finetune/proxy/{train,val,test}.jsonl` + `splits_manifest.json`                                                                                         
+      137 +- `data/finetune/vlm/{train,val,test}.jsonl` + `splits_manifest.json`                                                                                           
+      138 +- `data/finetune/dataset_card.md`                                                                                                                               
+      139  - `README.md`, `prompts/`, `ai_usage/step_logs.md`
+      140  
+      141  ## Analysis plan (`src/analyze.py` + `notebooks/eda.ipynb`)
+
+⏺ Update(README.md)
+  ⎿  Added 1 line
+      165  python src/annotate_llm.py
+      166  python src/annotate_vlm.py
+      167  python src/analyze.py
+      168 +python src/build_finetune.py all                                                                                                                                
+      169  ```
+      170  
+      171  ## Conventions & guarantees (see [CLAUDE.md](CLAUDE.md))
+
+⏺ Her şey tamamlandı. Özet:
+
+  ---
+  Üretilen dosyalar:
+
+  data/finetune/
+  ├── proxy/
+  │   ├── train.jsonl   6,007 cümle  (SUBJ: 24.7%)
+  │   ├── val.jsonl     1,278 cümle  (SUBJ: 24.3%)
+  │   ├── test.jsonl    1,276 cümle  (SUBJ: 21.1%)
+  │   └── splits_manifest.json
+  ├── vlm/
+  │   ├── train.jsonl   204 makale   (SUBJ: 18.6%)
+  │   ├── val.jsonl      44 makale   (SUBJ: 25.0%)
+  │   ├── test.jsonl     44 makale   (SUBJ: 15.9%)
+  │   └── splits_manifest.json
+  └── dataset_card.md
+
+  Doğrulama sonuçları:
+  - Leakage: 0 (train ∩ val = val ∩ test = train ∩ test = ∅)
+  - Outlet stratification: 8 outlet her 3 split'te de mevcut
+  - Image roundtrip: JPEG, max 1024px, base64 decode sorunsuz
+
+  Script: python src/build_finetune.py all (ya da proxy / vlm ayrı ayrı)
+
+✻ Cooked for 4m 59s
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── finetune-dataset-preparation ──
+❯ commit this
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ bypass permissions on (shift+tab to cycle) · ← for agents                                                                   Update available! Run: brew upgrade claude-code

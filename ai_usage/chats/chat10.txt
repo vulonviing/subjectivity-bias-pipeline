@@ -1,0 +1,1326 @@
+codex --yolo
+
+Updating Codex via `brew upgrade --cask codex`...
+==> Auto-updating Homebrew...
+Adjust how often this is run with `$HOMEBREW_AUTO_UPDATE_SECS` or disable with
+`$HOMEBREW_NO_AUTO_UPDATE=1`. Hide these hints with `$HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+==> Downloading https://ghcr.io/v2/homebrew/core/portable-ruby/blobs/sha256:4ba8d535df01e4bf97e6661c3815796fd77364ea2552606e891659133a76f0e1
+########################################################################################################################################################################### 100.0%
+==> Pouring portable-ruby-4.0.5_1.arm64_big_sur.bottle.tar.gz
+==> Auto-updated Homebrew!
+Updated 3 taps (gromgit/fuse, homebrew/core and homebrew/cask).
+==> New Formulae
+aube: Fast Node.js package manager
+btdu: Sampling disk usage profiler for btrfs
+bumblebee: Read-only developer endpoint scanner for supply-chain exposure
+cc-switch-cli: All-in-one assistant tool for Claude Code, Codex, Gemini, OpenCode and OpenClaw
+chunkah: OCI building tool for content-based layers
+cloudmonkey: Apache CloudStack CloudMonkey CLI
+codeburn: See where your AI coding tokens go - by task, tool, model, and project
+cozypkg: CLI for managing Cozystack packages
+dz6: Fast Vim-inspired TUI hex editor
+erlang@28: Programming language for highly scalable real-time systems
+far2l-tty: Unix TTY port of FAR Manager v2 (with NetRocks support)
+ghcitty: Fast, friendly GHCi
+gmp-ecm: Elliptic Curve Method for integer factorization
+goenv@2: Go version management
+herdr: Agent multiplexer that lives in your terminal
+ladder: Selfhosted alternative to 12ft.io and 1ft.io HTTP web proxies
+leaf-md: Terminal Markdown previewer with a GUI-like experience
+libredwg: DWG utilities
+lisette: Language inspired by Rust that compiles to Go
+m4ri: Library for fast arithmetic with dense matrices over GF(2)
+mercury-cli: CLI interface for Mercury banking
+miasma: Trap AI web scrapers in an endless poison pit
+mips-linux-gnu-binutils: GNU Binutils for mips-linux-gnu cross development
+openjdk@25: Development kit for the Java programming language
+panache: Language server, formatter, and linter for Markdown, Quarto, and R Markdown
+phpantom-lsp: Fast PHP language server written in Rust
+quickjs-ng: QuickJS, the Next Generation: a mighty JavaScript engine
+quien: Better WHOIS and domain intelligence toolkit
+ratty: GPU-rendered terminal emulator with inline 3D graphics
+rustnet: Cross-platform network monitoring terminal UI with deep packet inspection
+sanity: Command-line interface for Sanity
+satellite-tracker: Terminal-based real-time satellite tracking and orbit prediction application
+sdl2-compat: SDL2 compatibility layer that uses SDL3 behind the scenes
+sdl3_net: Simple cross-platform wrapper over TCP/IP sockets
+skm: Simple and powerful SSH keys manager
+tdf: TUI-based PDF viewer
+telegram-send: Command-line tool to send Telegram messages
+vs-preview: Previewer for VapourSynth scripts
+wl-clipboard: Command-line copy/paste utilities for Wayland
+zerolang: Programming language for agents with explicit effects and predictable memory
+==> New Casks
+activitywatch@beta: Time tracker
+agentsmesh: AI agent workforce platform
+airi: AI companion and VTuber application
+antigravity-cli: Terminal interface for Antigravity agents
+antigravity-ide: AI Coding Agent IDE
+atomcode: Open-source terminal AI coding agent
+auto-subs: Subtitle generator for audio and video files
+cc-pocket: Remote client for Codex and Claude coding agents
+choragus: Sonos controller
+chronoid: Automatic time tracker and productivity insights app
+dbx: Database management tool
+devin-cli: Coding agent with Devin Cloud integration
+dusklight: Reverse-engineered reimplementation of Twilight Princess
+eurkey-next: Keyboard layout for Europeans, coders, and translators
+executor: Tool discovery and execution layer for AI agents
+exo: Run AI models locally across multiple devices
+facescreen: Camera and text overlay for presentations and screen sharing
+font-montenegrin-gothic-one
+font-pliant
+font-xiaolai
+font-xiaolai-mono
+ghostvm: Native macOS Virtual Machines for Apple Silicon
+grok-build: Extensible coding agent for the terminal
+harvest: Time tracking application
+keyscreen: Show key presses on screen
+macmd-viewer: Markdown viewer with QuickLook and Mermaid support
+mactools: Menu bar toolbox
+maestri: Canvas for agent orchestration
+meetily: Meeting transcription and analysis application
+mirai: Inference engine for AI models
+mister-plimsoll: Storage volume usage monitoring and fullness notifications
+open-island: Native companion app for AI coding agents
+openpencil: Open-source design editor compatible with Figma
+overtone-analyzer: Real-time voice spectrum analyzer and audio editor
+pgen: PostgreSQL client
+ping-island: Menu bar status for coding agent sessions
+rcmd: App switcher driven by the Right Command key
+smoothcapture: Screen recorder and video editor
+speechify-ai-assistant: AI-powered reading and voice assistant
+tangleguard-cli: Codebase Architecture Context via the CLI for LLMs and Humans
+tldraw: Editor for .tldr files
+trickster: Quickly access recently changed or modified files with a keyboard shortcut
+tuna: Application launcher
+vmlx: Run local AI models on Apple Silicon
+vocevista-video: Voice spectrum analyzer with resonance and vowel analysis
+vocevista-video-pro: High-resolution voice spectrum and vibrato analyzer
+whatcable: Menu bar app for USB-C cable diagnostics
+yojam: Open links in selected browser, profiles, or apps
+
+You have 23 outdated formulae and 2 outdated casks installed.
+
+==> Fetching downloads for: codex
+✔︎ Cask codex (0.136.0)                                                                                                                                 Verified     81.7MB/ 81.7MB
+==> Upgrading 1 outdated package:
+codex 0.130.0 -> 0.136.0
+==> Upgrading codex
+  0.130.0 -> 0.136.0
+All dependencies satisfied.
+==> Unlinking Binary '/opt/homebrew/bin/codex'
+==> Linking Binary 'codex-aarch64-apple-darwin' to '/opt/homebrew/bin/codex'
+==> Purging files for version 0.130.0 of Cask codex
+🍺  codex was successfully upgraded!
+==> Upgraded 1 outdated package
+codex 0.130.0 -> 0.136.0
+
+🎉 Update ran successfully! Please restart Codex.
+codex --yolo
+
+  Bunlar görece temiz. Bazı uzun cümleler ve quote’lar var ama çoğu gerçek haber içeriği. Otomatik “gereksiz” demek doğru olmaz.
+
+  Washington Times
+  Bir menü/footer kalıntısı var:
+
+  - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  Bu net biçimde haber değil.
+
+  Sonuç
+  Veri tamamen kötü değil. Asıl haber cümlelerinin çoğu düzgün. Ama annotation/model aşamasından önce küçük bir “sentence-level temizlik” şart.
+
+  Özellikle çıkarılması gerekenler:
+
+  - NPR transkript dipnotları.
+  - URL ve tweet embed kalıntıları.
+  - Subscribe / sign up / Google’a ekle tarzı promo satırları.
+  - CyberGuy gibi branded promo article/cümleleri.
+  - Menü/footer kalıntıları.
+  - Bölüm başlıklarının iki cümleye yapıştığı durumlar.
+
+  Bu yapılırsa veri çok daha güvenilir olur. Şu haliyle model, haber dilindeki taraflılığı öğrenmek yerine bazı outlet’lerin web sayfası kalıntılarını da sinyal sanabilir.
+
+
+› patternerlin outlet by outlet yakabileceğine inanıyorum. bütün outletleri bana bir sıralasana kullanılan.
+
+
+• Kullanılan outlet’ler:
+
+  1. dailycaller
+  2. foxnews
+  3. huffpost
+  4. npr
+  5. nypost
+  6. theguardian
+  7. washingtonexaminer
+  8. washingtontimes
+
+  Bloklara göre:
+
+  Left block
+
+  - huffpost
+  - npr
+  - theguardian
+
+  Right block
+
+  - dailycaller
+  - foxnews
+  - nypost
+  - washingtonexaminer
+  - washingtontimes
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+/fork
+
+╭────────────────────────────────────────────────╮
+│ >_ OpenAI Codex (v0.136.0)                     │
+│                                                │
+│ model:       gpt-5.5 medium   /model to change │
+│ directory:   ~/Documents/media-bias-pipeline   │
+│ permissions: YOLO mode                         │
+╰────────────────────────────────────────────────╯
+
+  Tip: Run /review to get a code review of your current changes.
+
+• Thread forked from 019e8a23-3591-7612-8e50-67150a850ab6
+
+
+› projeyi oku ve anla. ardından son derece obsesif, takıntılı ve titiz bir şekilde adım adım yapacağın bir analize geç. hedefin ayırmış olduğumuz cümleleri analiz etmek,
+  mantıksız patternerli yakalamak ve varsa da gereksiz olanların durumunu netleştirmek ve tespit etmek. ardından bunları raporla. bu bağlamda outlet by outlet gidebilirsin; tek
+  bir outletten sample alıp sentence örneklerine bakabilirsin mesela. bunu nasıl yapacağını planla. herhangi bir edit ya da düzeltme istemiyorum; beklediğim çıktı sadece
+  kapsamlı bir sentence metodolojisi auditi olacak.
+
+
+• Önce repo yapısını ve sentence ayrıştırmasının nerede tanımlandığını okuyacağım. Edit yapmayacağım; sadece dosya, veri ve mevcut pipeline davranışını anlamak için non-mutating
+  keşif yapıyorum.
+
+• İlk geçişte repo git deposu olarak görünmüyor; bu sadece audit planını etkilemez. Şimdi README, pipeline modülleri ve veri çıktılarının biçimini okuyup sentence seviyesindeki
+  gerçek kaynakları bulacağım.
+
+• Sentence dosyası ve mevcut audit çıktıları zaten var; bu iyi, çünkü planı varsayıma değil mevcut veri şekline göre kurabiliriz. Şimdi split kodunu, cleaning katmanını ve daha
+  önceki audit örnekleme mantığını birlikte okuyorum.
+
+• Kodda önemli bir ayrıntı çıktı: sentence split şu anda “minimal split” olarak yazılmış ama kısa fragment bridge davranışı uyguluyor; bu auditin özel olarak ölçmesi gereken bir
+  metodoloji riski. Cleaning sonrası text üzerinde split edildiği için rapor, hem temizleme kalıntılarını hem de sentence boundary/bridge hatalarını ayrı sınıflandırmalı.
+
+• Planı outlet-by-outlet tasarlamak için önce veri hacmini ve sentence satırlarının dağılımını netleştiriyorum. Özellikle çok kısa/çok uzun cümleler, duplicate oranı, [OUTLET]
+  maskesi ve HTML/CTA kalıntısı gibi hızlı sinyallere bakacağım.
+
+• Yerelde python komutu yok, python3 ile devam edeceğim. Bu sadece keşif komutunu etkiledi; repo dosyalarına dokunulmadı.
+
+• Hızlı sinyal taraması şimdiden birkaç audit hedefi verdi: NPR transcript footer duplicate’ları, URL/copyright kalıntıları, 7 adet aşırı uzun sentence ve bazı cross-outlet
+  duplicate haber metinleri. Mevcut audit raporlarını okuyup bunların daha önce bilinen mi yeni mi olduğunu ayıracağım.
+
+• Step log’a göre sentence split “minimal + bridge” olarak kasıtlı tasarlanmış ve ikinci faz sentence cleaning ertelenmiş. Bu yüzden auditin ana sorusu “bu output LLM/proxy
+  annotation için yeterince temiz ve mantıklı mı?” olacak; planı sadece body cleaning tekrarı gibi kurgulamamak gerekiyor.
+
+• Bir sonraki keşif pass’i doğrudan sentence methodology’ye yönelik olacak: adjacent sentence overlap/bridge izleri, duplicate boilerplate, aşırı kısa/uzun boundary hataları ve
+  outlet bazında örnek cümle kümeleri. Bu, rapor planındaki kategori ve örnekleme protokolünü netleştirecek.
+
+• Bu pass, sadece “temizlik kalıntısı” değil “sentence split kararının yan etkisi” de olduğunu gösterdi: 153 adjacent overlap var; bir kısmı gerçek kısa-fragment bridge, bir
+  kısmı bölüm başlığı/label gibi bağlamı bozabilecek çoğaltma. Plan bunu ayrı bir audit ekseni yapmalı.
+
+• Proposed Plan
+
+
+  # Sentence Methodology Audit Plan
+
+  ## Summary
+
+  Amaç: data/processed/sentences.jsonl içindeki 8,887 sentence row’unu, articles_clean.jsonl ile join ederek outlet-by-outlet metodoloji auditi yapmak. Edit, düzeltme, dosya
+  yazma, annotation çalıştırma yok; çıktı yalnızca Türkçe kapsamlı audit raporu olacak.
+
+  Mevcut veri: 300 clean article, 8 outlet, left/right dengesi 150/150. Proxy/LLM/VLM çıktıları boş; audit yalnızca sentence üretim metodolojisi ve sentence kalitesi üzerine
+  kurulacak.
+
+  ## Audit Yöntemi
+
+  - Veri birleştirme: sentence_id, article_id, sentence_index, text, n_tokens_est, n_chars alanlarını article metadata ile eşleştir.
+  - Full-corpus otomatik tarama:
+      - URL, shortlink, copyright, transcript footer, subscribe/newsletter, nav/menu, AP footer, social embed, outlet-token yoğunluğu.
+      - Çok kısa, çok uzun, lowercase başlangıç, terminal punctuation anomalisi, title/body concatenation, duplicate sentence grupları.
+      - Adjacent overlap/bridge izleri: kısa fragment bridging’in gerçek fayda mı, başlık/label çoğaltması mı ürettiğini ayır.
+
+  - Manual outlet pass:
+      - Her outlet için minimum 12 article incele: 5 deterministic random, 3 anomaly-score yüksek, 2 sentence-count yüksek outlier, 2 sentence-count düşük outlier.
+      - Flagged row için ±2 komşu sentence, ayrıca article başı/sonu ilk-son 5 sentence kontrol edilecek.
+
+  - Karar sınıfları:
+      - keep: metodolojik olarak uygun sentence.
+      - drop_candidate: boilerplate/chrome/gereksiz row.
+      - boundary_error: merge/split/bridge problemi.
+      - article_drop_candidate: tekil article bütünüyle non-editorial/promotional.
+      - design_tradeoff: bilinçli tutulmuş ama raporda risk olarak anılacak unsur.
+
+  ## Outlet Odakları
+
+  - dailycaller: t.co/tweet embed kalıntıları, standalone social attribution, uzun rhetorical/opinion cümleleri, eski MORE LINKS riskinin sentence seviyesinde izi.
+  - foxnews: CyberGuy/Screencaps branded column sentence’ları, promotional CTA yoğunluğu, aşırı uzun quote/sentence boundary.
+  - huffpost: AP follow footer, AP syndication duplicate’ları, quote attribution kaynaklı lowercase/boundary sorunları.
+  - npr: transcript copyright footerları, “Accuracy and availability…” duplicate’ları, Accessibility links, speaker label bridge’leri, section-heading bridge çoğaltması.
+  - nypost: “Add The California Post on Google” concatenation, California Post newsletter footer, entertainment/listicle yapılarının geçerliliği.
+  - theguardian: long duplicate quote/paragraf, liveblog/newsletter kalıntısı, section heading bridge etkisi.
+  - washingtonexaminer: lowercase quote split’leri, opinion-style kısa cümlelerin gerçekten gereksiz mi yoksa valid framing signal mı olduğu.
+  - washingtontimes: nav/menu row kalıntısı, liste satırları, Google kelimesinin boilerplate değil haber içeriği olduğu false-positive ayrımı.
+
+  ## Rapor Formatı
+
+  - Executive verdict: sentence metodolojisi genel olarak kullanılabilir mi, hangi riskler annotation öncesi kritik.
+  - Global metrics: outlet başına article/sentence dağılımı, outlier tabloları, duplicate ve anomaly sayıları.
+  - Issue inventory: severity, source, count, sentence_id, örnek text, karar sınıfı, gerekçe.
+  - Outlet-by-outlet bölüm: her outlet için net bulgular, “gereksiz/drop candidate” row örnekleri, kabul edilebilir tradeoff’lar.
+  - Methodology verdict: short-fragment bridging faydalı mı, nerede mantıksız pattern üretiyor, second-phase sentence cleaning gerçekten gerekli mi.
+
+  ## Test Senaryoları
+
+  - Valid quote vs boilerplate ayrımı: quoted political speech uzun olsa bile otomatik drop edilmez.
+  - Bridge audit: “The claim”, “Accessibility links”, speaker labels gibi fragment’lerin iki komşuya yapıştırılması ayrıca işaretlenir.
+  - Duplicate audit: NPR transcript footer gibi gerçek boilerplate duplicate ile syndicated AP haber duplicate’ı ayrı raporlanır.
+  - False-positive kontrolü: “Google” haber içeriğinde geçiyorsa boilerplate sayılmaz; URL/CTA bağlamı varsa sayılır.
+  - Outlet leakage değil sentence utility odağı: [OUTLET] maskesi sadece sentence kalitesini bozuyorsa raporlanır.
+
+  ## Assumptions
+
+  - Rapor Türkçe olacak.
+  - Repo dosyalarına yazılmayacak; CLAUDE.md logging kuralı da kullanıcı “edit yok” dediği için uygulanmayacak.
+  - Annotation modeli, proxy modeli veya web araması kullanılmayacak.
+  - Public API/schema değişikliği yok; mevcut articles_clean.jsonl ve sentences.jsonl audit kaynağı olarak sabit kabul edilecek.
+
+
+
+› Implement the plan.
+
+
+• Planı rapora dönüştürüyorum: önce corpus-wide metrikleri ve anomali kümelerini çıkaracağım, sonra outlet bazlı örnekleri ve karar sınıflarını netleştireceğim. Dosya
+  yazmayacağım; komutlar sadece mevcut JSONL çıktıları okuyacak.
+
+• İlk metrik seti tamamlandı. Şimdi bridge/overlap davranışını daha dikkatli ayırıyorum, çünkü bu corpus’ta “kısa tepki fragment’i bağlama ekleme” niyeti bazı bölüm başlıklarını
+  iki kez modele sokuyor gibi görünüyor.
+
+• Bridge analizinde 185 adjacent overlap bulundu; bunun 11’i açıkça başlık/chrome bridge problemi, 33’ü NPR speaker-label tradeoff’u, 7’si muhtemelen doğru quote fragment
+  bridge’i. Şimdi gereksiz/drop-candidate row’ların benzersiz toplamını ve outlet dağılımını çıkarıp raporun severity tablosunu sabitleyeceğim.
+
+• Audit tamamlandı. Dosya yazmadım, düzeltme yapmadım; yalnızca data/processed/articles_clean.jsonl ve data/processed/sentences.jsonl okundu.
+
+  Kısa Hüküm
+  Sentence metodolojisi genel haber cümleleri için çalışıyor, ama annotation öncesi “olduğu gibi” kullanmak riskli. Kritik problem sentence splitter’dan çok, cleaning sonrası
+  hâlâ sentence seviyesine düşmüş chrome/boilerplate kalıntıları ve short-fragment bridging’in bazı başlıkları iki komşu cümleye çoğaltması.
+
+  En net karar: sentences.jsonl fine-tuning/LLM annotation öncesi ikinci bir sentence-level audit-cleaning katmanı gerektiriyor. Bu katman olmadan özellikle NPR, Fox/CyberGuy,
+  NYPost/California Post ve DailyCaller social embed row’ları modeli yanlış sinyallerle besler.
+
+  Corpus Özeti
+
+  - 300 article, 8,887 sentence.
+  - Left/right article dengesi: 150/150.
+  - Outlet dağılımı:
+      - dailycaller: 20 article, 441 sentence, medyan 16.5 sentence/article.
+      - foxnews: 35 article, 1,385 sentence, medyan 33.
+      - huffpost: 63 article, 1,400 sentence, medyan 18.
+      - npr: 23 article, 936 sentence, medyan 36.
+      - nypost: 35 article, 837 sentence, medyan 22.
+      - theguardian: 64 article, 2,375 sentence, medyan 30.
+      - washingtonexaminer: 25 article, 671 sentence, medyan 22.
+      - washingtontimes: 35 article, 842 sentence, medyan 21.
+
+  Global Bulgular
+
+  - 55 unique drop/review candidate sentence bulundu.
+  - En güçlü gereksiz pattern’ler:
+      - NPR transcript footer: 24 row, 4 article.
+      - URL/shortlink: 10 row, 8 article.
+      - Social embed attribution: 9 row, çoğunlukla DailyCaller.
+      - CyberGuy branded/promo: 9 row, 1 Fox article.
+      - Navigation/menu chrome: 8 row, 5 article.
+      - NYPost “Add The California Post on Google”: 3 row, 3 article.
+      - HuffPost AP follow footer: 1 row.
+
+  - Duplicate text: 103 duplicate group, 215 row. En temiz boilerplate duplicate NPR transcript footer cümleleri:
+      - Accuracy and availability of [OUTLET] transcripts may vary.
+      - Transcript text may be revised to correct errors or match updates to audio.
+      - Audio on [OUTLET].org may be edited after its original broadcast or publication.
+      - The authoritative record of [OUTLET]’s programming is the audio record.
+
+  - Çok uzun cümleler: sadece 7 row >80 token. Bunların çoğu gerçek quote/uzun siyasi açıklama; otomatik drop değil, yalnızca annotation maliyeti ve boundary kontrolü gerektirir.
+  - <=3 token sentence yok. Bu, short-fragment bridging’in izolasyon problemini çözdüğünü gösteriyor.
+
+  Bridge / Boundary Audit
+  src/sentence_split.py kısa fragment’leri önceki ve sonraki uzun cümleye ekliyor. Bu tasarım bazı yerlerde doğru, bazı yerlerde açıkça zararlı.
+
+  - 185 adjacent overlap tespit edildi.
+  - 11 açık heading/chrome bridge hatası:
+      - NPR: The claim, The evidence, The bottom line, Watch this, Picture show, Accessibility links.
+      - HuffPost: CAMPAIGN FINANCE CASE.
+
+  - 33 NPR speaker-label tradeoff:
+      - MCDANIEL:, FLORIDO:, ROSE: gibi speaker label’lar iki cümleye taşınıyor.
+      - Bu tamamen yanlış değil; transcript bağlamını koruyor. Ama classifier için “speaker label” noise.
+
+  - 7 quote-fragment büyük ölçüde kabul edilebilir:
+      - We won., The end., he said., WHAT? gibi parçalar tek başına anlamsız olacağı için bridge mantığı burada işe yarıyor.
+
+  - Net verdict: bridge mekanizması kısa quoted reaction fragment’leri için yararlı, section heading ve transcript label için fazla agresif.
+
+  Outlet-by-Outlet Bulgular
+  dailycaller
+
+  - 9 unique drop/review row.
+  - Ana problem: social embed attribution ve t.co shortlink.
+  - Örnekler:
+      - 470c03...:11: https://t.co/... — The Wall Street Journal (@WSJ) May 30, 2026
+      - 79c0a4...:1: — Homeland Security (@DHSgov) June 1, 2026
+
+  - Karar: standalone tweet attribution row’ları drop candidate. İçeriğe gömülü URL taşıyan sentence’lar review/drop-tail candidate.
+
+  foxnews
+
+  - 9 CyberGuy row’unun tamamı tek article’da: 255f62b3af..., title Your Microsoft text codes are going away.
+  - Örnekler:
+      - Join CyberGuy Live...
+      - Register here: CyberGuyLive.com.
+      - Sign up for my FREE CyberGuy Report
+      - Copyright 2026 CyberGuy.com.
+
+  - Karar: bu sadece sentence-level drop değil, article-level drop candidate. Article haberden çok branded promo/CTA metni.
+
+  huffpost
+
+  - Genel sentence kalitesi iyi.
+  - Tek net residual:
+      - b5c7f0...:40: ___ Follow AP’s coverage ... https://apnews.com/...
+
+  - Bazı uzun quote’lar var ama haber içeriği. Drop değil.
+  - Karar: AP follow footer drop candidate.
+
+  npr
+
+  - En problemli outlet.
+  - 29 unique drop/review row.
+  - 24 NPR transcript footer row’u 4 article’da sistematik.
+  - 4 Accessibility links/nav row’u.
+  - Speaker-label bridge yoğunluğu yüksek.
+  - Örnek:
+      - 86b57b...:49: Accuracy and availability of [OUTLET] transcripts may vary.
+      - 86b57b...:51: Audio on [OUTLET].org may be edited...
+      - bddac9...:0/1: Accessibility links iki adjacent sentence içine bridge edilmiş.
+
+  - Karar: transcript footer ve accessibility chrome kesin drop. Speaker-label bridge için ya kabul edilmiş transcript tradeoff’u diye raporlanmalı ya da transcript-specific
+    sentence cleanup gerekir.
+
+  nypost
+
+  - 5 drop/review row.
+  - Ana problem California Post chrome’un haber cümlesine bitişmesi:
+      - Add The California Post on GoogleCops...
+      - Add The California Post on GoogleAn election...
+
+  - Footer:
+      - California Post Opinion California Post Newsletters: Sign up here!
+
+  - Karar: concatenated CTA prefix sentence boundary kalitesini bozuyor; prefix stripping/drop gerekir.
+
+  theguardian
+
+  - Büyük ölçüde temiz.
+  - Long sentence ve liveblog yoğunluğu yüksek ama çoğu gerçek editorial/news content.
+  - Edge suspicion:
+      - If you’re not already signed up, subscribe now. Get in touch
+
+  - Duplicate long Kuwait quote aynı article içinde iki kez geçiyor; bu scraper/ live update tekrarına benziyor ama tek başına global drop kuralı çıkarmak riskli.
+  - Karar: low-priority review; systematic blocker değil.
+
+  washingtonexaminer
+
+  - Belirgin chrome/drop pattern çıkmadı.
+  - Lowercase-start örnekleri çoğunlukla quote continuation:
+      - soon we will all become israel.”
+      - papers? essays? losers” — captured the sentiment.
+
+  - Karar: otomatik drop gerektiren pattern yok. Boundary açısından dikkat ama corpus’a zarar düşük.
+
+  washingtontimes
+
+  - 2 net nav/menu row:
+      - - Capitol Hill Show
+      - - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  - Bazı Google match’leri haber içeriği; boilerplate sayılmamalı.
+  - Karar: nav/menu row kesin drop candidate; Google keyword tek başına pattern olmamalı.
+
+  Methodology Verdict
+
+  - Sentence splitter ana haber cümlelerini üretmekte başarılı; token medyanları makul ve çok kısa sentence yok.
+  - Ama “minimal split” iddiası ile mevcut output’un annotation-ready olması aynı şey değil.
+  - En büyük yanlış pattern: cleaning sonrası kalan web chrome, splitter tarafından geçerli sentence gibi normalize ediliyor.
+  - İkinci büyük risk: bridge logic section heading’leri ve transcript speaker label’ları iki cümleye çoğaltıyor.
+  - Gereksiz row’lar toplam corpus’un küçük yüzdesi olsa da etkisi orantısız: NPR transcript footer ve CyberGuy gibi pattern’ler model için outlet/source/style shortcut yaratır.
+
+  Net Öneri
+  Annotation/proxy step öncesi sentence-level cleanup şart. En azından şu kararlar uygulanmadan bu sentence setini “fine-tuning-ready” saymamak gerekir:
+
+  - NPR transcript footer bloklarını drop.
+  - Accessibility links, nav/menu, subscribe/sign-in row’larını drop.
+  - Standalone tweet attribution ve URL-only/URL-heavy row’ları drop veya URL tail strip.
+  - Fox CyberGuy article’ı article-level drop candidate olarak işaretle.
+  - NYPost California Post CTA prefix’lerini temizle.
+  - Bridge logic’i heading/speaker-label türleri için yeniden değerlendirilmiş olarak raporla.
+
+
+› biraz daha az teknik olacak şekilde örneklerle açıklar mısın
+
+
+• Tabii. Kısaca: cümlelere ayırma sistemi fena çalışmıyor, ama bazı “haber cümlesi olmayan” parçalar da cümle gibi kalmış. Bunlar düzeltilmeden bu veriyi modele verirsek model
+  haberlerdeki taraflı dili değil, web sitesi artığı, reklam/promo metni veya transkript dipnotlarını öğrenebilir.
+
+  Genel Durum
+  Veride 300 haberden çıkarılmış 8,887 cümle var. Büyük çoğunluk gerçek haber cümlesi. Ama bazı outlet’lerde tekrar eden problemli kalıplar var.
+
+  Problem üç ana tipte:
+
+  1. Haber olmayan site artıkları.
+  2. Cümlenin yanlış yerde kesilmesi veya iki cümleye garip şekilde yapışması.
+  3. Bazı outlet’lere özgü gereksiz/promo metinleri.
+
+  1. Haber Olmayan Site Artıkları
+  Bazı satırlar haber içeriği değil, sitenin teknik veya abonelik metni.
+
+  Örneğin NPR’da şu tarz cümleler kalmış:
+
+  Accuracy and availability of [OUTLET] transcripts may vary.
+
+  Audio on [OUTLET].org may be edited after its original broadcast or publication.
+
+  Bunlar haber değil. Model bunları görürse “NPR transkript dipnotu” gibi şeyleri öğrenir, medya taraflılığı ya da subjektif dil değil.
+
+  NYPost tarafında da şöyle bir şey var:
+
+  Add The California Post on GoogleAn election interference scandal...
+
+  Burada “Add The California Post on Google” haber cümlesine yapışmış. Bu açıkça web sayfası artığı.
+
+  DailyCaller’da da tweet kalıntıları var:
+
+  — Homeland Security (@DHSgov) June 1, 2026
+
+  Bu tek başına haber cümlesi değil; tweet embed’inden kalan kaynak satırı.
+
+  2. Cümle Bölme Mantığının Yan Etkileri
+  Sistem çok kısa parçaları tek başına bırakmamak için onları önceki ve sonraki cümleye yapıştırıyor. Bu bazı durumlarda iyi.
+
+  Örneğin:
+
+  We won.
+
+  Bunu tek başına bırakmak anlamsız olabilir. Önceki ve sonraki cümleyle birlikte değerlendirmek mantıklı.
+
+  Ama aynı mantık bazen başlıkları da yapıştırıyor:
+
+  The claim
+
+  The evidence
+
+  The bottom line
+
+  Bunlar aslında bölüm başlığı. Sistem bunları hem önceki cümlenin sonuna hem sonraki cümlenin başına ekliyor. Bu da modele aynı başlığı gereksiz yere iki kere gösteriyor.
+
+  Örnek sorunlu yapı:
+
+  ... benefits. The claim
+  The claim Among the most common assertions...
+
+  Burada “The claim” haber cümlesi değil, bölüm başlığı. Bu şekilde kalması mantıksız.
+
+  3. Outlet Bazında En Net Problemler
+  NPR
+  En sorunlu outlet NPR. Çünkü transkriptlerden kalan dipnotlar ve konuşmacı etiketleri var.
+
+  Örnek:
+
+  FLORIDO:
+  MCDANIEL:
+
+  Bunlar tamamen gereksiz değil; transkript bağlamı veriyor. Ama “sentence-level bias” modeli için gürültü olabilir.
+
+  Daha net gereksiz olanlar:
+
+  Transcript text may be revised to correct errors or match updates to audio.
+
+  Bunlar kesinlikle çıkarılmalı.
+
+  Fox News
+  Bir Fox article’ında “CyberGuy” markalı promo metni kalmış.
+
+  Örnekler:
+
+  Join CyberGuy Live: Lock Down Your Phone in 30 Minutes
+
+  Register here: CyberGuyLive.com.
+
+  Sign up for my FREE CyberGuy Report
+
+  Bu haber cümlesi değil; reklam/promo gibi. Bu yüzden tek tek cümle temizliği yerine bu article komple şüpheli.
+
+  NYPost
+  California Post / Google abonelik kalıntıları var:
+
+  Add The California Post on Google...
+
+  Bu haberin başına yapışmış teknik/promo metin. Temizlenmeli.
+
+  DailyCaller
+  Tweet embed kalıntıları var:
+
+  https://t.co/... — The Wall Street Journal (@WSJ) May 30, 2026
+
+  Bunlar kaynak/embedded tweet artığı. Haber cümlesi gibi kullanılmamalı.
+
+  HuffPost
+  Genelde iyi. Ama bir AP footer kalmış:
+
+  Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/...
+
+  Bu da haber değil, link yönlendirmesi.
+
+  Guardian / Washington Examiner
+  Bunlar görece temiz. Bazı uzun cümleler ve quote’lar var ama çoğu gerçek haber içeriği. Otomatik “gereksiz” demek doğru olmaz.
+
+  Washington Times
+  Bir menü/footer kalıntısı var:
+
+  - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  Bu net biçimde haber değil.
+
+  Sonuç
+  Veri tamamen kötü değil. Asıl haber cümlelerinin çoğu düzgün. Ama annotation/model aşamasından önce küçük bir “sentence-level temizlik” şart.
+
+  Özellikle çıkarılması gerekenler:
+
+  - NPR transkript dipnotları.
+  - URL ve tweet embed kalıntıları.
+  - Subscribe / sign up / Google’a ekle tarzı promo satırları.
+  - CyberGuy gibi branded promo article/cümleleri.
+  - Menü/footer kalıntıları.
+  - Bölüm başlıklarının iki cümleye yapıştığı durumlar.
+
+  Bu yapılırsa veri çok daha güvenilir olur. Şu haliyle model, haber dilindeki taraflılığı öğrenmek yerine bazı outlet’lerin web sayfası kalıntılarını da sinyal sanabilir.
+
+
+› patternerlin outlet by outlet yakabileceğine inanıyorum. bütün outletleri bana bir sıralasana kullanılan.
+
+
+• Kullanılan outlet’ler:
+
+  1. dailycaller
+  2. foxnews
+  3. huffpost
+  4. npr
+  5. nypost
+  6. theguardian
+  7. washingtonexaminer
+  8. washingtontimes
+
+  Bloklara göre:
+
+  Left block
+
+  - huffpost
+  - npr
+  - theguardian
+
+  Right block
+
+  - dailycaller
+  - foxnews
+  - nypost
+  - washingtonexaminer
+  - washingtontimes
+
+Token usage: total=295,985 input=276,265 (+ 704,896 cached) output=19,720 (reasoning 3,209)
+To continue this session, run codex resume 019e8a23-3591-7612-8e50-67150a850ab6
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+
+› tamamdır. şimdi sadece theguardian için fazla teknik olmayacak şekilde 10 adet sample olarak kapsamlı bir audit yapma ve sonra bunu bana yeniden teknik olmayacak şekilde
+  örneklerle rapor olarak sunma planı hazırla.
+
+
+• The Guardian özelinde planı varsayımla değil mevcut corpus şekline göre kuracağım. Şimdi sadece Guardian article/sentence dağılımını, önceki audit notlarını ve bariz örnek
+  pattern’leri okuyorum; dosya yazmayacağım.
+
+• Explored
+  └ Search theguardian|Guardian|newsletter|subscribe|Middle East crisis|First Thing in audit_results.md
+
+• Ran python3 - <<'PY'
+  │ import json, collections, statistics, re
+  │
+  │ … +34 lines
+  └   File "<stdin>", line 21
+        for c,aid,title in sorted((len(by_article[a['article_id']]), a['article_id'], a['title']) for a in arts, reverse=True)[:8]:
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    SyntaxError: Generator expression must be parenthesized
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +27 lines
+  └ guardian_bridge_like_overlaps 26
+
+    … +97 lines (ctrl + t to view transcript)
+    A 'Updates from Monday’s fourth-round matches Mon 1'
+    B 'Mon 1 Jun 2026 12.28 CEST'
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Guardian tarafında önceki genel audit’e kıyasla daha spesifik bir resim oluştu: sistematik büyük problem az, ama briefing/liveblog türlerinde başlık, editör ismi, spor/front-
+  pages/puzzle gibi newsletter parçaları sentence gibi kalabiliyor. Bir komutta küçük syntax hatası oldu; aynı istatistiği düzelterek tamamlıyorum.
+
+• Ran python3 - <<'PY'
+  │ import json, random, collections, re
+  │
+  │ … +36 lines
+  └ Traceback (most recent call last):
+      File "<stdin>", line 31, in <module>
+    TypeError: '<' not supported between instances of 'dict' and 'dict'
+
+• Ran python3 - <<'PY'
+  │ import json, collections, statistics, re
+  │
+  │ … +34 lines
+  └ guardian_articles 64
+    guardian_sentences 2373
+    … +42 lines (ctrl + t to view transcript)
+    url 0 articles 0
+    social_attr 0 articles 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Örnek sepeti komutunda sıralama Python tarafında dict karşılaştırmasına takıldı; planı etkileyecek bir veri değişmedi. Sadece 10 sample önerisini deterministik şekilde tekrar
+  çıkarıyorum.
+
+• Ran python3 - <<'PY'
+  │ import json, random, collections
+  │
+  │ … +34 lines
+  └ PROPOSED_SAMPLE_10
+    1 98a599fb7d6985bfb1023186b175f75912b6bddb n_sent 36 reason random_seed_17 title Family visitation partly restored at New Jersey ICE facility after week of protests
+    … +10 lines (ctrl + t to view transcript)
+    | Robert Reich
+    10 17552a4eef8f592f496df5f5714711cce1904538 n_sent 9 reason low_sentence_count_control title Blond Bangladeshi buffalo nicknamed ‘Donald Trump’ saved from Eid sacrifice
+
+• Proposed Plan
+
+
+  # The Guardian İçin 10 Sample Sentence Audit Planı
+
+  ## Özet
+
+  Amaç: Sadece theguardian outlet’i için 10 article sample seçip, cümlelerin gerçekten haber/anlamlı analiz birimi olup olmadığını fazla teknik olmayan bir dille incelemek.
+  Çıktı bir düzeltme listesi değil, örneklerle açıklanan okunabilir bir audit raporu olacak.
+
+  Veride The Guardian için 64 article ve yaklaşık 2.3k sentence var. Ön bulguya göre büyük sistematik kirlilik az; asıl riskler briefing/liveblog yazılarında newsletter
+  parçaları, bölüm başlıkları, editör isimleri ve tekrar eden canlı blog metinleri.
+
+  ## 10 Sample Seçimi
+
+  Aşağıdaki 10 article incelenecek:
+
+  1. 98a599... — normal haber kontrolü: ICE facility protest article.
+  2. 64cde8... — kısa/normal ekonomi haberi kontrolü.
+  3. 252cb0... — section heading bridge örneği: The global atelier.
+  4. 6ec73c... — normal kısa haber kontrolü.
+  5. 12a6b2... — büyük risk sample: Monday briefing, newsletter/front pages/puzzles/sport parçaları.
+  6. e71fb8... — First Thing formatı, subscribe/get in touch tail kontrolü.
+  7. 59c855... — liveblog, uzun tekrar eden quote kontrolü.
+  8. e9a9d1... — sports liveblog, tarih/metadata satırı kontrolü.
+  9. 05ae0d... — opinion yazısı, kısa vurgu cümleleri ve bridge davranışı.
+  10. 17552a... — düşük sentence count kontrolü, kısa haberde sistem temiz mi diye bakılacak.
+
+  Bu sepet hem rastgele normal örnekleri hem de özellikle riskli Guardian formatlarını kapsıyor.
+
+  ## Audit’te Bakılacak Şeyler
+
+  - Cümle gerçekten haber/opinion içeriği mi, yoksa site/newsletter artığı mı?
+  - Bölüm başlığı yanlışlıkla cümlenin sonuna veya başına yapışmış mı?
+  - Liveblog veya briefing formatında tekrar eden parçalar var mı?
+  - Kısa cümleler gerçekten anlamlı vurgu mu, yoksa kopuk parça mı?
+  - Guardian’a özel “newsletter team”, “front pages”, “Today in Focus”, “The Upside”, “Bored at work?” gibi parçalar haber cümlesi gibi kalmış mı?
+  - Uzun quote’lar gerçek içerik mi, yoksa aynı metin tekrar mı edilmiş?
+
+  ## Rapor Formatı
+
+  Rapor teknik olmayacak ve şu sırayla sunulacak:
+
+  - Genel karar: Guardian sentence kalitesi güvenilir mi?
+  - İyi çalışan örnekler: temiz ve anlamlı cümlelerden 3-5 örnek.
+  - Sorunlu örnekler: her problem tipi için net örnek.
+  - Sample-by-sample kısa değerlendirme: 10 article’ın her biri için “temiz”, “küçük sorunlu”, “dikkat gerektiriyor” gibi sade etiket.
+  - Sonuç: Guardian için çıkarılması/işaretlenmesi gereken pattern’ler.
+
+  Örnek problem açıklaması şu seviyede olacak:
+
+  Power for profit tek başına haber cümlesi değil; bir bölüm başlığı. Sistem bunu önceki cümlenin sonuna ve sonraki cümlenin başına yapıştırınca model bunu gerçek haber dili
+  sanabilir.
+
+  ## Kabul Kriterleri
+
+  - 10 sample’ın tamamı okunur şekilde değerlendirilmiş olacak.
+  - Her bulgu en az bir gerçek sentence örneğiyle açıklanacak.
+  - “Gereksiz”, “kalabilir”, “dikkat edilmeli” ayrımı açık olacak.
+  - Kod değişikliği, dosya yazma veya veri düzeltme yapılmayacak.
+  - Public API, schema veya pipeline değişikliği yok.
+
+  ## Varsayımlar
+
+  - Rapor Türkçe ve az teknik olacak.
+  - Amaç model/pipeline düzeltmek değil, Guardian sentence metodolojisini anlaşılır şekilde denetlemek.
+  - Gereksiz görülen parçalar öneri olarak raporlanacak; otomatik silme planı yapılmayacak.
+
+
+─ Worked for 1m 57s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+
+› Implement the plan.
+
+
+• Guardian için 10 sample audit’i uyguluyorum. Sadece mevcut article ve sentence JSONL dosyalarını okuyacağım; raporu örneklerle, teknik jargon kullanmadan özetleyeceğim.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │ sample_ids=['98a599fb7d6985bfb1023186b175f75912b6bddb','64cde87b28570a6644076a304bcd16ea5fac3d92','252cb063793f183785b42e78bd37a46e4dffd9da','6ec73c2a1f65e31845e95ce05eb13f52
+  │ … +36 lines
+  └
+    ### 98a599fb7d6985bfb1023186b175f75912b6bddb n= 36 TITLE: Family visitation partly restored at New Jersey ICE facility after week of protests
+    … +175 lines (ctrl + t to view transcript)
+    8 'Albino buffaloes are rare in Bangladesh, where most cattle are dark, making it stand out during the peak Eid livestock season – although it was the nickname that probably
+    saved its life.'
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │ sample_ids=set(['98a599fb7d6985bfb1023186b175f75912b6bddb','64cde87b28570a6644076a304bcd16ea5fac3d92','252cb063793f183785b42e78bd37a46e4dffd9da','6ec73c2a1f65e31845e95ce05eb1
+  │ … +26 lines
+  └
+    ### e9a9d17d5d4eda29c3624884b03d851eb308deba TITLE: French Open 2026: Keys, Cobolli and Auger-Aliassime in action on day nine – live OVERLAPS 3
+    … +73 lines (ctrl + t to view transcript)
+
+    ### 6ec73c2a1f65e31845e95ce05eb13f521d9245de TITLE: Six people stabbed in London after Arsenal’s victory parade OVERLAPS 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The Guardian için 10 örneklik audit’i yaptım. Dosya değiştirmedim; sadece mevcut cümleleri okudum.
+
+  Genel Sonuç
+  The Guardian tarafı genel olarak diğer bazı outlet’lere göre daha temiz. Normal haber yazılarında cümleler çoğunlukla doğru ayrılmış ve gerçekten haber içeriği taşıyor.
+  Sorunlar daha çok üç özel formatta çıkıyor:
+
+  1. briefing / newsletter tarzı yazılar
+  2. live / canlı blog yazıları
+  3. bölüm başlıklarının gerçek cümle gibi metne yapışması
+
+  Yani problem “Guardian komple kirli” değil. Daha doğru ifade şu: Guardian’da düz haberler iyi, ama briefing ve liveblog formatları dikkat istiyor.
+
+  İncelenen 10 Örnek
+
+  1. Family visitation partly restored at New Jersey ICE facility...
+     Temiz. Cümleler haber içeriği. Sadece [OUTLET] maskesi geçen normal bir attribution var.
+
+  2. UK house prices fall for first time this year...
+     Çok temiz. Cümleler düzgün, gereksiz site artığı yok.
+
+  3. LA’s storied fashion district in a slump...
+     Küçük ama net bir sorun var: bölüm başlığı cümlelere yapışmış.
+
+  Örnek:
+
+  ... set us back.” The global atelier
+
+  Sonraki cümle:
+
+  The global atelier LA hosted the Olympics in 1984...
+
+  Burada The global atelier haber cümlesi değil, bölüm başlığı. İki yerde birden görünmesi gereksiz.
+
+  4. Six people stabbed in London after Arsenal’s victory parade
+     Temiz. Kısa bir cümle var:
+
+  Twenty-four people were arrested.
+
+  Bu kısa ama geçerli haber cümlesi. Sorun değil.
+
+  5. Monday briefing: Does Trump’s $1.8bn anti-weaponization fund...
+     En sorunlu örnek bu. Çünkü klasik haber değil, briefing/newsletter formatında.
+
+  Sorunlu başlık yapışmaları:
+
+  Power for profit
+
+  An administration uninhibited
+
+  The new normal?
+
+  Bunlar bölüm başlığı. Ama cümlelerin sonuna ve başına yapışmış.
+
+  Daha problemli newsletter parçaları da var:
+
+  Poppy Noor, newsletters team
+
+  The front pages
+
+  Today in Focus
+
+  The Upside
+
+  Bored at work?
+
+  Bunlar haberin ana içeriği değil. Model bunları görürse Guardian’ın newsletter yapısını öğrenebilir, haber dilindeki framing’i değil.
+
+  Özellikle şu cümle gereksiz görünüyor:
+
+  Sign up here for a weekly roundup of The Upside, sent to you every Sunday Bored at work?
+
+  Bu net biçimde abonelik/promo parçası.
+
+  6. First Thing: Trump tells critics to sit back and relax...
+     Kısmen sorunlu. Başlangıçta newsletter dili var:
+
+  Good morning, Martin Belam here.
+
+  I will be popping into your inbox writing First Thing...
+
+  Bunlar haberden çok bülten dili. Tamamen yanlış değil, ama sentence-level bias analizi için dikkatli ele alınmalı.
+
+  Sonda da şu kalmış:
+
+  ... the long road to adulthood. Sign up
+
+  Buradaki Sign up gereksiz abonelik kalıntısı.
+
+  7. Middle East crisis live...
+     Canlı blog olduğu için tekrar riski var. En dikkat çeken şey aynı uzun resmi açıklamanın iki kez geçmesi.
+
+  Örnek iki ayrı cümlede tekrar ediyor:
+
+  The Ministry of Foreign Affairs reiterates...
+
+  Bu gerçek haber içeriği olabilir, ama aynı metnin tekrar etmesi modele gereksiz ağırlık verir. Bu yüzden “silinsin” demekten çok “duplicate/liveblog tekrar kontrolü” gerekli.
+
+  8. French Open 2026... live
+     Canlı spor blogunda metadata kalıntısı var.
+
+  Örnekler:
+
+  French Open 2026:
+
+  Mon 1 Jun 2026 12.28 CEST
+
+  First published on Mon 1 Jun 2026...
+
+  Bunlar haber cümlesi değil; tarih/sayfa metadata’sı. Bu sample net biçimde liveblog temizliği gerektiriyor.
+
+  9. I know what it’s like to be 80... | Robert Reich
+     Opinion yazısı ama cümleler büyük ölçüde anlamlı. Kısa vurgu cümleleri var:
+
+  I do not wish Trump ill.
+
+  Trump turns 80 next month.
+
+  Of course not.
+
+  Bunlar kısa ama yazarın argümanının parçası. Gereksiz değil. Hatta framing analizi için değerli olabilir.
+
+  Burada sistemin kısa cümleleri komşu cümlelere bağlaması genelde kabul edilebilir.
+
+  10. Blond Bangladeshi buffalo nicknamed Donald Trump...
+     Çok temiz. Kısa haber, net cümleler, belirgin gereksiz kalıntı yok.
+
+  Guardian İçin Pattern’ler
+  Net yakalanabilecek gereksiz pattern’ler:
+
+  Sign up
+  subscribe
+  newsletters team
+  weekly roundup
+  Bored at work?
+  The front pages
+  Today in Focus
+  The Upside
+  First published on
+  Mon 1 Jun 2026...
+
+  Dikkatli ele alınması gereken başlıklar:
+
+  Power for profit
+  An administration uninhibited
+  The new normal?
+  The global atelier
+  French Open 2026:
+
+  Bunlar her zaman “kötü metin” değil; çoğu bölüm başlığı. Ama cümleye yapıştığında analiz için gürültü oluyor.
+
+  Kısa Değerlendirme
+
+  - Temiz örnekler: ICE facility haberi, UK house prices haberi, Arsenal stabbing haberi, Bangladeshi buffalo haberi.
+  - Küçük sorunlu örnek: LA fashion district, çünkü bölüm başlığı yapışmış.
+  - Dikkat gerektiren örnekler: Monday briefing, First Thing, French Open liveblog, Middle East liveblog.
+  - Opinion örneği: Robert Reich yazısı, kısa cümleler nedeniyle şüpheli görünse de büyük ölçüde anlamlı.
+
+  Net Sonuç
+  The Guardian için genel kalite iyi, ama bütün Guardian cümlelerini aynı kategoriye koymak yanlış olur. Düz haberler güvenilir. Briefing, newsletter ve liveblog formatları ayrı
+  temizlenmeli veya en azından annotation öncesi işaretlenmeli.
+
+  En önemli karar: Guardian’da “gereksiz pattern” ararken tüm kısa cümleleri silmek yanlış olur. Asıl hedef newsletter/liveblog artıkları ve bölüm başlıkları olmalı.
+
+─ Worked for 1m 10s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+
+› harika. şimdi bu outlet özelinde cleaning safhasında fix planlaylaım. lakin planı şöyle kurgula: fazla detaya inme ve detayla sistemi kalabalıklaştırma. her şeyi mükemmel
+  yapamayız. must olan kritik patternleri cleaninge al ve sonra temizle, ardından sentence yeniden çalıştır.
+
+
+• Guardian fix planını “az ama etkili” tutacağım: sadece annotation’ı belirgin kirletecek briefing/newsletter/liveblog kalıntılarını cleaning’e alacak şekilde düşüneceğim. Önce
+  mevcut cleaning.py içinde Guardian’a özel ne var ve bu pattern’ler corpus’ta kaç örneğe dokunur, onu hızlıca doğruluyorum.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +23 lines
+  └ guardian articles 64 sentences 2373
+
+    … +30 lines (ctrl + t to view transcript)
+      12a6b2641cd5fba63a00f5fe08708c5216d2240a:102 tok 20 'The front pages “Mandelson files show no mitigation of security concerns over top US job”, is [OUTLET]’s front page
+    today.'
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +23 lines
+  └
+    LINE newsletter_tail_lines hits 2 articles 1
+    … +13 lines (ctrl + t to view transcript)
+    ('e9a9d17d5d4eda29c3624884b03d851eb308deba', 5, 'First published on Mon 1 Jun 2026 11.00 CESTMon 1 Jun 2026 12.28 CEST')
+    ('e9a9d17d5d4eda29c3624884b03d851eb308deba', 6, 'First published on Mon 1 Jun 2026 11.00 CESTSolidarity with Potapova:')
+
+⚠ Heads up, you have less than 25% of your 5h limit left. Run /status for a breakdown.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Mevcut cleaning kodu zaten bazı outletlerde inline/prefix düzeltmeleri içeriyor; Guardian tarafında ise sadece birkaç eski newsletter/email pattern’i var. Planı bu yapıya küçük
+  eklemeler olarak kurmak en temiz yol: geniş refactor değil, birkaç Guardian blacklist/regex + yeniden üretim + kısa doğrulama.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 - <<'PY'
+  │ import json,re,collections
+  │
+  │ … +31 lines
+  └
+     drop_subscription_lines hits 2 articles 1
+    … +22 lines (ctrl + t to view transcript)
+    heading The new normal? line hits 1 articles 1
+    ('12a6b2641cd5fba63a00f5fe08708c5216d2240a', 34, 'The new normal?')
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Plan netleşti: Guardian için bütün başlık problemlerini çözmeye çalışmayacağım; sadece net şekilde haber dışı veya sentence’i bozduğu görülen birkaç pattern’i alacağım.
+  Uygulama planı cleaning’e küçük ekleme, clean articles regenerate, sonra sentence split regenerate ve sadece hedef pattern doğrulaması olacak.
+
+• Explored
+  └ Read clean_articles.py
+    Search __init__.py in .
+    List src
+
+• Proposed Plan
+
+
+  # The Guardian Minimal Cleaning Fix Planı
+
+  ## Özet
+
+  The Guardian için sadece kritik ve net pattern’leri temizleyeceğiz. Amaç mükemmel temizlik değil; annotation öncesi en bariz newsletter/liveblog/section-heading kirliliğini
+  azaltmak.
+
+  Akış:
+
+  1. src/cleaning.py içine küçük Guardian odaklı kurallar eklenecek.
+  2. python3 scripts/clean_articles.py ile articles_clean.jsonl yeniden üretilecek.
+  3. python3 -m src.sentence_split ile sentences.jsonl yeniden üretilecek.
+  4. Sadece hedef pattern’lerin kaybolduğu doğrulanacak.
+
+  ## Cleaning’e Alınacak Must Pattern’ler
+
+  - Guardian newsletter/promo kalıntıları:
+      - sign up here for a weekly roundup
+      - bored at work?
+      - newsletters team
+
+  - Guardian briefing bölüm başlıkları:
+      - the front pages
+      - today in focus
+      - the upside
+      - power for profit
+      - an administration uninhibited
+      - the new normal?
+      - the global atelier
+
+  - Guardian liveblog metadata:
+      - saf tarih satırları: Mon 1 Jun 2026 12.28 CEST benzeri
+      - First published on Mon ... CEST prefix’i
+      - CESTMon ... gibi yapışık tarih artıkları
+
+  ## Bilerek Alınmayacaklar
+
+  - Kısa ama anlamlı opinion cümleleri silinmeyecek: Of course not., Why?, I do not wish Trump ill. gibi.
+  - Liveblog içindeki uzun tekrar quote’lar şimdilik silinmeyecek; duplicate temizliği ayrı ve daha riskli bir iş.
+  - Michael, Poppy gibi tek isimler broad rule olarak eklenmeyecek; false positive riski fazla.
+
+  ## Doğrulama
+
+  - Guardian sentence’larında şu pattern’ler tekrar aranacak ve 0 ya da beklenen minimuma indiği kontrol edilecek:
+      - Sign up here
+      - Bored at work?
+      - newsletters team
+      - The front pages
+      - Today in Focus
+      - The Upside
+      - First published on
+      - Mon ... CEST
+
+  - 10 sample’dan özellikle şu üçü spot-check edilecek:
+      - Monday briefing article
+      - French Open liveblog
+      - LA fashion district article
+
+  - Article count 300 kalmalı; Guardian article count 64 kalmalı.
+  - sentences.jsonl yeniden üretildikten sonra Guardian’daki bariz newsletter/liveblog cümleleri kaybolmuş olmalı.
+
+  ## Varsayımlar
+
+  - Bu küçük bir cleaning pass olacak; kapsam dışı refactor yapılmayacak.
+  - Proje kuralına uygun olarak ai_usage/step_logs.md içine tek kısa append-only log eklenebilir.
+  - Public schema, model prompt’u veya annotation akışı değişmeyecek.
+
+
+─ Worked for 1m 28s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+
+› Implement the plan.
+
+
+• Uygulamaya geçiyorum: Guardian için sadece planladığımız küçük cleaning kurallarını ekleyeceğim, ardından clean articles ve sentence split çıktısını yeniden üreteceğim.
+  Değişiklik dar kapsamlı olacak; kısa/opinion cümlelerine dokunmayacağım.
+
+• Ran tail -80 ai_usage/step_logs.md
+  └   - Step 7 should implement audit_results_v2.md Section 3 recommendations.
+      - foxnews_1 CyberGuy article drop decision deferred to Step 7 (need to check left/right balance: 150/149).
+    … +84 lines (ctrl + t to view transcript)
+    - **Notes:** Scope intentionally stayed must-clean only. Normal attribution with `[OUTLET]`, real short sentences, quote-heavy sentences, cross-outlet references, and broader
+    content-type issues such as streaming/listicle article suitability remain out of scope for this pass.
+
+• Ran python3 - <<'PY'
+  │ from pathlib import Path
+  │ text=Path('ai_usage/step_logs.md').read_text(encoding='utf-8')
+  │ … +4 lines
+  └ 14
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Kod değişikliğini şimdi yapıyorum: Guardian’a exact heading drop ve liveblog tarih prefix temizliği ekleyeceğim. Geniş “short sentence” veya “all headings” kuralı koymuyorum;
+  sadece audit’te görünen must pattern’ler.
+
+• Edited src/cleaning.py (+24 -0)
+    129          "if you’re not already signed up, subscribe now",
+    130 +        "sign up here for a weekly roundup",
+    131 +        "newsletters team",
+    132          "newsletters@",
+        ⋮
+    207  }
+    208 +_GUARDIAN_STANDALONE_HEADINGS = {
+    209 +    "the front pages",
+    210 +    "today in focus",
+    211 +    "the upside",
+    212 +    "bored at work?",
+    213 +    "power for profit",
+    214 +    "an administration uninhibited",
+    215 +    "the new normal?",
+    216 +    "the global atelier",
+    217 +}
+    218 +_GUARDIAN_LIVEBLOG_META_PREFIX = re.compile(
+    219 +    r"^(?:first published on\s+)?mon\s+\d+\s+\w+\s+\d{4}\s+\d+(?:\.\d+)?\s+cest",
+    220 +    re.I,
+    221 +)
+    222
+        ⋮
+    329          return True
+    330 +    if source == "theguardian" and lower.strip(" .:") in _GUARDIAN_STANDALONE_HEADINGS:
+    331 +        return True
+    332      for term in GLOBAL_BLACKLIST:
+        ⋮
+    358          line = _NYPOST_CALIFORNIA_PREFIX.sub("", line).strip()
+    359 +    if source == "theguardian":
+    360 +        for _ in range(2):
+    361 +            cleaned = _GUARDIAN_LIVEBLOG_META_PREFIX.sub("", line).strip()
+    362 +            if cleaned == line:
+    363 +                break
+    364 +            line = cleaned
+    365      if source == "washingtontimes":
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Patch tamam. Şimdi önce syntax kontrolü yapıyorum, sonra temiz article ve sentence çıktısını yeniden üreteceğim.
+
+• Ran python3 -m py_compile src/cleaning.py scripts/clean_articles.py src/sentence_split.py
+  └ (no output)
+
+• Ran python3 - <<'PY'
+  │ from cleaning import clean_body
+  │ sample='First published on Mon 1 Jun 2026 11.00 CESTSolidarity with Potapova:\nMon 1 Jun 2026 12.28 CEST\nThe front pages\nSign up here for a weekly roundup of The Upside,
+  │ … +3 lines
+  └ Solidarity with Potapova:
+    Real sentence remains.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Syntax ve küçük örnek kontrolü geçti: Guardian tarih prefix’i temizleniyor, standalone heading/subscription satırları düşüyor, gerçek cümle kalıyor. Şimdi pipeline çıktılarını
+  yeniden üretiyorum.
+
+• Ran python3 scripts/clean_articles.py
+  └
+    Wrote 300 articles to /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/articles_clean.jsonl
+    … +11 lines (ctrl + t to view transcript)
+    -----------------------------------------------------------------------------------
+    TOTAL                       300     1,211,515    1,161,263        4.1%             175
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• articles_clean.jsonl yeniden üretildi; article sayısı 300, Guardian 64 olarak kaldı. Şimdi sentence split’i yeniden çalıştırıyorum.
+
+• Ran python3 -m src.sentence_split
+  └ articles=300  sentences=8798  avg=29.3/article  bridge_groups=266
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Sentence split de tamamlandı: 8,798 sentence üretildi. Şimdi hedef Guardian pattern’lerinin kaybolduğunu ve istemeden kısa/opinion cümlelerini silmediğimizi doğruluyorum.
+
+• Ran python3 - <<'PY'
+  │ import json,collections,re
+  │ sample_ids=['12a6b2641cd5fba63a00f5fe08708c5216d2240a','e9a9d17d5d4eda29c3624884b03d851eb308deba','252cb063793f183785b42e78bd37a46e4dffd9da','05ae0dff339c18b66b53010cd2628f35
+  │ … +17 lines
+  └
+    ### 12a6b2641cd5fba63a00f5fe08708c5216d2240a n 120 Monday briefing: Does Trump’s $1.8bn ‘anti-weaponization fund’ signal a new era of law and disorder?
+    … +76 lines (ctrl + t to view transcript)
+    83 'Trump is clearly incapable of satisfactorily discharging the duties of president of the United States.'
+    84 'The sooner the 25th amendment is invoked, or he is impeached, the safer are America and the world.'
+
+• Ran python3 - <<'PY'
+  │ import json,re,collections
+  │
+  │ … +33 lines
+  └ guardian_articles 64 guardian_sentences 2366
+    sign_up_here 0 articles 0
+    … +12 lines (ctrl + t to view transcript)
+    preserve_check 'Of course not. The evidence continues to mount.' 1
+    preserve_check 'Why? Trump being Trump' 1
+
+• Ran python3 - <<'PY'
+  │ import json, collections
+  │
+  │ … +12 lines
+  └ articles_total 300
+    sentences_total 8798
+    articles_by_source {'theguardian': 64, 'npr': 23, 'huffpost': 63, 'foxnews': 35, 'nypost': 35, 'washingtonexaminer': 25, 'washingtontimes': 35, 'dailycaller': 20}
+    sentences_by_source {'theguardian': 2366, 'npr': 912, 'huffpost': 1398, 'foxnews': 1372, 'nypost': 818, 'washingtonexaminer': 671, 'washingtontimes': 828, 'dailycaller': 433}
+    short_bodies_under_200 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Doğrulama hedef pattern’ler için temiz: Guardian’da planlanan newsletter/briefing/liveblog kalıntıları 0’a indi; Robert Reich opinion’daki kısa ama anlamlı cümleler korunmuş.
+  Son olarak proje kuralına uygun kısa step log ekliyorum.
+
+• Edited ai_usage/step_logs.md (+7 -0)
+    317  - **Notes:** Scope intentionally stayed must-clean only. Normal attribution with `[OUTLET]`, real short sentences, quote-heavy sentences, cross-outlet references, and br
+         oader content-type issues such as streaming/listicle article suitability remain out of scope for this pass.
+    318 +
+    319 +## Step 15 — Guardian minimal cleaning fix — 2026-06-03
+    320 +- **Goal:** Apply only the critical The Guardian-specific cleaning fixes identified in the 10-sample sentence audit, then regenerate clean articles and sentence splits.
+    321 +- **Action:** Added narrow Guardian rules in `src/cleaning.py`: exact drops for newsletter/promo headings (`The front pages`, `Today in Focus`, `The Upside`, `Bored at w
+         ork?`), exact drops for audited briefing section headings (`Power for profit`, `An administration uninhibited`, `The new normal?`, `The global atelier`), blacklist entri
+         es for `sign up here for a weekly roundup` and `newsletters team`, and conservative liveblog date-prefix stripping for `Mon ... CEST` / `First published on Mon ... CEST`
+         . Regenerated `data/processed/articles_clean.jsonl` and `data/processed/sentences.jsonl`.
+    322 +- **Prompt / model:** GPT-5 Codex — implement the Guardian-specific minimal fix plan without broad refactors or over-cleaning.
+    323 +- **Outcome:** Rebuild succeeded: 300 articles, 8,798 sentences, bridge groups=266. Guardian remains 64 articles and 2,366 sentences. Verification returned 0 Guardian se
+         ntence hits for the targeted phrases (`Sign up here`, `Bored at work?`, `newsletters team`, `The front pages`, `Today in Focus`, `The Upside`, `First published on`, `Mon
+          ... CEST`, `Power for profit`, `An administration uninhibited`, `The new normal?`, `The global atelier`). Short meaningful opinion snippets such as `I do not wish Trump
+          ill.`, `Why? Trump being Trump...`, and `Of course not. The evidence continues to mount.` were preserved.
+    324 +- **Notes:** Scope intentionally stayed Guardian-only and minimal. Liveblog title fragments, real quotes, `[OUTLET]` attribution, and broader duplicate/liveblog suitabil
+         ity questions remain out of scope.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Implemented the Guardian-only minimal cleaning pass.
+
+  Changed:
+
+  - src/cleaning.py
+      - Dropped Guardian newsletter/promo remnants like sign up here, newsletters team, The front pages, Today in Focus, The Upside, Bored at work?.
+      - Dropped the audited standalone section headings like Power for profit, An administration uninhibited, The new normal?, The global atelier.
+      - Added conservative cleanup for Guardian liveblog date metadata like Mon ... CEST and First published on Mon ... CEST.
+
+  - ai_usage/step_logs.md
+      - Appended Step 15 log.
+
+  Regenerated:
+
+  - python3 scripts/clean_articles.py
+  - python3 -m src.sentence_split
+
+  Verification:
+
+  - 300 articles still present.
+  - Guardian still has 64 articles.
+  - Total sentences now: 8,798.
+  - Guardian sentences now: 2,366.
+  - Target Guardian patterns now return 0 hits:
+      - Sign up here
+      - Bored at work?
+      - newsletters team
+      - The front pages
+      - Today in Focus
+      - The Upside
+      - First published on
+      - Mon ... CEST
+      - Power for profit
+      - An administration uninhibited
+      - The new normal?
+      - The global atelier
+
+  Also confirmed we did not remove meaningful short opinion sentences like I do not wish Trump ill., Why? Trump being Trump..., and Of course not. The evidence continues to
+  mount.
+
+─ Worked for 2m 28s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ 
+› Explain this codebase
+ 
+  gpt-5.5 medium · ~/Documents/media-bias-pipeline

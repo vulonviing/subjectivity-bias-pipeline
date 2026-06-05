@@ -1,0 +1,1231 @@
+codex --yolo resume 019e8a23-3591-7612-8e50-67150a850ab6
+
+╭────────────────────────────────────────────────╮
+│ >_ OpenAI Codex (v0.136.0)                     │
+│                                                │
+│ model:       gpt-5.5 medium   /model to change │
+│ directory:   ~/Documents/media-bias-pipeline   │
+│ permissions: YOLO mode                         │
+╰────────────────────────────────────────────────╯
+
+  Tip: [tui.keymap] in ~/.codex/config.toml lets you rebind supported shortcuts.
+
+
+› projeyi oku ve anla. ardından son derece obsesif, takıntılı ve titiz bir şekilde adım adım yapacağın bir analize geç. hedefin ayırmış olduğumuz cümleleri analiz etmek,
+  mantıksız patternerli yakalamak ve varsa da gereksiz olanların durumunu netleştirmek ve tespit etmek. ardından bunları raporla. bu bağlamda outlet by outlet gidebilirsin; tek
+  bir outletten sample alıp sentence örneklerine bakabilirsin mesela. bunu nasıl yapacağını planla. herhangi bir edit ya da düzeltme istemiyorum; beklediğim çıktı sadece
+  kapsamlı bir sentence metodolojisi auditi olacak.
+
+
+• Önce repo yapısını ve sentence ayrıştırmasının nerede tanımlandığını okuyacağım. Edit yapmayacağım; sadece dosya, veri ve mevcut pipeline davranışını anlamak için non-mutating
+  keşif yapıyorum.
+
+• İlk geçişte repo git deposu olarak görünmüyor; bu sadece audit planını etkilemez. Şimdi README, pipeline modülleri ve veri çıktılarının biçimini okuyup sentence seviyesindeki
+  gerçek kaynakları bulacağım.
+
+• Sentence dosyası ve mevcut audit çıktıları zaten var; bu iyi, çünkü planı varsayıma değil mevcut veri şekline göre kurabiliriz. Şimdi split kodunu, cleaning katmanını ve daha
+  önceki audit örnekleme mantığını birlikte okuyorum.
+
+• Kodda önemli bir ayrıntı çıktı: sentence split şu anda “minimal split” olarak yazılmış ama kısa fragment bridge davranışı uyguluyor; bu auditin özel olarak ölçmesi gereken bir
+  metodoloji riski. Cleaning sonrası text üzerinde split edildiği için rapor, hem temizleme kalıntılarını hem de sentence boundary/bridge hatalarını ayrı sınıflandırmalı.
+
+• Planı outlet-by-outlet tasarlamak için önce veri hacmini ve sentence satırlarının dağılımını netleştiriyorum. Özellikle çok kısa/çok uzun cümleler, duplicate oranı, [OUTLET]
+  maskesi ve HTML/CTA kalıntısı gibi hızlı sinyallere bakacağım.
+
+• Yerelde python komutu yok, python3 ile devam edeceğim. Bu sadece keşif komutunu etkiledi; repo dosyalarına dokunulmadı.
+
+• Hızlı sinyal taraması şimdiden birkaç audit hedefi verdi: NPR transcript footer duplicate’ları, URL/copyright kalıntıları, 7 adet aşırı uzun sentence ve bazı cross-outlet
+  duplicate haber metinleri. Mevcut audit raporlarını okuyup bunların daha önce bilinen mi yeni mi olduğunu ayıracağım.
+
+• Step log’a göre sentence split “minimal + bridge” olarak kasıtlı tasarlanmış ve ikinci faz sentence cleaning ertelenmiş. Bu yüzden auditin ana sorusu “bu output LLM/proxy
+  annotation için yeterince temiz ve mantıklı mı?” olacak; planı sadece body cleaning tekrarı gibi kurgulamamak gerekiyor.
+
+• Bir sonraki keşif pass’i doğrudan sentence methodology’ye yönelik olacak: adjacent sentence overlap/bridge izleri, duplicate boilerplate, aşırı kısa/uzun boundary hataları ve
+  outlet bazında örnek cümle kümeleri. Bu, rapor planındaki kategori ve örnekleme protokolünü netleştirecek.
+
+• Bu pass, sadece “temizlik kalıntısı” değil “sentence split kararının yan etkisi” de olduğunu gösterdi: 153 adjacent overlap var; bir kısmı gerçek kısa-fragment bridge, bir
+  kısmı bölüm başlığı/label gibi bağlamı bozabilecek çoğaltma. Plan bunu ayrı bir audit ekseni yapmalı.
+
+• Proposed Plan
+
+
+  # Sentence Methodology Audit Plan
+
+  ## Summary
+
+  Amaç: data/processed/sentences.jsonl içindeki 8,887 sentence row’unu, articles_clean.jsonl ile join ederek outlet-by-outlet metodoloji auditi yapmak. Edit, düzeltme, dosya
+  yazma, annotation çalıştırma yok; çıktı yalnızca Türkçe kapsamlı audit raporu olacak.
+
+  Mevcut veri: 300 clean article, 8 outlet, left/right dengesi 150/150. Proxy/LLM/VLM çıktıları boş; audit yalnızca sentence üretim metodolojisi ve sentence kalitesi üzerine
+  kurulacak.
+
+  ## Audit Yöntemi
+
+  - Veri birleştirme: sentence_id, article_id, sentence_index, text, n_tokens_est, n_chars alanlarını article metadata ile eşleştir.
+  - Full-corpus otomatik tarama:
+      - URL, shortlink, copyright, transcript footer, subscribe/newsletter, nav/menu, AP footer, social embed, outlet-token yoğunluğu.
+      - Çok kısa, çok uzun, lowercase başlangıç, terminal punctuation anomalisi, title/body concatenation, duplicate sentence grupları.
+      - Adjacent overlap/bridge izleri: kısa fragment bridging’in gerçek fayda mı, başlık/label çoğaltması mı ürettiğini ayır.
+
+  - Manual outlet pass:
+      - Her outlet için minimum 12 article incele: 5 deterministic random, 3 anomaly-score yüksek, 2 sentence-count yüksek outlier, 2 sentence-count düşük outlier.
+      - Flagged row için ±2 komşu sentence, ayrıca article başı/sonu ilk-son 5 sentence kontrol edilecek.
+
+  - Karar sınıfları:
+      - keep: metodolojik olarak uygun sentence.
+      - drop_candidate: boilerplate/chrome/gereksiz row.
+      - boundary_error: merge/split/bridge problemi.
+      - article_drop_candidate: tekil article bütünüyle non-editorial/promotional.
+      - design_tradeoff: bilinçli tutulmuş ama raporda risk olarak anılacak unsur.
+
+  ## Outlet Odakları
+
+  - dailycaller: t.co/tweet embed kalıntıları, standalone social attribution, uzun rhetorical/opinion cümleleri, eski MORE LINKS riskinin sentence seviyesinde izi.
+  - foxnews: CyberGuy/Screencaps branded column sentence’ları, promotional CTA yoğunluğu, aşırı uzun quote/sentence boundary.
+  - huffpost: AP follow footer, AP syndication duplicate’ları, quote attribution kaynaklı lowercase/boundary sorunları.
+  - npr: transcript copyright footerları, “Accuracy and availability…” duplicate’ları, Accessibility links, speaker label bridge’leri, section-heading bridge çoğaltması.
+  - nypost: “Add The California Post on Google” concatenation, California Post newsletter footer, entertainment/listicle yapılarının geçerliliği.
+  - theguardian: long duplicate quote/paragraf, liveblog/newsletter kalıntısı, section heading bridge etkisi.
+  - washingtonexaminer: lowercase quote split’leri, opinion-style kısa cümlelerin gerçekten gereksiz mi yoksa valid framing signal mı olduğu.
+  - washingtontimes: nav/menu row kalıntısı, liste satırları, Google kelimesinin boilerplate değil haber içeriği olduğu false-positive ayrımı.
+
+  ## Rapor Formatı
+
+  - Executive verdict: sentence metodolojisi genel olarak kullanılabilir mi, hangi riskler annotation öncesi kritik.
+  - Global metrics: outlet başına article/sentence dağılımı, outlier tabloları, duplicate ve anomaly sayıları.
+  - Issue inventory: severity, source, count, sentence_id, örnek text, karar sınıfı, gerekçe.
+  - Outlet-by-outlet bölüm: her outlet için net bulgular, “gereksiz/drop candidate” row örnekleri, kabul edilebilir tradeoff’lar.
+  - Methodology verdict: short-fragment bridging faydalı mı, nerede mantıksız pattern üretiyor, second-phase sentence cleaning gerçekten gerekli mi.
+
+  ## Test Senaryoları
+
+  - Valid quote vs boilerplate ayrımı: quoted political speech uzun olsa bile otomatik drop edilmez.
+  - Bridge audit: “The claim”, “Accessibility links”, speaker labels gibi fragment’lerin iki komşuya yapıştırılması ayrıca işaretlenir.
+  - Duplicate audit: NPR transcript footer gibi gerçek boilerplate duplicate ile syndicated AP haber duplicate’ı ayrı raporlanır.
+  - False-positive kontrolü: “Google” haber içeriğinde geçiyorsa boilerplate sayılmaz; URL/CTA bağlamı varsa sayılır.
+  - Outlet leakage değil sentence utility odağı: [OUTLET] maskesi sadece sentence kalitesini bozuyorsa raporlanır.
+
+  ## Assumptions
+
+  - Rapor Türkçe olacak.
+  - Repo dosyalarına yazılmayacak; CLAUDE.md logging kuralı da kullanıcı “edit yok” dediği için uygulanmayacak.
+  - Annotation modeli, proxy modeli veya web araması kullanılmayacak.
+  - Public API/schema değişikliği yok; mevcut articles_clean.jsonl ve sentences.jsonl audit kaynağı olarak sabit kabul edilecek.
+
+
+
+› Implement the plan.
+
+
+• Planı rapora dönüştürüyorum: önce corpus-wide metrikleri ve anomali kümelerini çıkaracağım, sonra outlet bazlı örnekleri ve karar sınıflarını netleştireceğim. Dosya
+  yazmayacağım; komutlar sadece mevcut JSONL çıktıları okuyacak.
+
+• İlk metrik seti tamamlandı. Şimdi bridge/overlap davranışını daha dikkatli ayırıyorum, çünkü bu corpus’ta “kısa tepki fragment’i bağlama ekleme” niyeti bazı bölüm başlıklarını
+  iki kez modele sokuyor gibi görünüyor.
+
+• Bridge analizinde 185 adjacent overlap bulundu; bunun 11’i açıkça başlık/chrome bridge problemi, 33’ü NPR speaker-label tradeoff’u, 7’si muhtemelen doğru quote fragment
+  bridge’i. Şimdi gereksiz/drop-candidate row’ların benzersiz toplamını ve outlet dağılımını çıkarıp raporun severity tablosunu sabitleyeceğim.
+
+• Audit tamamlandı. Dosya yazmadım, düzeltme yapmadım; yalnızca data/processed/articles_clean.jsonl ve data/processed/sentences.jsonl okundu.
+
+  Kısa Hüküm
+  Sentence metodolojisi genel haber cümleleri için çalışıyor, ama annotation öncesi “olduğu gibi” kullanmak riskli. Kritik problem sentence splitter’dan çok, cleaning sonrası
+  hâlâ sentence seviyesine düşmüş chrome/boilerplate kalıntıları ve short-fragment bridging’in bazı başlıkları iki komşu cümleye çoğaltması.
+
+  En net karar: sentences.jsonl fine-tuning/LLM annotation öncesi ikinci bir sentence-level audit-cleaning katmanı gerektiriyor. Bu katman olmadan özellikle NPR, Fox/CyberGuy,
+  NYPost/California Post ve DailyCaller social embed row’ları modeli yanlış sinyallerle besler.
+
+  Corpus Özeti
+
+  - 300 article, 8,887 sentence.
+  - Left/right article dengesi: 150/150.
+  - Outlet dağılımı:
+      - dailycaller: 20 article, 441 sentence, medyan 16.5 sentence/article.
+      - foxnews: 35 article, 1,385 sentence, medyan 33.
+      - huffpost: 63 article, 1,400 sentence, medyan 18.
+      - npr: 23 article, 936 sentence, medyan 36.
+      - nypost: 35 article, 837 sentence, medyan 22.
+      - theguardian: 64 article, 2,375 sentence, medyan 30.
+      - washingtonexaminer: 25 article, 671 sentence, medyan 22.
+      - washingtontimes: 35 article, 842 sentence, medyan 21.
+
+  Global Bulgular
+
+  - 55 unique drop/review candidate sentence bulundu.
+  - En güçlü gereksiz pattern’ler:
+      - NPR transcript footer: 24 row, 4 article.
+      - URL/shortlink: 10 row, 8 article.
+      - Social embed attribution: 9 row, çoğunlukla DailyCaller.
+      - CyberGuy branded/promo: 9 row, 1 Fox article.
+      - Navigation/menu chrome: 8 row, 5 article.
+      - NYPost “Add The California Post on Google”: 3 row, 3 article.
+      - HuffPost AP follow footer: 1 row.
+
+  - Duplicate text: 103 duplicate group, 215 row. En temiz boilerplate duplicate NPR transcript footer cümleleri:
+      - Accuracy and availability of [OUTLET] transcripts may vary.
+      - Transcript text may be revised to correct errors or match updates to audio.
+      - Audio on [OUTLET].org may be edited after its original broadcast or publication.
+      - The authoritative record of [OUTLET]’s programming is the audio record.
+
+  - Çok uzun cümleler: sadece 7 row >80 token. Bunların çoğu gerçek quote/uzun siyasi açıklama; otomatik drop değil, yalnızca annotation maliyeti ve boundary kontrolü gerektirir.
+  - <=3 token sentence yok. Bu, short-fragment bridging’in izolasyon problemini çözdüğünü gösteriyor.
+
+  Bridge / Boundary Audit
+  src/sentence_split.py kısa fragment’leri önceki ve sonraki uzun cümleye ekliyor. Bu tasarım bazı yerlerde doğru, bazı yerlerde açıkça zararlı.
+
+  - 185 adjacent overlap tespit edildi.
+  - 11 açık heading/chrome bridge hatası:
+      - NPR: The claim, The evidence, The bottom line, Watch this, Picture show, Accessibility links.
+      - HuffPost: CAMPAIGN FINANCE CASE.
+
+  - 33 NPR speaker-label tradeoff:
+      - MCDANIEL:, FLORIDO:, ROSE: gibi speaker label’lar iki cümleye taşınıyor.
+      - Bu tamamen yanlış değil; transcript bağlamını koruyor. Ama classifier için “speaker label” noise.
+
+  - 7 quote-fragment büyük ölçüde kabul edilebilir:
+      - We won., The end., he said., WHAT? gibi parçalar tek başına anlamsız olacağı için bridge mantığı burada işe yarıyor.
+
+  - Net verdict: bridge mekanizması kısa quoted reaction fragment’leri için yararlı, section heading ve transcript label için fazla agresif.
+
+  Outlet-by-Outlet Bulgular
+  dailycaller
+
+  - 9 unique drop/review row.
+  - Ana problem: social embed attribution ve t.co shortlink.
+  - Örnekler:
+      - 470c03...:11: https://t.co/... — The Wall Street Journal (@WSJ) May 30, 2026
+      - 79c0a4...:1: — Homeland Security (@DHSgov) June 1, 2026
+
+  - Karar: standalone tweet attribution row’ları drop candidate. İçeriğe gömülü URL taşıyan sentence’lar review/drop-tail candidate.
+
+  foxnews
+
+  - 9 CyberGuy row’unun tamamı tek article’da: 255f62b3af..., title Your Microsoft text codes are going away.
+  - Örnekler:
+      - Join CyberGuy Live...
+      - Register here: CyberGuyLive.com.
+      - Sign up for my FREE CyberGuy Report
+      - Copyright 2026 CyberGuy.com.
+
+  - Karar: bu sadece sentence-level drop değil, article-level drop candidate. Article haberden çok branded promo/CTA metni.
+
+  huffpost
+
+  - Genel sentence kalitesi iyi.
+  - Tek net residual:
+      - b5c7f0...:40: ___ Follow AP’s coverage ... https://apnews.com/...
+
+  - Bazı uzun quote’lar var ama haber içeriği. Drop değil.
+  - Karar: AP follow footer drop candidate.
+
+  npr
+
+  - En problemli outlet.
+  - 29 unique drop/review row.
+  - 24 NPR transcript footer row’u 4 article’da sistematik.
+  - 4 Accessibility links/nav row’u.
+  - Speaker-label bridge yoğunluğu yüksek.
+  - Örnek:
+      - 86b57b...:49: Accuracy and availability of [OUTLET] transcripts may vary.
+      - 86b57b...:51: Audio on [OUTLET].org may be edited...
+      - bddac9...:0/1: Accessibility links iki adjacent sentence içine bridge edilmiş.
+
+  - Karar: transcript footer ve accessibility chrome kesin drop. Speaker-label bridge için ya kabul edilmiş transcript tradeoff’u diye raporlanmalı ya da transcript-specific
+    sentence cleanup gerekir.
+
+  nypost
+
+  - 5 drop/review row.
+  - Ana problem California Post chrome’un haber cümlesine bitişmesi:
+      - Add The California Post on GoogleCops...
+      - Add The California Post on GoogleAn election...
+
+  - Footer:
+      - California Post Opinion California Post Newsletters: Sign up here!
+
+  - Karar: concatenated CTA prefix sentence boundary kalitesini bozuyor; prefix stripping/drop gerekir.
+
+  theguardian
+
+  - Büyük ölçüde temiz.
+  - Long sentence ve liveblog yoğunluğu yüksek ama çoğu gerçek editorial/news content.
+  - Edge suspicion:
+      - If you’re not already signed up, subscribe now. Get in touch
+
+  - Duplicate long Kuwait quote aynı article içinde iki kez geçiyor; bu scraper/ live update tekrarına benziyor ama tek başına global drop kuralı çıkarmak riskli.
+  - Karar: low-priority review; systematic blocker değil.
+
+  washingtonexaminer
+
+  - Belirgin chrome/drop pattern çıkmadı.
+  - Lowercase-start örnekleri çoğunlukla quote continuation:
+      - soon we will all become israel.”
+      - papers? essays? losers” — captured the sentiment.
+
+  - Karar: otomatik drop gerektiren pattern yok. Boundary açısından dikkat ama corpus’a zarar düşük.
+
+  washingtontimes
+
+  - 2 net nav/menu row:
+      - - Capitol Hill Show
+      - - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  - Bazı Google match’leri haber içeriği; boilerplate sayılmamalı.
+  - Karar: nav/menu row kesin drop candidate; Google keyword tek başına pattern olmamalı.
+
+  Methodology Verdict
+
+  - Sentence splitter ana haber cümlelerini üretmekte başarılı; token medyanları makul ve çok kısa sentence yok.
+  - Ama “minimal split” iddiası ile mevcut output’un annotation-ready olması aynı şey değil.
+  - En büyük yanlış pattern: cleaning sonrası kalan web chrome, splitter tarafından geçerli sentence gibi normalize ediliyor.
+  - İkinci büyük risk: bridge logic section heading’leri ve transcript speaker label’ları iki cümleye çoğaltıyor.
+  - Gereksiz row’lar toplam corpus’un küçük yüzdesi olsa da etkisi orantısız: NPR transcript footer ve CyberGuy gibi pattern’ler model için outlet/source/style shortcut yaratır.
+
+  Net Öneri
+  Annotation/proxy step öncesi sentence-level cleanup şart. En azından şu kararlar uygulanmadan bu sentence setini “fine-tuning-ready” saymamak gerekir:
+
+  - NPR transcript footer bloklarını drop.
+  - Accessibility links, nav/menu, subscribe/sign-in row’larını drop.
+  - Standalone tweet attribution ve URL-only/URL-heavy row’ları drop veya URL tail strip.
+  - Fox CyberGuy article’ı article-level drop candidate olarak işaretle.
+  - NYPost California Post CTA prefix’lerini temizle.
+  - Bridge logic’i heading/speaker-label türleri için yeniden değerlendirilmiş olarak raporla.
+
+
+› biraz daha az teknik olacak şekilde örneklerle açıklar mısın
+
+
+• Tabii. Kısaca: cümlelere ayırma sistemi fena çalışmıyor, ama bazı “haber cümlesi olmayan” parçalar da cümle gibi kalmış. Bunlar düzeltilmeden bu veriyi modele verirsek model
+  haberlerdeki taraflı dili değil, web sitesi artığı, reklam/promo metni veya transkript dipnotlarını öğrenebilir.
+
+  Genel Durum
+  Veride 300 haberden çıkarılmış 8,887 cümle var. Büyük çoğunluk gerçek haber cümlesi. Ama bazı outlet’lerde tekrar eden problemli kalıplar var.
+
+  Problem üç ana tipte:
+
+  1. Haber olmayan site artıkları.
+  2. Cümlenin yanlış yerde kesilmesi veya iki cümleye garip şekilde yapışması.
+  3. Bazı outlet’lere özgü gereksiz/promo metinleri.
+
+  1. Haber Olmayan Site Artıkları
+  Bazı satırlar haber içeriği değil, sitenin teknik veya abonelik metni.
+
+  Örneğin NPR’da şu tarz cümleler kalmış:
+
+  Accuracy and availability of [OUTLET] transcripts may vary.
+
+  Audio on [OUTLET].org may be edited after its original broadcast or publication.
+
+  Bunlar haber değil. Model bunları görürse “NPR transkript dipnotu” gibi şeyleri öğrenir, medya taraflılığı ya da subjektif dil değil.
+
+  NYPost tarafında da şöyle bir şey var:
+
+  Add The California Post on GoogleAn election interference scandal...
+
+  Burada “Add The California Post on Google” haber cümlesine yapışmış. Bu açıkça web sayfası artığı.
+
+  DailyCaller’da da tweet kalıntıları var:
+
+  — Homeland Security (@DHSgov) June 1, 2026
+
+  Bu tek başına haber cümlesi değil; tweet embed’inden kalan kaynak satırı.
+
+  2. Cümle Bölme Mantığının Yan Etkileri
+  Sistem çok kısa parçaları tek başına bırakmamak için onları önceki ve sonraki cümleye yapıştırıyor. Bu bazı durumlarda iyi.
+
+  Örneğin:
+
+  We won.
+
+  Bunu tek başına bırakmak anlamsız olabilir. Önceki ve sonraki cümleyle birlikte değerlendirmek mantıklı.
+
+  Ama aynı mantık bazen başlıkları da yapıştırıyor:
+
+  The claim
+
+  The evidence
+
+  The bottom line
+
+  Bunlar aslında bölüm başlığı. Sistem bunları hem önceki cümlenin sonuna hem sonraki cümlenin başına ekliyor. Bu da modele aynı başlığı gereksiz yere iki kere gösteriyor.
+
+  Örnek sorunlu yapı:
+
+  ... benefits. The claim
+  The claim Among the most common assertions...
+
+  Burada “The claim” haber cümlesi değil, bölüm başlığı. Bu şekilde kalması mantıksız.
+
+  3. Outlet Bazında En Net Problemler
+  NPR
+  En sorunlu outlet NPR. Çünkü transkriptlerden kalan dipnotlar ve konuşmacı etiketleri var.
+
+  Örnek:
+
+  FLORIDO:
+  MCDANIEL:
+
+  Bunlar tamamen gereksiz değil; transkript bağlamı veriyor. Ama “sentence-level bias” modeli için gürültü olabilir.
+
+  Daha net gereksiz olanlar:
+
+  Transcript text may be revised to correct errors or match updates to audio.
+
+  Bunlar kesinlikle çıkarılmalı.
+
+  Fox News
+  Bir Fox article’ında “CyberGuy” markalı promo metni kalmış.
+
+  Örnekler:
+
+  Join CyberGuy Live: Lock Down Your Phone in 30 Minutes
+
+  Register here: CyberGuyLive.com.
+
+  Sign up for my FREE CyberGuy Report
+
+  Bu haber cümlesi değil; reklam/promo gibi. Bu yüzden tek tek cümle temizliği yerine bu article komple şüpheli.
+
+  NYPost
+  California Post / Google abonelik kalıntıları var:
+
+  Add The California Post on Google...
+
+  Bu haberin başına yapışmış teknik/promo metin. Temizlenmeli.
+
+  DailyCaller
+  Tweet embed kalıntıları var:
+
+  https://t.co/... — The Wall Street Journal (@WSJ) May 30, 2026
+
+  Bunlar kaynak/embedded tweet artığı. Haber cümlesi gibi kullanılmamalı.
+
+  HuffPost
+  Genelde iyi. Ama bir AP footer kalmış:
+
+  Follow AP’s coverage of Latin America and the Caribbean at https://apnews.com/...
+
+  Bu da haber değil, link yönlendirmesi.
+
+  Guardian / Washington Examiner
+  Bunlar görece temiz. Bazı uzun cümleler ve quote’lar var ama çoğu gerçek haber içeriği. Otomatik “gereksiz” demek doğru olmaz.
+
+  Washington Times
+  Bir menü/footer kalıntısı var:
+
+  - ForAmerica - [OUTLET] Weekly - God, Country & American Story - Games - Subscribe - Sign In
+
+  Bu net biçimde haber değil.
+
+  Sonuç
+  Veri tamamen kötü değil. Asıl haber cümlelerinin çoğu düzgün. Ama annotation/model aşamasından önce küçük bir “sentence-level temizlik” şart.
+
+  Özellikle çıkarılması gerekenler:
+
+  - NPR transkript dipnotları.
+  - URL ve tweet embed kalıntıları.
+  - Subscribe / sign up / Google’a ekle tarzı promo satırları.
+  - CyberGuy gibi branded promo article/cümleleri.
+  - Menü/footer kalıntıları.
+  - Bölüm başlıklarının iki cümleye yapıştığı durumlar.
+
+  Bu yapılırsa veri çok daha güvenilir olur. Şu haliyle model, haber dilindeki taraflılığı öğrenmek yerine bazı outlet’lerin web sayfası kalıntılarını da sinyal sanabilir.
+
+
+› patternerlin outlet by outlet yakabileceğine inanıyorum. bütün outletleri bana bir sıralasana kullanılan.
+
+
+• Kullanılan outlet’ler:
+
+  1. dailycaller
+  2. foxnews
+  3. huffpost
+  4. npr
+  5. nypost
+  6. theguardian
+  7. washingtonexaminer
+  8. washingtontimes
+
+  Bloklara göre:
+
+  Left block
+
+  - huffpost
+  - npr
+  - theguardian
+
+  Right block
+
+  - dailycaller
+  - foxnews
+  - nypost
+  - washingtonexaminer
+  - washingtontimes
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+
+› şimdi sadece foxnews için fazla teknik olmayacak şekilde 10 adet sample olarak kapsamlı bir audit yapma ve sonra bunu bana yeniden teknik olmayacak şekilde örneklerle rapor
+  olarak sunma planı hazırla.
+
+
+• FoxNews özelindeki planı veri üstüne oturtacağım; önce kaç FoxNews article/sentence var, hangi örnekler sıradan hangileri riskli görünüyor onu okuyorum. Şimdilik sadece mevcut
+  JSONL dosyalarını tarıyorum, edit yok.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, statistics, re
+  │
+  │ … +21 lines
+  └ fox_articles 35 fox_sentences 1385
+    sentences_per_article min med max 13 33 122
+    … +14 lines (ctrl + t to view transcript)
+    19 8227b9e1b3e9fa9d58a14740f11a79cd7aafe4cd FDA delays cost Americans trillions and slow lifesaving drugs, new report says
+    19 f72cc84e5305f7e230fb8601c479349ff69bb15c Platner controversies fuel speculation about little-known Maine ballot replacement provision
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re, random
+  │
+  │ … +39 lines
+  └ candidate_10
+    random 44 f64fc83544bba2a58d2d16922720c1d6ba00fc60 {'outlet_token': 3} Hasan Piker says UK has barred him, trashes 'unbelievable...power' of pro-Israel groups
+    … +10 lines (ctrl + t to view transcript)
+    low_count 13 367e10a8523a49bc288993f5220a303aec166f5d {'outlet_token': 4} College students accused of inciting boardwalk chaos walk free as prosecutors pull plug, city
+    demands answers
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +24 lines
+  └
+     cyberguy rows 9 articles 1
+    … +60 lines (ctrl + t to view transcript)
+    edd7b02790698b450e002a0c6bb9c79f141a34cb:3 tok 13 'Well, buckle up because we have a real doozy today. HORRIFIED TOURISTS WATCH'
+    edd7b02790698b450e002a0c6bb9c79f141a34cb:4 tok 12 'HORRIFIED TOURISTS WATCH AS BISON BOILS TO DEATH IN YELLOWSTONE HOT SPRING'
+
+• Proposed Plan
+
+
+  # FoxNews Sentence Audit Planı
+
+  ## Özet
+
+  Sadece foxnews için 10 haberlik bir örnek set incelenecek. Amaç teknik bir hata listesi çıkarmaktan çok, “Bu cümleler gerçekten haber analizi için işe yarıyor mu, yoksa
+  reklam/site artığı/garip bölünmüş cümleler mi var?” sorusunu örneklerle cevaplamak.
+
+  Çıktı Türkçe, fazla teknik olmayan bir rapor olacak. Kod veya veri değiştirilmeyecek.
+
+  ## 10 Örnek Haber
+
+  10 sample’ı “rastgele + riskli görünen + kısa/uzun uç örnekler” karışımı olarak seçeceğiz:
+
+  1. Hasan Piker says UK has barred him...
+  2. Fourth US drug boat strike in a week kills more 'narco-terrorists'
+  3. Congress barrels toward deadline pile-up...
+  4. Woman tests fate by getting too close to a massive bison...
+  5. Platner controversies fuel speculation...
+  6. Your Microsoft text codes are going away
+  7. Rising pop culture star Rachel Pizzolato...
+  8. Trump flips script on left...
+  9. NYC landlord pleads for help as '9-year-squatter'...
+  10. College students accused of inciting boardwalk chaos...
+
+  Bu seçimle hem normal FoxNews haberleri hem de problem çıkarma ihtimali yüksek branded/promo veya çok uzun article’lar kapsanacak.
+
+  ## Audit Yöntemi
+
+  Her haber için cümleler tek tek okunacak, ama rapor teknik terimlere boğulmayacak. Her sample’da şu sorular sorulacak:
+
+  - Bu cümle gerçekten haber içeriği mi?
+  - Cümle gereksiz promo, abonelik, marka tanıtımı veya site artığı mı?
+  - Cümle yanlış yerde bölünmüş mü?
+  - Çok kısa cümle tek başına anlamsız mı?
+  - Çok uzun cümle hâlâ anlamlı mı, yoksa birkaç düşünce birbirine yapışmış mı?
+  - [OUTLET] maskesi cümleyi anlaşılmaz yapıyor mu?
+  - Bu cümle modele verilirse model haber dilini mi öğrenir, yoksa FoxNews’e özgü format/artık sinyalini mi öğrenir?
+
+  Özellikle şu FoxNews pattern’leri aranacak:
+
+  - CyberGuy ve benzeri branded/promo cümleleri.
+  - Register here, Sign up, FREE report gibi reklam veya CTA cümleleri.
+  - Çok uzun alıntılar.
+  - Kısa, slogan gibi duran ama haber bağlamında anlamlı olabilecek cümleler.
+  - [OUTLET] has reached out... gibi tekrar eden haber-formülü cümleleri.
+
+  ## Rapor Formatı
+
+  Rapor fazla teknik olmayacak ve örnek ağırlıklı olacak:
+
+  - Genel hüküm: FoxNews sentence seti kullanılabilir mi?
+  - 10 haberin kısa kısa değerlendirmesi.
+  - Her problem tipi için 2-4 gerçek cümle örneği.
+  - Her örnek için basit karar:
+      - “Kalsın”
+      - “Şüpheli”
+      - “Çıkarılmalı”
+      - “Tüm haber problemli olabilir”
+
+  - Son bölümde net özet:
+      - FoxNews’te en sık problem ne?
+      - CyberGuy article’ı özel problem mi, genel problem mi?
+      - Annotation öncesi hangi tür cümleler temizlenmeli?
+
+  ## Varsayımlar
+
+  - “10 sample” = 10 FoxNews article sample olarak yorumlanacak.
+  - Sentence audit yapılacak; article crawling veya cleaning değiştirilmeyecek.
+  - Rapor teknik değil, okunabilir ve örnek odaklı olacak.
+  - Amaç düzeltme yapmak değil, FoxNews sentence metodolojisinin sorunlarını net göstermek.
+
+
+─ Worked for 1m 04s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+
+› Implement the plan.
+
+
+• FoxNews için 10 sample audit’i çıkarıyorum. Seçilen article’ların cümlelerini okuyup her biri için “kalsın / şüpheli / çıkarılmalı / tüm haber problemli olabilir” kararlarını
+  örneklerle netleştireceğim; repo dosyalarına dokunmuyorum.
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │ ids = [
+  │ … +43 lines
+  └ SUMMARY BY ARTICLE
+
+    … +64 lines (ctrl + t to view transcript)
+      outlet_formula 11 "Both the Delaware DOJ and NAACP Delaware State Conference of Branches did not immediately respond to [OUTLET]'s request for comment."
+      outlet_formula 12 '[OUTLET] has also reached out to Nicholl, Clauvil, Scott and Barnett for comment.'
+
+• Ran python3 - <<'PY'
+  │ import json, collections
+  │ ids = [
+  │ … +39 lines
+  └
+    ### f64fc83544bba2a58d2d16922720c1d6ba00fc60 | 44 sentences
+    … +197 lines (ctrl + t to view transcript)
+    009 tok=021 In addition, the City has reached out to Fleur McKendall of the NAACP to arrange a meeting and discuss these matters.
+    010 tok=019 At this time, we have not yet received a response but remain willing to engage in a constructive dialogue."
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• FoxNews için 10 article / 1,385 toplam FoxNews cümlesi içinden seçilen 10 sample üzerinde audit yaptım. Dosya değiştirmedim; sadece mevcut data/processed/sentences.jsonl ve
+  data/processed/articles_clean.jsonl okundu.
+
+  Genel Hüküm
+  FoxNews tarafında cümlelerin çoğu haber içeriği olarak kullanılabilir. Ama üç pattern net şekilde yakalanıyor:
+
+  1. Branded/promo içerik: özellikle CyberGuy.
+  2. Haber içine karışmış all-caps bağlantı başlıkları.
+  3. “FoxNews reached out / request for comment” gibi tekrar eden formül cümleleri.
+
+  Bunların hepsi aynı ağırlıkta değil. CyberGuy ciddi problem; all-caps başlıklar orta seviye problem; request-for-comment cümleleri ise çoğu zaman kalabilir ama modele çok
+  tekrar verilirse format sinyali yaratır.
+
+  1. Hasan Piker Article
+  Karar: Büyük ölçüde kalsın.
+
+  Bu article genel olarak haber cümlelerinden oluşuyor. Kısa ama anlamlı bir cümle var:
+
+  "This is straight-up fascism," Piker said.
+
+  Bu kısa olsa da haber içeriği; çıkarılmamalı.
+
+  Şüpheli olan şey all-caps ara başlık:
+
+  HASAN PIKER DEFENDS...
+
+  Bu gerçek haber cümlesi değil, muhtemelen link/ara başlık. Model için çok değerli değil.
+
+  2. Drug Boat Strike Article
+  Karar: Kalsın, ama all-caps başlıklar şüpheli.
+
+  Haber cümleleri temiz. Örneğin “No American service members were harmed” kısa ama içerik olarak önemli.
+
+  Ama şu tip satırlar sorunlu:
+
+  US MILITARY ATTACKS IRAN...
+
+  Bunlar haber metninin doğal cümlesinden çok, ilgili haber linki veya site içi başlık gibi duruyor.
+
+  3. Congress Deadline Article
+  Karar: Kalsın, all-caps satırlar review.
+
+  Normal haber akışı iyi. Ama şu tarz cümleler araya giriyor:
+
+  SENATE GOP ERUPTS...
+
+  Bu cümle gibi görünse de aslında FoxNews’in related-story başlığı olabilir. Annotation için “haber cümlesi” saymak zayıf.
+
+  4. Bison / OutKick Article
+  Karar: Şüpheli ama tamamen atılacak kadar kötü değil.
+
+  Bu article daha köşe yazısı / viral içerik tonu taşıyor. Bazı cümleler haber değil, yorumlu anlatım:
+
+  Well, buckle up...
+
+  Bir de all-caps link başlığı var:
+
+  HORRIFIED TOURISTS WATCH...
+
+  Bu article bias/framing analizi için ilginç olabilir çünkü dil çok opinionated. Ama “düz haber” kalitesi düşük.
+
+  5. Platner Ballot Article
+  Karar: Temiz sayılabilir.
+
+  Bu sample en düzgünlerden biri. Cümleler çoğunlukla açıklayıcı haber cümlesi. Tek şüpheli parça yine all-caps başlık:
+
+  BERNIE SANDERS DEFENDS...
+
+  Bu çıkarılsa bile article’ın ana metni sağlam kalır.
+
+  6. Microsoft Text Codes / CyberGuy Article
+  Karar: Tüm haber problemli olabilir.
+
+  Bu en net sorunlu sample. İçinde çok fazla marka/promo cümlesi var:
+
+  Join CyberGuy Live...
+
+  Register here: CyberGuyLive.com.
+
+  Sign up for my FREE CyberGuy Report
+
+  Bunlar haber cümlesi değil. Reklam, etkinlik duyurusu veya newsletter çağrısı gibi.
+
+  Bu article’ın bazı teknik açıklama cümleleri kullanılabilir, ama genel gövde CyberGuy markasıyla çok kirlenmiş. Benim kararım: sentence sentence temizlemektense article-level
+  “drop candidate” olarak işaretlenmeli.
+
+  7. Rachel Pizzolato / OutKick Column
+  Karar: Şüpheli; haberden çok kişisel/kolon formatı.
+
+  Bu article 122 cümleyle FoxNews sample içindeki en uzun metin. Çok sayıda kısa, konuşma diliyle yazılmış cümle var:
+
+  That's the power of Pizzolato.
+
+  It's a new month.
+
+  Go have an incredible day.
+
+  Bunlar haber cümlesi değil; köşe yazısı/newsletter havası taşıyor.
+
+  Bir de çok uzun, değer yargısı yüklü bir cümle var; aile, boşanma, mahkeme, ahlak çöküşü gibi birçok fikri tek cümlede topluyor. Bu bias/framing için sinyal olabilir, ama
+  sentence kalitesi olarak “çok yoğun ve opinionated” bir örnek.
+
+  Karar: Tamamen gereksiz değil, ama düz haber dataset’i için riskli.
+
+  8. FARA / Foreign Influence Article
+  Karar: Kalsın, birkaç uzun quote ve all-caps başlık review.
+
+  Bu article politik haber olarak anlamlı. Uzun quote’lar var ama içerik taşıyor. Örneğin FARA’nın “political weapon” olarak kullanıldığına dair alıntılar framing analizi için
+  değerli.
+
+  Ama yine all-caps ara başlıklar var:
+
+  FEDS SUBPOENA HASAN PIKER...
+
+  Bu satırlar haber içeriğinden çok link başlığı gibi.
+
+  9. NYC Landlord Article
+  Karar: Kalsın, bazı kısa fragment’ler ve all-caps satırlar şüpheli.
+
+  Article genel olarak haber/anlatı formatında düzgün. Ama şu tip parçalar tek başına zayıf:
+
+  EXCLUSIVE: NEW YORK CITY —
+
+  It gets pretty stressful.
+
+  İkincisi quote bağlamında kalabilir; ilki ise tam cümle değil, dateline/etiket gibi.
+
+  All-caps related headline da var:
+
+  WASHINGTON POST BLASTS...
+
+  Bu da doğal haber cümlesi gibi değil.
+
+  10. College Students / Boardwalk Article
+  Karar: Temiz ama formulaic cümleler var.
+
+  Bu kısa ve çoğunlukla düzgün bir haber. Problem daha çok tekrar eden gazetecilik formülü:
+
+  did not immediately respond...
+
+  [OUTLET] has also reached out...
+
+  Bunlar haber standardı açısından normal. Ama model eğitiminde çok tekrarlanırsa “request for comment” formatını öğrenebilir. Bu yüzden kesin drop değil, ama yoğun tekrar varsa
+  azaltılabilir.
+
+  FoxNews’te Yakalanan Ana Pattern’ler
+  Kesin çıkarılmalı / güçlü problem
+
+  - CyberGuy promo cümleleri.
+  - Register here, Sign up, FREE report gibi CTA cümleleri.
+  - Copyright/promo kapanışları.
+
+  Şüpheli / review
+
+  - All-caps related-story başlıkları.
+  - EXCLUSIVE: NEW YORK CITY — gibi tek başına cümle olmayan etiketler.
+  - Çok kısa konuşma dili parçaları, özellikle OutKick column’larında.
+  - Çok uzun, birçok fikri tek cümlede toplayan opinionated cümleler.
+
+  Genelde kalsın
+
+  - Kısa ama anlamlı quote’lar.
+  - request for comment cümleleri, az sayıdaysa.
+  - Uzun quote’lar, eğer gerçek kaynak açıklamasıysa.
+  - Opinionated cümleler, eğer hedef zaten “subjective framing” ise.
+
+  Net Sonuç
+  FoxNews için problem genel bir “her şey bozuk” problemi değil. Daha çok belli formatlar üzerinden yakalanabilir:
+
+  1. CyberGuy gibi branded içerikler.
+  2. OutKick tarzı köşe/newsletter dili.
+  3. All-caps related-link başlıkları.
+  4. Site/promo CTA cümleleri.
+  5. Çok tekrar eden gazetecilik formül cümleleri.
+
+  En sert karar: Your Microsoft text codes are going away article’ı CyberGuy nedeniyle article-level drop candidate.
+
+  En dikkatli karar: OutKick column’ları tamamen atılmamalı; çünkü subjektif framing için değerli olabilirler. Ama “haber cümlesi” ile “kolon/newsletter üslubu” ayrı
+  işaretlenmeli.
+
+─ Worked for 1m 15s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 xhigh for Plan mode.
+
+
+› her şeyi mükemmel yapamayız. must olarak temizlenmesi gerek olarak gördüğün, cleaning adımında, yöntemleri planla ve bunları bir prompt olarak bana ver. fakat gerçekleştirme,
+  gerçekleştirme işlemini ben yapacağım. cleaningde temizledikten sonra yeniden sentence böleriz.
+
+
+• Must-clean listesini mevcut cleaning katmanıyla çakıştırarak netleştireceğim. Özellikle zaten temizlenen pattern’leri tekrar önermemek için cleaning.py ve önceki audit
+  bulgularındaki kalan FoxNews/NPR/NYPost/DailyCaller kalıntılarını hızlıca doğruluyorum.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +22 lines
+  └ npr_transcript_footer rows 24 articles 4 sources {'npr': 24}
+    accessibility_links rows 4 articles 2 sources {'npr': 4}
+    … +5 lines (ctrl + t to view transcript)
+    ap_follow rows 1 articles 1 sources {'huffpost': 1}
+    hash_rule rows 2 articles 1 sources {'foxnews': 2}
+
+• Proposed Plan
+
+
+  # Must-Clean Planı + Uygulama Prompt’u
+
+  ## Özet
+
+  Amaç mükemmel temizlik değil; sadece model/annotation kalitesini açıkça bozacak yüksek kesinlikli kalıntıları cleaning aşamasında temizlemek. Schema değişmeyecek. Temizlikten
+  sonra articles_clean.jsonl yeniden üretilecek, ardından sentence split tekrar çalıştırılacak.
+
+  Must-clean kapsamı:
+
+  - NPR transcript/footer kalıntıları.
+  - NPR Accessibility links chrome’u.
+  - FoxNews CyberGuy promo/CTA satırları.
+  - NYPost California Post Google/newsletter chrome’u.
+  - DailyCaller/NPR standalone tweet attribution satırları ve shortlink kalıntıları.
+  - HuffPost AP follow footer.
+  - Washington Times menu/footer satırları.
+  - Fox/OutKick #################### separator kalıntıları.
+
+  ## Cleaning Yöntemi
+
+  - src/cleaning.py içinde yüksek kesinlikli blacklist/regex ekle.
+  - Geniş ve riskli kurallar ekleme:
+      - Tüm Google geçen satırları silme.
+      - Tüm all-caps başlıkları silme.
+      - Tüm kısa/uzun cümleleri silme.
+      - Tüm [OUTLET] geçen cümleleri silme.
+      - Cross-outlet referansları maskeleme/silme.
+
+  - NYPost için sadece satır drop değil, prefix temizliği de yap:
+      - Add The California Post on Google metni gerçek haber cümlesine yapışmışsa sadece bu prefix çıkarılsın, kalan haber cümlesi korunsun.
+
+  - URL temizliği için:
+      - Standalone URL/social attribution satırları drop.
+      - Haber cümlesinin sonuna yapışmış https://... / t.co/... URL’leri mümkünse sadece URL tail strip edilsin.
+      - AP follow footer gibi URL sonrası anlamsız kalan satırlar ayrıca drop edilsin.
+
+  ## Uygulama Prompt’u
+
+  Aşağıdaki prompt’u implementer/agent’a ver:
+
+  Repo: /Users/emrecanulu/Documents/media-bias-pipeline
+
+  Task: Implement a minimal MUST-clean pass in the existing cleaning step. Do not attempt perfect cleanup. Do not change schemas. Do not implement annotation. After cleaning,
+  regenerate cleaned articles and sentence split outputs.
+
+  Files to touch:
+  - src/cleaning.py
+  - ai_usage/step_logs.md
+  - regenerated outputs: data/processed/articles_clean.jsonl and data/processed/sentences.jsonl
+
+  Implement only these high-confidence cleanup rules:
+
+  1. NPR transcript/footer cleanup
+  Add NPR-specific blacklist or regex rules that drop lines containing:
+  - "copyright ©"
+  - "all rights reserved"
+  - "accuracy and availability of npr transcripts"
+  - "transcript text may be revised"
+  - "audio on npr.org may be edited"
+  - "authoritative record of npr's programming"
+  - "authoritative record of npr’s programming"
+
+  2. NPR accessibility chrome
+  Drop lines containing:
+  - "accessibility links"
+
+  3. FoxNews CyberGuy promo cleanup
+  In foxnews-specific blacklist, drop lines containing:
+  - "cyberguy"
+  - "cyberguylive.com"
+  - "sign up for my free cyberguy report"
+  - "ultimate scam survival guide"
+  - "trusted by millions who watch cyberguy"
+  - "register here: cyberguy"
+
+  Do not drop the full article. Only remove the promo/CTA lines.
+
+  4. NYPost California Post cleanup
+  Before line blacklist evaluation, strip this prefix when it appears:
+  - "Add The California Post on Google"
+
+  This must preserve the remaining article sentence if the prefix is glued to it, e.g.
+  "Add The California Post on GoogleCops..." -> "Cops..."
+
+  Also drop lines containing:
+  - "california post newsletters"
+  - "california post opinion"
+
+  5. Social attribution and URL cleanup
+  Add robust regex cleanup for standalone tweet/social attribution lines:
+  - lines beginning with "-" or "—" followed by text, "(@handle)", date, year.
+
+  Example to remove:
+  "— Homeland Security (@DHSgov) June 1, 2026"
+
+  Strip trailing URLs from otherwise useful lines:
+  - http://...
+  - https://...
+  - www....
+  - t.co links
+
+  If the remaining line becomes empty or only punctuation/chrome, drop it.
+
+  6. HuffPost/AP footer
+  Drop lines matching:
+  - "Follow AP's coverage"
+  - "Follow AP’s coverage"
+
+  7. Washington Times menu/footer
+  In washingtontimes-specific blacklist, drop lines containing:
+  - "capitol hill show"
+  - "foramerica"
+  - "games - subscribe - sign in"
+  - "washington times weekly"
+
+  8. Hash separator cleanup
+  Drop lines containing long hash separators:
+  - regex for 5 or more "#", e.g. r"#{5,}"
+
+  Important constraints:
+  - Do not add broad all-caps removal.
+  - Do not remove all short sentences.
+  - Do not remove all long sentences.
+  - Do not remove all [OUTLET] sentences.
+  - Do not mask/delete cross-outlet references like Washington Post, CNN, NYT, WSJ.
+  - Keep article count at 300 unless a body becomes impossible to preserve; if any body becomes empty, stop and report.
+
+  After implementation:
+  1. Run:
+     python3 scripts/clean_articles.py
+     python3 src/sentence_split.py
+
+  2. Verify these residual searches return 0 rows in data/processed/sentences.jsonl:
+     - Copyright / transcript footer:
+       Copyright, Accuracy and availability, Transcript text may be revised, Audio on [OUTLET], authoritative record
+     - Accessibility links
+     - CyberGuy / CyberGuyLive / FREE CyberGuy / Ultimate Scam Survival Guide
+     - Add The California Post on Google / California Post Newsletters
+     - standalone social attribution lines like "— Name (@handle) Month DD, YYYY"
+     - http:// / https:// / www. / t.co
+     - Follow AP’s coverage / Follow AP's coverage
+     - Capitol Hill Show / ForAmerica / Games - Subscribe - Sign In
+     - "#####"
+
+  3. Also verify:
+     - data/processed/articles_clean.jsonl has 300 rows.
+     - data/processed/sentences.jsonl exists and has nonzero rows.
+     - No article body is empty.
+     - FoxNews CyberGuy article still exists, but its promo/CTA lines are gone.
+
+  4. Append a new forward-only entry to ai_usage/step_logs.md:
+     - Goal: must-clean high-confidence sentence artifacts before re-splitting.
+     - Action: summarize exact blacklist/regex additions and regeneration commands.
+     - Outcome: include article count, sentence count, and residual verification results.
+     - Notes: explicitly state that broad all-caps/short-sentence/cross-outlet cleanup was intentionally not implemented.
+
+  ## Test Plan
+
+  - Run residual pattern scan after regeneration; all must-clean categories should be zero.
+  - Spot-check these known cases:
+      - NPR transcript footer rows disappear.
+      - FoxNews CyberGuy CTA rows disappear.
+      - NYPost Add The California Post on GoogleCops... becomes normal Cops... sentence, not full-line loss.
+      - DailyCaller standalone tweet attribution rows disappear.
+      - HuffPost AP follow footer disappears.
+      - Washington Times menu/footer disappears.
+
+  - Confirm no broad damage:
+      - Real quote sentences remain.
+      - request for comment sentences remain.
+      - Cross-outlet references remain.
+      - Short but meaningful sentences remain.
+
+  ## Varsayımlar
+
+  - Bu sadece “must-clean” pass; mükemmel sentence methodology cleanup değil.
+  - Article drop yapılmayacak.
+  - Sentence split cleanup’tan sonra yeniden çalıştırılacak.
+  - Annotation/proxy/VLM adımlarına dokunulmayacak.
+
+
+─ Worked for 1m 34s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Model changed to gpt-5.5 medium for Default mode.
+
+
+› Implement the plan.
+
+
+• Must-clean pass’i şimdi uyguluyorum. Değişiklikleri sadece cleaning katmanına sınırlayacağım, sonra clean articles ve sentence split çıktısını yeniden üreteceğim; geniş
+  kapsamlı all-caps/short-sentence temizliği eklemeyeceğim.
+
+• Explored
+  └ Read cleaning.py, clean_articles.py
+
+• Ran tail -80 ai_usage/step_logs.md
+  └   - Foxnews_3 Screencaps article body still has some boilerplate but body size > 200 chars; keeping in corpus for now.
+      - Washington Times `"washington times"` alias now also masks cross-outlet references in other outlets' text referencing the Times.
+    … +82 lines (ctrl + t to view transcript)
+    - **Notes:** Scope intentionally stayed narrow. `[OUTLET]` attribution, long real quotes, short opinion sentences, cross-outlet references, and section-heading bridge
+    behavior were left unchanged.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Görünüşe göre must-clean değişiklikleri çalışma ağacında zaten mevcut: cleaning.py içinde CyberGuy/NPR/California Post/URL cleanup kuralları ve step log’da “Step 10” kaydı var.
+  Yine de isteği tamamlamak için çıktıları yeniden üretip residual kontrolleri çalıştıracağım; eksik bir kural varsa ancak o zaman düzeltme yapacağım.
+
+• Explored
+  └ Read cleaning.py
+
+• Ran python3 - <<'PY'
+  │ import json, collections, re
+  │
+  │ … +27 lines
+  └ articles_clean 300 empty_bodies 0 short_under_200 0
+    sentences 8834
+    … +10 lines (ctrl + t to view transcript)
+      dcc8101e8abd84c32ad2d7ee415b039e62ce4484:117 "It's time to turn the page. ####################"
+      dcc8101e8abd84c32ad2d7ee415b039e62ce4484:118 '#################### And that is it.'
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Residual kontrollerde tek açık eksik kaldı: Fox/OutKick hash separator (####################) iki sentence içinde hâlâ duruyor. Bunu dar bir regex ile line-level drop’a ekleyip
+  rebuild edeceğim.
+
+• Edited src/cleaning.py (+1 -0)
+    168      re.compile(r"^https?://\S+\s+[—-]\s+.+\(@\w+\).+\w+\s+\d+,\s*\d{4}\s*$"),
+    169 +    re.compile(r"#{5,}"),
+    170      # Lines starting with (optional "- ") + pictographic emoji (e.g. NPR audio chapter markers: "- 🎧 …")
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Hash separator kuralı eklendi. Şimdi articles_clean.jsonl ve sentences.jsonl yeniden üretip must-clean pattern’lerin gerçekten sıfıra indiğini doğruluyorum.
+
+• Ran python3 scripts/clean_articles.py && python3 src/sentence_split.py
+  └
+    Wrote 300 articles to /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/articles_clean.jsonl
+    … +15 lines (ctrl + t to view transcript)
+        from .utils import PROCESSED, read_jsonl, write_jsonl
+    ImportError: attempted relative import with no known parent package
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Clean articles başarıyla yeniden üretildi; sentence split komutu script olarak çalıştırılınca relative import hatası verdi. Modül olarak çalıştırmak gerekiyor, şimdi python3 -m
+  src.sentence_split ile devam ediyorum.
+
+• Ran python3 -m src.sentence_split
+  └ articles=300  sentences=8834  avg=29.4/article  bridge_groups=329
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Rebuild tamamlandı. Şimdi article/sentence sayıları, boş body kontrolü ve tüm must-clean residual pattern’leri için doğrulama taramasını çalıştırıyorum.
+
+• Ran python3 -m py_compile src/cleaning.py src/sentence_split.py scripts/clean_articles.py
+  └ (no output)
+
+• Ran python3 - <<'PY'
+  │ import json
+  │
+  │ … +13 lines
+  └ cyberguy_article_exists True
+    cyberguy_article_body_chars 6247
+    … +16 lines (ctrl + t to view transcript)
+    93 'Set up a passkey, verify your backup email and remove old recovery options.'
+    94 '- Get my best tech tips, urgent security alerts and exclusive deals delivered straight to your inbox.'
+
+• Ran python3 - <<'PY'
+  │ import json, re, collections
+  │
+  │ … +28 lines
+  └ articles_clean 300
+    empty_bodies 0
+    … +10 lines (ctrl + t to view transcript)
+    menu_footer 0
+    hashes 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Residual keyword kontrolleri sıfırlandı, ama CyberGuy spot-check’inde bir promo satırı marka adı geçmediği için kalmış: “Get my best tech tips… delivered straight to your
+  inbox.” Bu planın CTA temizliği niyetine giriyor, dar FoxNews kuralı olarak ekleyip yeniden üreteceğim.
+
+• Edited src/cleaning.py (+2 -0)
+    76          "write to us at cyberguy.com",
+    77 +        "get my best tech tips",
+    78 +        "exclusive deals delivered straight to your inbox",
+    79      ],
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Ek FoxNews CTA satırı da kapsama alındı. Şimdi ikinci kez rebuild ve doğrulama yapıyorum; bu geçişten sonra log’u forward-only olarak ekleyeceğim.
+
+• Ran python3 scripts/clean_articles.py && python3 -m src.sentence_split
+  └
+    Wrote 300 articles to /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/articles_clean.jsonl
+    … +12 lines (ctrl + t to view transcript)
+    TOTAL                       300     1,211,515    1,164,510        3.9%             183
+    articles=300  sentences=8833  avg=29.4/article  bridge_groups=329
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Rebuild temiz geçti: 300 article ve 8,833 sentence üretildi. Son residual scan ve CyberGuy spot-check’i çalıştırıp log girdisini ekliyorum.
+
+• Ran python3 -m py_compile src/cleaning.py src/sentence_split.py scripts/clean_articles.py
+  └ (no output)
+
+• Ran python3 - <<'PY'
+  │ import json
+  │
+  │ … +11 lines
+  └ cyberguy_article_exists True
+    body_chars 6145
+    … +7 lines (ctrl + t to view transcript)
+    92 'If your Microsoft account holds years of email, family photos or work files, this change deserves your attention.'
+    93 'Set up a passkey, verify your backup email and remove old recovery options.'
+
+• Ran python3 - <<'PY'
+  │ import json, re
+  │
+  │ … +28 lines
+  └ articles_clean 300
+    empty_bodies 0
+    … +10 lines (ctrl + t to view transcript)
+    menu_footer 0
+    hashes 0
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Doğrulama tamam: hedef residual pattern’lerin tamamı 0. Şimdi proje kuralına uygun şekilde yeni bir forward-only AI usage log girdisi ekliyorum; önceki log’u geriye dönük
+  değiştirmeyeceğim.
+
+• Edited ai_usage/step_logs.md (+7 -0)
+    289  - **Notes:** Scope intentionally stayed narrow. `[OUTLET]` attribution, long real quotes, short opinion sentences, cross-outlet references, and section-heading bridge be
+         havior were left unchanged.
+    290 +
+    291 +## Step 11 — Complete must-clean residual verification — 2026-06-03
+    292 +- **Goal:** Finish the must-clean pass by closing residual Fox/OutKick separator and CTA artifacts, then verify regenerated article and sentence outputs.
+    293 +- **Action:** Added a narrow global regex for long hash separators (`#{5,}`) and extended the FoxNews-specific blacklist for the remaining CyberGuy newsletter CTA text (
+         `"get my best tech tips"` / `"exclusive deals delivered straight to your inbox"`). Regenerated `data/processed/articles_clean.jsonl` with `python3 scripts/clean_articles
+         .py` and regenerated `data/processed/sentences.jsonl` with `python3 -m src.sentence_split`.
+    294 +- **Prompt / model:** GPT-5 Codex — implement the must-clean plan, preserving the intentionally narrow scope.
+    295 +- **Outcome:** Rebuild succeeded: 300 articles, 0 empty bodies, 0 bodies under 200 chars, 8,833 sentences. Residual checks returned 0 for copyright/transcript footer phr
+         ases, `Accessibility links`, CyberGuy/CyberGuyLive/CTA text, California Post chrome, standalone social attribution, URL/shortlink patterns, AP follow footer, Washington
+         Times menu/footer terms, and long hash separators. `py_compile` passed for `src/cleaning.py`, `src/sentence_split.py`, and `scripts/clean_articles.py`.
+    296 +- **Notes:** Broad all-caps removal, all short-sentence removal, all `[OUTLET]` sentence removal, cross-outlet reference cleanup, and section-heading bridge cleanup rema
+         in intentionally out of scope.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Must-clean pass uygulandı ve çıktılar yeniden üretildi.
+
+  Değişenler:
+
+  - src/cleaning.py: dar kapsamlı must-clean kuralları eklendi/tamamlandı.
+  - data/processed/articles_clean.jsonl: yeniden üretildi.
+  - data/processed/sentences.jsonl: yeniden split edildi.
+  - ai_usage/step_logs.md: forward-only Step 11 log’u eklendi.
+
+  Son durum:
+
+  - articles_clean.jsonl: 300 article
+  - Empty body: 0
+  - 200 karakter altı body: 0
+  - sentences.jsonl: 8,833 sentence
+  - py_compile: geçti
+
+  Residual kontrollerin tamamı 0:
+
+  - NPR transcript/footer
+  - Accessibility links
+  - CyberGuy / CyberGuyLive / CTA text
+  - California Post chrome
+  - Standalone social attribution
+  - URL / t.co / www
+  - AP follow footer
+  - Washington Times menu/footer
+  - ##### separator
+
+  Not: İlk python3 src/sentence_split.py denemesi relative import yüzünden çalışmadı; doğru komut olan python3 -m src.sentence_split ile yeniden split başarıyla üretildi.
+
+─ Worked for 2m 48s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+
+› loga ekle
+
+
+• Log girdisini zaten forward-only olarak eklemiştim; yine de dosyada gerçekten durduğunu kontrol ediyorum.
+
+• Ran tail -40 ai_usage/step_logs.md
+  └ - **Prompt / model:** claude-opus-4-7 — implement Step 8 sentence splitting per approved plan (spaCy en_core_web_sm, n=3 words, Seçenek A consecutive bridge, sınır=tek
+    komşuya yapıştır).
+    … +45 lines (ctrl + t to view transcript)
+    - **Notes:** Scope remained must-clean only. Quote-heavy sentences, long real news sentences, section-heading bridge behavior, cross-outlet references, and `[OUTLET]`
+    attribution sentences remain intentionally unchanged for later sentence-methodology review.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Log’a eklenmiş durumda. Son kayıt:
+
+  ai_usage/step_logs.md
+
+  - Step 11 — Complete must-clean residual verification
+  - Ayrıca dosyada Step 12 — Inline separator and read-through cleanup verification da mevcut; bu da must-clean sonrası ek doğrulama/cleanup kaydını içeriyor.
+
+  Yani logging tamam.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+ 
+› Implement {feature}
+ 
+  gpt-5.5 medium · ~/Documents/media-bias-pipeline

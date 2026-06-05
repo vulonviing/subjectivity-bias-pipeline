@@ -1,0 +1,648 @@
+claude --dangerously-skip-permissions
+ ▐▛███▜▌   Claude Code v2.1.133
+▝▜█████▛▘  Opus Plan with medium effort · Claude Pro
+  ▘▘ ▝▝    ~/Documents/media-bias-pipeline
+
+❯ projeyi oku ve anla. şimdi sırada cümleleştirme adımımız var zira temizlikleri yaptık. burada cümleleştirme, yani sentence by sentence ayırma işlemine başlayalım. yapacağın    
+  ayırma felsefesinde bir n koy ve bu n'den kısa olan yani cümle bile olmayan tek kelimelik reaksiyonlar için şu işlemi uygula:bunları bir önceki cümlenin sonuna ve bir sonraki  
+  cümlenin başına vererek ayır. örneğin:                                                                                                                                          
+                                                                                                                                                                                  
+  trump says it is nothing. hah! he should also ask this to the workers.                                                                                                          
+                                                                                                                                                                                  
+  here as youcan see; maybe hah would be dropped but actually it loads very important outcome here. so it should be exist. bu yüzden:                                             
+                                                                                                                                                                                  
+  trump says it is nothing. hah!                                                                                                                                                  
+  hah! he should also ask this to the workers.                                                                                                                                    
+                                                                                                                                                                                  
+  şeklinde cümleleri ayırmanı istiyorum mesela bu durumda.                                                                                                                        
+                                                                                                                                                                                  
+  ayırma işlemini planlayalım.                                                                                                                                                    
+
+⏺ Explore(Explore project structure)                              
+  ⎿  Done (12 tool uses · 44.8k tokens · 1m 2s)                                                                                                                             
+  (ctrl+o to expand)                                                                                                                                                              
+                                                                                                                                                                            
+  Read 1 file (ctrl+o to expand)                                                                                                                                                  
+                                                                                                                                                                                  
+⏺ Bash(head -1 /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/articles_clean.jsonl | python3 -c "import json,sys; d=json.loads(sys.stdin.read()); print…)         
+  ⎿  Ghana’s LGBTQ community is living in fear after the country’s parliament approved a sweeping bill that criminalises the promotion of LGBTQ+ activities and identifying a     
+     s lesbian, gay, bisexual, transgender or queer, rights groups have warned.                                                                                                   
+     The legislation, which was passed on Friday, mandates prison sentences of three to 10 years.                                                                                 
+     … +9 lines (ctrl+o to expand)                                                                                                                                                
+                                                                                                                                                                                  
+⏺ Projeyi okudum. Mevcut durum:                                                                                                                                                   
+  - data/processed/articles_clean.jsonl (300 makale, temizlenmiş, body alanı \n paragraf ayraçları ve [OUTLET] maskeleri içeriyor)                                                
+  - src/sentence_split.py stub halinde, çıktı şeması zaten kilitli (sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est)                                         
+  - nltk ve spacy requirements'ta mevcut, henüz hiçbiri kullanılmamış                                                                                                             
+  - Çıktı: data/processed/sentences.jsonl                                                                                                                                         
+                                                                                                                                                                                  
+  Senin "kısa reaksiyonu hem önceki hem sonraki cümleye yapıştır" felsefen şemayı koruyor (sadece text örtüşüyor, sentence_index hâlâ benzersiz). Plana geçmeden önce birkaç      
+  tasarım kararı netleştirmem lazım.                                                                                                                                              
+  ⎿  Tool use rejected                                                                                                                                                            
+                                                                                                                                                                                  
+⏺ İlk, ikinci ve dördüncü soruları yanıtladın. Üçüncü soruyu (ardışık kısa parçalar) netleştirmek istiyorsun. Hangi kısmı açmamı istersin? Mesela:                              
+                                                                                                                                                                                  
+  - Senaryoyu somut bir örnekle mi göstereyim ("X dedi. hah! oh no! Y geldi." → her iki seçenek için tam çıktı nasıl görünür)?                                                    
+  - Yoksa farklı/ek seçenekler mi düşünüyorsun (ör. ardışık kısa parçaları tek bir bağımsız cümle olarak da tut)?                                                                 
+  - Yoksa bu durumun verinde ne kadar sık olduğunu mu merak ediyorsun?                                                                                                            
+                                                                                                                                                                                  
+  Hangisini açayım, veya aklındaki başka bir soru/durum var mı?                                                                                                                   
+                                                                                                                                                                                  
+✻ Sautéed for 2m 32s                                                                                                                                                              
+                                                                                                                                                                                  
+❯ tam olarak senaryoyu anlamadım, açar mısın                                                                                                                                      
+                                                                                                                                                                                  
+⏺ Tabii. Senaryo şu: bir makalede arka arkaya iki tane kısa reaksiyon geliyor. Tek başına "hah!" değil, "hah! oh no!" gibi peş peşe iki tanesi.                                   
+                                                                                                                                                                                  
+  Örnek metin:                                                                                                                                                                    
+  Trump says it is nothing. hah! oh no! He should ask the workers.                                                                                                                
+                                                                                                                                                                                  
+  spaCy bunu 4 cümleye böler:                                                                                                                                                     
+  1. Trump says it is nothing.                                                                                                                                                    
+  2. hah!  ← kısa (n<3)                                                                                                                                                           
+  3. oh no! ← kısa (n<3)                                                                                                                                                          
+  4. He should ask the workers.                                                                                                                                                   
+                               
+  İki kısa parça yan yana. Soru: bunları nasıl köprüleyelim?                                                                                                                      
+                                                                                                                                                                                  
+  ---                                                                                                                                                                             
+  Seçenek A — Birleştirip tek köprü (Önerdiğim):                                                                                                                                  
+                                                                                                                                                                                  
+  Önce iki kısa parçayı tek bir "köprü" gibi düşünüyoruz: hah! oh no!. Sonra bunu hem önceki hem sonraki cümleye yapıştırıyoruz.                                                
+                                                                                                                                                                                  
+  Çıktı (2 satır):                                                                                                                                                              
+  1. Trump says it is nothing. hah! oh no!                                                                                                                                        
+  2. hah! oh no! He should ask the workers.                                                                                                                                     
+                                           
+  Temiz, tahmin edilebilir. Senin orijinal felsefene en yakın olan bu.                                                                                                            
+                                                                                                                                                                                  
+  ---                                                                                                                                                                             
+  Seçenek B — Her birini ayrı ayrı köprüle:                                                                                                                                       
+                                                                                                                                                                                  
+  Her kısa parçayı kendi başına işliyoruz. hah! hem solundakine hem sağındakine yapışır; oh no! de hem solundakine hem sağındakine yapışır. Ama hah!'ın sağındaki oh no! de kısa,
+  oh no!'nun solundaki hah! de kısa — yani komşuyu ararken kısa olmayan bir cümleye kadar gitmemiz gerekiyor.                                                                     
+                                                                                                                                                                                
+  Çıktı (4 satır, çok daha gürültülü):                                                                                                                                            
+  1. Trump says it is nothing. hah!                                                                                                                                             
+  2. hah! oh no!                                                                                                                                                                  
+  3. oh no! He should ask the workers.                                                                                                                                          
+  4. (belki "hah! oh no!" de ayrı kalır)
+                                        
+  Daha çok örtüşen kayıt üretir, downstream'de gürültü artar.                                                                                                                     
+                                                                                                                                                                                  
+  ---                                                                                                                                                                             
+  Kısaca: A'da iki kısa parça "tek bir reaksiyon bloğu" sayılır ve sadece 2 çıktı satırı olur; B'de her biri bağımsız işlenir ve 3-4 satır olur. Hangisini tercih edersin?        
+                                                                                                                                                                                  
+✻ Brewed for 18s                                    
+                                                                                                                                                                                  
+❯ seçenek a olsun.                                                                                                                                                                
+                                                                                                                                                                                  
+⏺ Updated plan                                                                                                                                                                    
+  ⎿  /plan to preview                                                                                                                                                             
+                                                                                                                                                                                  
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Ready to code?                                                                   
+                                                                                                                                                                                  
+ Here is Claude's plan:                                                                                                                                                           
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Plan: Sentence Splitting (Step 8)                                                                                                                                                
+                                                                                                                                                                                
+ Context                                                                                                                                                                        
+
+ Cleaning aşaması Step 7'de tamamlandı: data/processed/articles_clean.jsonl 300 temizlenmiş makale içeriyor (outlet maskeleri, boilerplate temizliği, bio/byline regex'leri
+ uygulanmış). Pipeline'da bir sonraki adım src/sentence_split.py — şu an NotImplementedError raise eden bir stub. Bu adımın amacı body alanını cümlelere bölüp
+ data/processed/sentences.jsonl üretmek.
+
+ Standart spaCy bölmesinin ötesinde, kullanıcının istediği özel davranış: çok kısa parçalar (örn. "hah!", "wow!", "oh no!") tek başına bir cümle olarak bırakılırsa downstream
+ LLM/proxy annotation'da bağlamsız kalıp gürültü üretir. Bunlar önemli pragmatik sinyal taşıyor (öfke, alay, şaşkınluk). Çözüm: bu kısa parçaları hem önceki hem sonraki cümleye
+ "köprü" olarak yapıştırmak. Aynı kısa metin iki çıktı satırında görünür, ama her ikisinde de tam bağlamla.
+
+ Şema değişmiyor: sentence_id = f"{article_id}:{sentence_index}" benzersiz kalır; sadece bazı satırların text alanı kısa parçayla örtüşür.
+
+ Design Decisions (kullanıcıyla onaylandı)
+
+ ┌─────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │              Karar              │                                                         Değer                                                         │
+ ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Eşik n                          │ 3 kelime (whitespace token count). Bir parça ≤3 kelimeyse "kısa reaksiyon" sayılır.                                   │
+ ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Splitter                        │ spaCy en_core_web_sm (NLTK punkt yerine — tırnak/kısaltma davranışı daha iyi)                                         │
+ ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Ardışık kısa parçalar           │ Birleştirip tek köprü (Seçenek A): hah! oh no! tek bir reaksiyon bloğu olarak hem öncekine hem sonrakine yapıştırılır │
+ ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+ │ Sınır durumu (makale başı/sonu) │ Sadece var olan komşuya yapıştır; izole kısa parça için ayrı kayıt üretme                                             │
+ └─────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ Worked Example
+
+ Girdi:
+ Trump says it is nothing. hah! oh no! He should ask the workers.
+
+ spaCy çıktısı: [S1, hah!, oh no!, S4]. hah! ve oh no! ≤3 kelime → ikisi tek köprü blok: "hah! oh no!".
+
+ Çıktı sentences.jsonl:
+ {"sentence_index": 0, "text": "Trump says it is nothing. hah! oh no!"}
+ {"sentence_index": 1, "text": "hah! oh no! He should ask the workers."}
+
+ Implementation Plan
+
+ 1. Bağımlılıklar
+
+ - requirements.txt: spacy zaten var. en_core_web_sm model paketi requirements'a eklenmemeli (PyPI üzerinden değil, python -m spacy download ile kurulur). Bunun yerine README'ye
+  kurulum notu eklenir.
+ - Kurulum komutu (kullanıcı çalıştırır): python -m spacy download en_core_web_sm
+
+ 2. src/sentence_split.py — doldur
+
+ Stub'daki docstring ve şema korunur. Yeni içerik:
+
+ Sabitler (modül üstünde, CLAUDE.md Rule 4 gereği src/ içinde):
+ SHORT_FRAGMENT_MAX_TOKENS = 3   # ≤3 kelime → kısa reaksiyon (köprü)
+ SPACY_MODEL = "en_core_web_sm"
+
+ Fonksiyonlar:
+
+ - load_nlp() -> spacy.Language
+ spaCy modelini yükler. Sadece senter (veya parser) pipeline component'i; ner, lemmatizer, vs. devre dışı (disable=[...]) — hız için.
+ - n_tokens(text: str) -> int
+ Whitespace tokenizer: len(text.split()). Hem eşik kontrolü hem çıktı n_tokens_est için kullanılır.
+ - split_body(body: str, nlp) -> list[str]
+   a. spaCy ile cümlelere böl: [s.text.strip() for s in nlp(body).sents if s.text.strip()].
+   b. Boş cümleleri filtrele. [OUTLET] maskesi olduğu gibi geçer (spaCy bunu bozmaz, test edilecek).
+   c. Ardışık kısa parçaları gruplara topla (run-length grouping):
+       - groups: list[tuple[str, bool]] — her eleman (metin, is_short) çifti.
+     - Ardışık is_short=True olanlar tek bir grupta birleştirilir (Seçenek A): metinleri tek boşlukla join.
+   d. Köprü mantığını uygula:
+       - output: list[str] = []
+     - Her uzun cümle için, sol komşu kısa-grup varsa sonuna ekle; sağ komşu kısa-grup varsa başına ekle.
+     - Kısa-gruplar bağımsız çıktı satırı üretmez; sadece komşulara yapışır.
+     - Sınır: ilk cümle kısa-grupsa ve sağ komşusu varsa sadece sağa yapışır; tek başına makale = tek kısa-grup ise olduğu gibi tek satır olarak çıkar.
+ - process_article(article: dict, nlp) -> Iterator[dict]
+ body üzerinde split_body çağırır, şema'ya uygun dict'leri yield eder:
+ {
+   "sentence_id":    f"{article['article_id']}:{i}",
+  - Senaryoyu somut bir örnekle mi göstereyim ("X dedi. hah! oh no! Y geldi." → her iki seçenek için tam çıktı nasıl görünür)?
+  - Yoksa farklı/ek seçenekler mi düşünüyorsun (ör. ardışık kısa parçaları tek bir bağımsız cümle olarak da tut)?
+  - Yoksa bu durumun verinde ne kadar sık olduğunu mu merak ediyorsun?
+
+  Hangisini açayım, veya aklındaki başka bir soru/durum var mı?
+
+✻ Sautéed for 2m 32s
+
+❯ tam olarak senaryoyu anlamadım, açar mısın                                                                                                                                      
+
+⏺ Tabii. Senaryo şu: bir makalede arka arkaya iki tane kısa reaksiyon geliyor. Tek başına "hah!" değil, "hah! oh no!" gibi peş peşe iki tanesi.
+
+  Örnek metin:
+  Trump says it is nothing. hah! oh no! He should ask the workers.
+
+  spaCy bunu 4 cümleye böler:
+  1. Trump says it is nothing.
+  2. hah!  ← kısa (n<3)
+  3. oh no! ← kısa (n<3)
+  4. He should ask the workers.
+
+  İki kısa parça yan yana. Soru: bunları nasıl köprüleyelim?
+
+  ---
+  Seçenek A — Birleştirip tek köprü (Önerdiğim):
+
+  Önce iki kısa parçayı tek bir "köprü" gibi düşünüyoruz: hah! oh no!. Sonra bunu hem önceki hem sonraki cümleye yapıştırıyoruz.
+
+  Çıktı (2 satır):
+  1. Trump says it is nothing. hah! oh no!
+  2. hah! oh no! He should ask the workers.
+
+  Temiz, tahmin edilebilir. Senin orijinal felsefene en yakın olan bu.
+
+  ---
+  Seçenek B — Her birini ayrı ayrı köprüle:
+
+  Her kısa parçayı kendi başına işliyoruz. hah! hem solundakine hem sağındakine yapışır; oh no! de hem solundakine hem sağındakine yapışır. Ama hah!'ın sağındaki oh no! de kısa,
+  oh no!'nun solundaki hah! de kısa — yani komşuyu ararken kısa olmayan bir cümleye kadar gitmemiz gerekiyor.
+
+  Çıktı (4 satır, çok daha gürültülü):
+  1. Trump says it is nothing. hah!
+  2. hah! oh no!
+  3. oh no! He should ask the workers.
+  4. (belki "hah! oh no!" de ayrı kalır)
+
+  Daha çok örtüşen kayıt üretir, downstream'de gürültü artar.
+
+  ---
+  Kısaca: A'da iki kısa parça "tek bir reaksiyon bloğu" sayılır ve sadece 2 çıktı satırı olur; B'de her biri bağımsız işlenir ve 3-4 satır olur. Hangisini tercih edersin?
+
+✻ Brewed for 18s
+
+❯ seçenek a olsun.                                                                                                                                                                
+
+⏺ Updated plan
+  ⎿  /plan to preview
+
+⏺ User approved Claude's plan         
+  ⎿  Plan saved to: ~/.claude/plans/projeyi-oku-ve-anla-steady-brook.md · /plan to edit
+     Plan: Sentence Splitting (Step 8)
+                                                                                                                                                                                  
+     Context
+                                                                                                                                                                                  
+     Cleaning aşaması Step 7'de tamamlandı: data/processed/articles_clean.jsonl 300 temizlenmiş makale içeriyor (outlet maskeleri, boilerplate temizliği, bio/byline regex'leri 
+     uygulanmış). Pipeline'da bir sonraki adım src/sentence_split.py — şu an NotImplementedError raise eden bir stub. Bu adımın amacı body alanını cümlelere bölüp
+     data/processed/sentences.jsonl üretmek.
+
+     Standart spaCy bölmesinin ötesinde, kullanıcının istediği özel davranış: çok kısa parçalar (örn. "hah!", "wow!", "oh no!") tek başına bir cümle olarak bırakılırsa downstream
+      LLM/proxy annotation'da bağlamsız kalıp gürültü üretir. Bunlar önemli pragmatik sinyal taşıyor (öfke, alay, şaşkınluk). Çözüm: bu kısa parçaları hem önceki hem sonraki
+     cümleye "köprü" olarak yapıştırmak. Aynı kısa metin iki çıktı satırında görünür, ama her ikisinde de tam bağlamla.
+
+     Şema değişmiyor: sentence_id = f"{article_id}:{sentence_index}" benzersiz kalır; sadece bazı satırların text alanı kısa parçayla örtüşür.
+
+     Design Decisions (kullanıcıyla onaylandı)
+
+     ┌─────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+     │              Karar              │                                                         Değer                                                         │
+     ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Eşik n                          │ 3 kelime (whitespace token count). Bir parça ≤3 kelimeyse "kısa reaksiyon" sayılır.                                   │
+     ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Splitter                        │ spaCy en_core_web_sm (NLTK punkt yerine — tırnak/kısaltma davranışı daha iyi)                                         │
+     ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Ardışık kısa parçalar           │ Birleştirip tek köprü (Seçenek A): hah! oh no! tek bir reaksiyon bloğu olarak hem öncekine hem sonrakine yapıştırılır │
+     ├─────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+     │ Sınır durumu (makale başı/sonu) │ Sadece var olan komşuya yapıştır; izole kısa parça için ayrı kayıt üretme                                             │
+     └─────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+     Worked Example
+
+     Girdi:
+     Trump says it is nothing. hah! oh no! He should ask the workers.
+
+     spaCy çıktısı: [S1, hah!, oh no!, S4]. hah! ve oh no! ≤3 kelime → ikisi tek köprü blok: "hah! oh no!".
+
+     Çıktı sentences.jsonl:
+     {"sentence_index": 0, "text": "Trump says it is nothing. hah! oh no!"}
+     {"sentence_index": 1, "text": "hah! oh no! He should ask the workers."}
+
+     Implementation Plan
+
+     1. Bağımlılıklar
+
+     - requirements.txt: spacy zaten var. en_core_web_sm model paketi requirements'a eklenmemeli (PyPI üzerinden değil, python -m spacy download ile kurulur). Bunun yerine
+     README'ye kurulum notu eklenir.
+     - Kurulum komutu (kullanıcı çalıştırır): python -m spacy download en_core_web_sm
+
+     2. src/sentence_split.py — doldur
+
+     Stub'daki docstring ve şema korunur. Yeni içerik:
+
+     Sabitler (modül üstünde, CLAUDE.md Rule 4 gereği src/ içinde):
+     SHORT_FRAGMENT_MAX_TOKENS = 3   # ≤3 kelime → kısa reaksiyon (köprü)
+     SPACY_MODEL = "en_core_web_sm"
+
+     Fonksiyonlar:
+
+     - load_nlp() -> spacy.Language
+     spaCy modelini yükler. Sadece senter (veya parser) pipeline component'i; ner, lemmatizer, vs. devre dışı (disable=[...]) — hız için.
+     - n_tokens(text: str) -> int
+     Whitespace tokenizer: len(text.split()). Hem eşik kontrolü hem çıktı n_tokens_est için kullanılır.
+     - split_body(body: str, nlp) -> list[str]
+       a. spaCy ile cümlelere böl: [s.text.strip() for s in nlp(body).sents if s.text.strip()].
+       b. Boş cümleleri filtrele. [OUTLET] maskesi olduğu gibi geçer (spaCy bunu bozmaz, test edilecek).
+       c. Ardışık kısa parçaları gruplara topla (run-length grouping):
+           - groups: list[tuple[str, bool]] — her eleman (metin, is_short) çifti.
+         - Ardışık is_short=True olanlar tek bir grupta birleştirilir (Seçenek A): metinleri tek boşlukla join.
+       d. Köprü mantığını uygula:
+           - output: list[str] = []
+         - Her uzun cümle için, sol komşu kısa-grup varsa sonuna ekle; sağ komşu kısa-grup varsa başına ekle.
+         - Kısa-gruplar bağımsız çıktı satırı üretmez; sadece komşulara yapışır.
+         - Sınır: ilk cümle kısa-grupsa ve sağ komşusu varsa sadece sağa yapışır; tek başına makale = tek kısa-grup ise olduğu gibi tek satır olarak çıkar.
+     - process_article(article: dict, nlp) -> Iterator[dict]
+     body üzerinde split_body çağırır, şema'ya uygun dict'leri yield eder:
+     {
+       "sentence_id":    f"{article['article_id']}:{i}",
+       "article_id":     article["article_id"],
+       "sentence_index": i,
+       "text":           sent,
+       "n_chars":        len(sent),
+       "n_tokens_est":   n_tokens(sent),
+     }
+     - main() -> None
+       - read_jsonl(PROCESSED / "articles_clean.jsonl") ile makaleleri oku (src/utils.py).
+       - nlp = load_nlp()
+       - Tüm makaleler üzerinde döngü; tüm cümleleri biriktir.
+       - write_jsonl(PROCESSED / "sentences.jsonl", rows).
+       - stderr'e özet bas: makale sayısı, toplam cümle, ortalama cümle/makale, kaç kısa parça köprülendi (sayaç).
+
+     3. README güncellemesi
+
+     - "sentence_split" satırı zaten var. Altına kısa not: spaCy modeli kurma komutu + köprü mantığı tek cümlelik açıklama.
+     - Reproducibility (Rule 3): python -m spacy download en_core_web_sm komutunu Setup bölümüne ekle.
+
+     4. Logging (CLAUDE.md Rule 1)
+
+     ai_usage/step_logs.md sonuna yeni entry: Step 8 — sentence splitting — 2026-06-02. Goal/Action/Prompt/Outcome/Notes formatında.
+
+     5. Rule 5 — External model verification
+
+     spaCy en_core_web_sm harici LLM/API değil, lokal model. Yine de log entry'sine versiyon ve doğrulanmış kaynak (spacy.io official docs) eklenecek.
+
+     Files to Modify
+
+     ┌────────────────────────────────┬──────────────────────────────────────────────────────────┐
+     │              Path              │                          Change                          │
+     ├────────────────────────────────┼──────────────────────────────────────────────────────────┤
+     │ src/sentence_split.py          │ Stub'ı doldur (yukarıdaki implementation)                │
+     ├────────────────────────────────┼──────────────────────────────────────────────────────────┤
+     │ README.md                      │ spaCy model kurulum notu + sentence_split davranış özeti │
+     ├────────────────────────────────┼──────────────────────────────────────────────────────────┤
+     │ ai_usage/step_logs.md          │ Step 8 entry append                                      │
+     ├────────────────────────────────┼──────────────────────────────────────────────────────────┤
+     │ data/processed/sentences.jsonl │ Çalıştırma sonucu üretilir (commit dışı)                 │
+     └────────────────────────────────┴──────────────────────────────────────────────────────────┘
+
+     src/utils.py (read_jsonl, write_jsonl, PROCESSED) ve requirements.txt'teki spacy aynen kullanılır — yeniden yazılmaz.
+
+     Verification
+
+     1. Kurulum: python -m spacy download en_core_web_sm başarılı.
+     2. Çalıştırma: python -m src.sentence_split hatasız tamamlanır; stderr özeti makul (300 makale, ~10-25 cümle/makale beklenir).
+     3. Çıktı kontrolü:
+       - wc -l data/processed/sentences.jsonl → boş değil, ~3000-7000 arası satır.
+       - Her satır şemaya uyuyor (sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est).
+       - sentence_index her article_id içinde 0'dan başlayıp ardışık.
+     4. Köprü davranışı manuel doğrulama: en az 3 makale örnekleyip kısa parça (! ile biten ≤3 kelime) içerenleri grep'le; çıktıda bu parçanın hem önceki hem sonraki cümlede
+     göründüğünü gör.
+     5. [OUTLET] maskesi sağlam: cümle bölme [OUTLET] token'ını parçalamamalı. grep '\[OUTLET\]' data/processed/sentences.jsonl | head ile kontrol.
+     6. İzole kısa parça sınır durumu: makale başı/sonu kısa parça örneği — komşuya yapıştığını veya tek başına bir komşu yoksa tek satır olarak kaldığını doğrula.
+
+⏺ Başlayalım. Önce utils.py ve step_logs.md'i okuyorum.                         
+                                                                                  
+  Searched for 1 pattern, read 2 files (ctrl+o to expand)     
+                                                                                                                                                                                  
+⏺ İyi. Şimdi sentence_split.py'yi yazıyorum.                                    
+                                                                                                                                                                                  
+⏺ Write(src/sentence_split.py)                                                                                                                                                  
+  ⎿  Added 121 lines, removed 1 line                                                                                                                                              
+       7         filtering, deduplication) is a SEPARATE step done before LLM annotation.                                                                                         
+       8         Document that step in ai_usage/step_logs.md when it lands.                                                                                                       
+       9                                                                                                                                                                          
+      10 +Short-fragment bridging (n <= SHORT_FRAGMENT_MAX_TOKENS words):                                                                                                         
+      11 +    Fragments too short to stand alone (e.g. "hah!", "oh no!") are not emitted                                                                                          
+      12 +    as independent rows. Instead they are appended to the previous long sentence                                                                                        
+      13 +    AND prepended to the next long sentence. Consecutive short fragments are                                                                                          
+      14 +    merged into a single bridge block before attachment.                                                                                                         
+      15 +                                                                                                                                                                 
+      16 +    Example:                                                                                                                                                     
+      17 +        body: "Trump says it is nothing. hah! oh no! He should ask the workers."                                                                                 
+      18 +        output:                                                                                                                                                  
+      19 +            "Trump says it is nothing. hah! oh no!"                                                                                                              
+      20 +            "hah! oh no! He should ask the workers."                                                                                                             
+      21 +                                                                                                                                                                 
+      22  Output: data/processed/sentences.jsonl with schema:
+      23      {
+      24        "sentence_id":    str,              # f"{article_id}:{sentence_index}"
+     ...
+       31  """
+       32  from __future__ import annotations
+       33  
+       34 +import sys                                                                                                                                                      
+       35 +from typing import Iterator                                                                                                                                     
+       36  
+       37 +import spacy                                                                                                                                                    
+       38 +                                                                                                                                                                
+       39 +from .utils import PROCESSED, read_jsonl, write_jsonl                                                                                                           
+       40 +                                                                                                                                                                
+       41 +SHORT_FRAGMENT_MAX_TOKENS = 3                                                                                                                                   
+       42 +SPACY_MODEL = "en_core_web_sm"                                                                                                                                  
+       43 +                                                                                                                                                                
+       44 +                                                                                                                                                                
+       45 +def load_nlp() -> spacy.Language:                                                                                                                               
+       46 +    nlp = spacy.load(SPACY_MODEL)                                                                                                                               
+       47 +    # Keep only what's needed for sentence segmentation                                                                                                         
+       48 +    nlp.disable_pipes(*[p for p in nlp.pipe_names if p not in ("tok2vec", "senter")])                                                                           
+       49 +    return nlp                                                                                                                                                  
+       50 +                                                                                                                                                                
+       51 +                                                                                                                                                                
+       52 +def n_tokens(text: str) -> int:                                                                                                                                 
+       53 +    return len(text.split())                                                                                                                                    
+       54 +                                                                                                                                                                
+       55 +                                                                                                                                                                
+       56 +def split_body(body: str, nlp: spacy.Language) -> tuple[list[str], int]:                                                                                        
+       57 +    """Split body into sentences with short-fragment bridging.                                                                                                  
+       58 +                                                                                                                                                                
+       59 +    Returns (sentences, n_bridge_groups) where n_bridge_groups counts how many                                                                                  
+       60 +    short-fragment groups were absorbed into neighboring sentences.                                                                                             
+       61 +    """                                                                                                                                                         
+       62 +    # Treat each newline-separated paragraph independently so paragraph breaks                                                                                  
+       63 +    # always become sentence boundaries (spaCy doesn't guarantee this otherwise)                                                                                
+       64 +    paragraphs = [p.strip() for p in body.split("\n") if p.strip()]                                                                                             
+       65 +    raw_sents: list[str] = []                                                                                                                                   
+       66 +    for para in paragraphs:                                                                                                                                     
+       67 +        raw_sents.extend(s.text.strip() for s in nlp(para).sents if s.text.strip())                                                                             
+       68 +                                                                                                                                                                
+       69 +    if not raw_sents:                                                                                                                                           
+       70 +        return [], 0                                                                                                                                            
+       71 +                                                                                                                                                                
+       72 +    # Run-length group consecutive short fragments into single bridge blocks                                                                                    
+       73 +    groups: list[tuple[str, bool]] = []  # (text, is_short)                                                                                                     
+       74 +    for sent in raw_sents:                                                                                                                                      
+       75 +        is_short = n_tokens(sent) <= SHORT_FRAGMENT_MAX_TOKENS                                                                                                  
+       76 +        if groups and groups[-1][1] and is_short:                                                                                                               
+       77 +            groups[-1] = (groups[-1][0] + " " + sent, True)                                                                                                     
+       78 +        else:                                                                                                                                                   
+       79 +            groups.append((sent, is_short))                                                                                                                     
+       80 +                                                                                                                                                                
+       81 +    n_bridges = sum(1 for _, is_short in groups if is_short)                                                                                                    
+       82 +                                                                                                                                                                
+       83 +    # Edge case: article contains only short fragments → emit as one row                                                                                        
+       84 +    if all(is_short for _, is_short in groups):                                                                                                                 
+       85 +        return [" ".join(t for t, _ in groups)], 0                                                                                                              
+       86 +                                                                                                                                                                
+       87 +    # Emit one row per long group, bridging adjacent short blocks                                                                                               
+       88 +    output: list[str] = []                                                                                                                                      
+       89 +    for i, (text, is_short) in enumerate(groups):                                                                                                               
+       90 +        if is_short:                                                                                                                                            
+       91 +            continue                                                                                                                                            
+       92 +        parts: list[str] = []                                                                                                                                   
+       93 +        if i > 0 and groups[i - 1][1]:                                                                                                                          
+       94 +            parts.append(groups[i - 1][0])                                                                                                                      
+       95 +        parts.append(text)                                                                                                                                      
+       96 +        if i < len(groups) - 1 and groups[i + 1][1]:                                                                                                            
+       97 +            parts.append(groups[i + 1][0])                                                                                                                      
+       98 +        output.append(" ".join(parts))                                                                                                                          
+       99 +                                                                                                                                                                
+      100 +    return output, n_bridges                                                                                                                                    
+      101 +                                                                                                                                                                
+      102 +                                                                                                                                                                
+      103 +def process_article(article: dict, nlp: spacy.Language) -> Iterator[dict]:                                                                                      
+      104 +    sents, _ = split_body(article.get("body", ""), nlp)                                                                                                         
+      105 +    for i, text in enumerate(sents):                                                                                                                            
+      106 +        yield {                                                                                                                                                 
+      107 +            "sentence_id": f"{article['article_id']}:{i}",                                                                                                      
+      108 +            "article_id": article["article_id"],                                                                                                                
+      109 +            "sentence_index": i,                                                                                                                                
+      110 +            "text": text,                                                                                                                                       
+      111 +            "n_chars": len(text),                                                                                                                               
+      112 +            "n_tokens_est": n_tokens(text),                                                                                                                     
+      113 +        }                                                                                                                                                       
+      114 +                                                                                                                                                                
+      115 +                                                                                                                                                                
+      116  def main() -> None:
+       24 -    raise NotImplementedError("sentence_split.py: implement minimal sentence splitting")                                                                        
+      117 +    nlp = load_nlp()                                                                                                                                            
+      118 +    articles = list(read_jsonl(PROCESSED / "articles_clean.jsonl"))                                                                                             
+      119  
+      120 +    rows: list[dict] = []                                                                                                                                       
+      121 +    total_bridges = 0                                                                                                                                           
+      122 +    for article in articles:                                                                                                                                    
+      123 +        body = article.get("body", "")                                                                                                                          
+      124 +        sents, n_bridges = split_body(body, nlp)                                                                                                                
+      125 +        total_bridges += n_bridges                                                                                                                              
+      126 +        aid = article["article_id"]                                                                                                                             
+      127 +        for i, text in enumerate(sents):                                                                                                                        
+      128 +            rows.append({                                                                                                                                       
+      129 +                "sentence_id": f"{aid}:{i}",                                                                                                                    
+      130 +                "article_id": aid,                                                                                                                              
+      131 +                "sentence_index": i,                                                                                                                            
+      132 +                "text": text,                                                                                                                                   
+      133 +                "n_chars": len(text),                                                                                                                           
+      134 +                "n_tokens_est": n_tokens(text),                                                                                                                 
+      135 +            })                                                                                                                                                  
+      136  
+      137 +    write_jsonl(PROCESSED / "sentences.jsonl", rows)                                                                                                            
+      138 +                                                                                                                                                                
+      139 +    avg = len(rows) / len(articles) if articles else 0                                                                                                          
+      140 +    print(                                                                                                                                                      
+      141 +        f"articles={len(articles)}  sentences={len(rows)}  "                                                                                                    
+      142 +        f"avg={avg:.1f}/article  bridge_groups={total_bridges}",                                                                                                
+      143 +        file=sys.stderr,                                                                                                                                        
+      144 +    )                                                                                                                                                           
+      145 +                                                                                                                                                                
+      146 +                                                                                                                                                                
+      147  if __name__ == "__main__":
+      148      main()
+
+⏺ Şimdi README ve step_logs güncellemeleri:              
+                                                                                  
+⏺ Update(README.md)                                      
+  ⎿  Added 1 line                                                                                                                                                                 
+      134  ```powershell                                 
+      135  python -m venv .venv; .\.venv\Scripts\Activate.ps1                                                                                                                     
+      136  pip install -r requirements.txt                                                                                                                                      
+      137 +python -m spacy download en_core_web_sm   # required for sentence splitting                                                                                            
+      138  Copy-Item .env.example .env       # fill OPENAI_API_KEY, USER_AGENT, etc.                                                                                            
+      139  ```                                                                                                                                                                    
+      140                                                                                                                                                                       
+                                                                                                                                                                                
+  Read 1 file (ctrl+o to expand)                         
+                                                                                            
+⏺ Şimdi spaCy kurulumunu yap ve script'i çalıştır. Önce kurulum:
+                                                                                                                                                                                  
+⏺ Bash(python -m spacy download en_core_web_sm 2>&1 | tail -5)
+  ⎿  (eval):1: command not found: python                                                                                                                                          
+                                                                                                                                                                                
+⏺ Bash(python3 -m spacy download en_core_web_sm 2>&1 | tail -5)                                                                                                                   
+  ⎿  /Library/Frameworks/Python.framework/Versions/3.11/bin/python3: No module named spacy                                                                                        
+                                                                                                                                                                                  
+  Listed 2 directories (ctrl+o to expand)                                                                                                                                         
+                                                                                                                                                                                  
+⏺ Bash(pip3 show spacy 2>/dev/null | head -3; pip3.11 show spacy 2>/dev/null | head -3; pip3.13 show spacy 2>/dev/null | head -3)                                                 
+  ⎿  (No output)                                                                                                                                                                  
+                                                                                  
+⏺ Bash(pip3 list 2>/dev/null | grep -i spacy; pip3.13 list 2>/dev/null | grep -i spacy)                                                                                           
+  ⎿  No matches found                                                                                                                                                             
+                                                                                                                                                                                  
+⏺ Bash(pip3.13 install spacy 2>&1 | tail -3)                                                                                                                                      
+  ⎿  [notice] A new release of pip is available: 25.3 -> 26.1.2                                                                                                                   
+     [notice] To update, run: pip3.13 install --upgrade pip                                                                                                                       
+  ⎿  (timeout 2m)                                                                                                                                                                 
+                                                                                                                                                                                  
+⏺ Bash(pip3.13 list 2>/dev/null | grep -i spacy)                                                                                                                                  
+  ⎿  spacy                     3.8.14                                                                                                                                             
+     spacy-legacy              3.0.12                                                                                                                                             
+     spacy-loggers             1.0.5                                                                                                                                              
+                                                                                                                                                                                  
+⏺ Bash(python3.13 -m spacy download en_core_web_sm 2>&1 | tail -5)                                                                                                                
+  ⎿  [notice] A new release of pip is available: 25.3 -> 26.1.2                                                                                                                   
+     [notice] To update, run: pip3.13 install --upgrade pip
+     ✔ Download and installation successful                                                                                                                                       
+     You can now load the package via spacy.load('en_core_web_sm')                                                                                                              
+  ⎿  (timeout 1m)                                                                                                                                                                 
+                                                                                                                                                                                  
+⏺ Model kuruldu. Şimdi script'i çalıştıralım:                                                                                                                                     
+                                                                                                                                                                                  
+⏺ Bash(python3.13 -m src.sentence_split 2>&1)                                                                                                                                     
+  ⎿  Error: Exit code 1
+     Traceback (most recent call last):
+       File "<frozen runpy>", line 198, in _run_module_as_main
+       File "<frozen runpy>", line 88, in _run_code
+       File "/Users/emrecanulu/Documents/media-bias-pipeline/src/sentence_split.py", line 148, in <module>
+         main()
+         ~~~~^^
+       File "/Users/emrecanulu/Documents/media-bias-pipeline/src/sentence_split.py", line 124, in main
+         sents, n_bridges = split_body(body, nlp)
+                            ~~~~~~~~~~^^^^^^^^^^^
+     … +8 lines (ctrl+o to expand)
+
+⏺ Bash(python3.13 -c "import spacy; nlp = spacy.load('en_core_web_sm'); print(nlp.pipe_names)")
+  ⎿  ['tok2vec', 'tagger', 'parser', 'attribute_ruler', 'lemmatizer', 'ner']
+
+⏺ en_core_web_sm'de senter yok — sentence segmentation parser üzerinden geliyor. load_nlp'yi düzeltiyorum:
+
+⏺ Update(src/sentence_split.py)
+  ⎿  Added 5 lines, removed 2 lines
+      44  
+      45  def load_nlp() -> spacy.Language:
+      46      nlp = spacy.load(SPACY_MODEL)
+      47 -    # Keep only what's needed for sentence segmentation                                                                                                          
+      48 -    nlp.disable_pipes(*[p for p in nlp.pipe_names if p not in ("tok2vec", "senter")])                                                                            
+      47 +    # Keep tok2vec + whichever component sets sentence boundaries                                                                                                
+      48 +    sent_component = "senter" if "senter" in nlp.pipe_names else "parser"                                                                                        
+      49 +    disable = [p for p in nlp.pipe_names if p not in ("tok2vec", sent_component)]                                                                                
+      50 +    if disable:                                                                                                                                                  
+      51 +        nlp.disable_pipes(*disable)                                                                                                                              
+      52      return nlp
+      53  
+      54  
+
+⏺ Bash(python3.13 -m src.sentence_split 2>&1)
+  ⎿  articles=300  sentences=8887  avg=29.6/article  bridge_groups=341
+  ⎿  (timeout 5m)
+
+⏺ Çalıştı. Doğrulama kontrollerini yapalım:
+
+⏺ Bash(wc -l /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/sentences.jsonl && python3.13 -c "
+      import json…)
+  ⎿      8887 /Users/emrecanulu/Documents/media-bias-pipeline/data/processed/sentences.jsonl
+     Schema OK, index continuity OK
+     Sample first 3 rows:
+     … +3 lines (ctrl+o to expand)
+
+⏺ Bash(python3.13 -c "
+      import json…)
+  ⎿  [OUTLET] appears in 200 sentences (not split)
+     Example: "In a conversation with Leila Fadel for [OUTLET]'s Newsmakers, Platner addresses some of his controve"
+
+⏺ Bash(python3.13 -c "
+      import json…)
+  ⎿  Bridge found (overlap=3 words):
+       <- 'o prevent the recurrence of other cancers, including lung cancer. The next steps'
+       -> 'The next steps "The results are exciting," says Moderna\'s chief development offi'
+     … +27 lines (ctrl+o to expand)
+
+⏺ Her şey doğrulandı. Sonuçlar:                                                  
+                                                                                  
+  - 8,887 cümle, 300 makaleden, ortalama 29.6/makale                                                                                                                              
+  - 341 kısa-fragment grubu bridge olarak komşulara yapıştırıldı                                                                                                                  
+  - Schema ✓ — sentence_id, article_id, sentence_index, text, n_chars, n_tokens_est                                                                                               
+  - sentence_index her makalede 0'dan başlayıp ardışık ✓                                                                                                                          
+  - [OUTLET] maskeleri hiçbir cümlede kırılmadı (200 cümlede sağlam görünüyor) ✓                                                                                                  
+  - Bridge davranışı çalışıyor: "Congrats!" (1 kelime) ve "The next steps" (3 kelime) gibi kısa parçalar hem önceki hem sonraki cümleye yapışmış ✓                                
+                                                                                                                                                                                  
+  src/sentence_split.py tamamlandı, README.md kurulum notu güncellendi, ai_usage/step_logs.md'e Step 8 entry eklendi. Sıradaki adım proxy subjectivity labeling                   
+  (src/proxy_label.py).                                                                                                                                                           
+                                                                                                                                                                                  
+✻ Baked for 5m 18s                                                                                                                                                              
+                                                                                  
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── sentence-splitting-bridge ──
+❯                                                                                                                                                                                 
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ⏵⏵ bypass permissions on (shift+tab to cycle)                                                                                  Update available! Run: brew upgrade claude-code  
+                                                                                                                                                                                  
