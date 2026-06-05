@@ -401,11 +401,29 @@ Data annotation was performed by external models:
 
 ---
 
-## Findings (descriptive)
+## Results
 
-> All observations below are **descriptive**. Block-level or outlet-level differences are **not causal** claims. LLM labels are **silver / reference annotations**, not gold. Subjectivity is a **proxy signal** for one facet of opinionated framing — not a synonym for "bias".
+> All observations are **descriptive**. Block- and outlet-level differences are **not causal** claims. LLM/VLM labels are **silver / reference annotations**, not gold. Subjectivity is a **proxy signal** for one facet of opinionated framing — not a synonym for "bias".
+>
+> Figures live under `data/analysis/figures/`; full derivations and per-cell outputs are in `notebooks/eda.ipynb`.
 
-### 1) Overall proxy ↔ LLM agreement
+### Statistical methods
+
+Five techniques appear in the EDA; rationale for each choice is given here so the numbers below are interpretable without re-running the notebook.
+
+| Method | What it measures | Why used here (vs. alternative) |
+|---|---|---|
+| **Wilson 95 % CI** | Confidence interval for a proportion | Small n and mid-range rates make the Wald interval unreliable (can produce negative bounds); Wilson stays valid at n = 31. Used for NYP VLM-SUBJ. |
+| **Cohen's κ** | Chance-corrected inter-annotator agreement | Accounts for the fact that two annotators who both prefer OBJ would agree often by luck alone. With 76 % OBJ labels here κ is pulled down by class prevalence, so F1-SUBJ is the more informative companion metric. |
+| **Spearman ρ** | Rank correlation between two measurement sets | Used for article-level three-judge comparison (proxy, LLM, VLM SUBJ rates). Rank correlation is preferred over Pearson for proportion data because it does not assume a linear relationship or normal distribution. |
+| **Mann-Whitney U** | Non-parametric two-group location test | Used to compare LLM rationale lengths across two groups. Character-count distributions are right-skewed; Mann-Whitney is more robust than a t-test, which assumes normality. |
+| **Precision / Recall / F1** | Per-class classification agreement | F1-SUBJ is the headline metric because OBJ-class dominance inflates accuracy (85.3 % accuracy is trivially achievable by predicting OBJ always). Precision answers "of the proxy's SUBJ calls, how many did the LLM confirm?"; Recall answers "of the LLM's SUBJ labels, how many did the proxy catch?". |
+
+### 1. Corpus
+
+8,561 sentences across 300 articles (150 left-block / 150 right-block); 292 of 300 articles passed VLM annotation (5 skipped: 4 missing `image_url`, 1 stale 404 — Washington Times). All 8,561 LLM completions finished with `stop` — no truncation.
+
+### 2. Proxy ↔ LLM agreement (sentence level)
 
 | Metric | Value |
 |---|---|
@@ -426,9 +444,11 @@ Data annotation was performed by external models:
 | **Proxy OBJ** | 6,287 | 1,052 |
 | **Proxy SUBJ** | 210 | 1,012 |
 
-The dominant error is a single direction: the proxy labels 1,052 sentences as OBJ that the LLM silver labels as SUBJ. Proxy precision is high (82.8%) but recall is low (49.0%) — **the proxy systematically under-calls subjectivity**, missing evaluative language that appears structurally neutral at the lexical/syntactic level.
+The error is directional: **1,052 false negatives vs. 210 false positives**. Proxy precision is high (82.8%) but recall is low (49.0%) — the proxy under-calls subjectivity, missing evaluative language that is structurally neutral at the lexical/syntactic surface. The proxy almost never hallucinates SUBJ.
 
-### 2) Examples where the LLM is more sensitive (proxy = OBJ, LLM = SUBJ, conf ≥ 0.99)
+At disagreement points the LLM retains high confidence (mean 0.910 on FN cases); at false-positive points the proxy fires with mean score 0.638 — above threshold but only moderately confident. Disagreements reflect systematic model divergence, not random noise. Caveat: LLM confidence is anchored to the few-shot examples in `prompts/llm_sentence_annotation.txt` (range 0.88–0.97); proxy softmax lives on a different scale. Cross-model confidence comparisons here are descriptive, not calibrated.
+
+### 3. Where the proxy misses
 
 | Outlet / Block | Sentence | LLM rationale (summary) |
 |---|---|---|
@@ -436,9 +456,11 @@ The dominant error is a single direction: the proxy labels 1,052 sentences as OB
 | dailycaller / right | *"…the area right in front of historic Union Station became infested with the dregs of society."* | "infested with the dregs of society" — derogatory, loaded language toward a social group. |
 | foxnews / right | *"Doing so eight times in less than five years is wildly impressive."* | "wildly impressive" — author-evaluative phrase with intensifier. |
 
-All three receive proxy OBJ scores between 0.50–0.91. The proxy misses pragmatically loaded phrases ("slush fund", "dregs of society", "wildly impressive") because they are grammatically similar to neutral constructions. The LLM captures the evaluative intent.
+All three receive proxy OBJ scores 0.50–0.91. The proxy misses pragmatically loaded phrases because they are grammatically similar to neutral constructions.
 
-### 3) Block × topic analysis (LLM SUBJ %)
+**Rationale-term log-odds analysis** (`notebooks/eda.ipynb` §4.2): LLM rationales for proxy-missed SUBJ sentences over-use abstract framing terms (`characterization`, `loaded`, `exhortation`, `downgrading`, `unverified`) while agreement-SUBJ rationales over-use surface-marker terms (`rhetorical`, `question`, `figurative`, `explicit`). The proxy has learned the visible surface cues; it has not learned context-dependent, single-token subjectivity signals. This contrast identifies exactly the type of hard examples that would most improve the proxy at fine-tune time.
+
+### 4. Block × topic (LLM SUBJ %)
 
 | Block | topic_group | n | LLM SUBJ % | Proxy SUBJ % | Agreement % |
 |---|---|---:|---:|---:|---:|
@@ -462,15 +484,11 @@ Topic breakdown (LLM SUBJ %, n ≥ 30):
 | business | 2.8% (n=71) | 13.0% (n=69) | +10.2 |
 | general | 12.2% (n=435) | 23.6% (n=947) | +11.4 |
 
-Key observations:
-- **Opinion** tops both blocks (~57–62%) — expected; confirms the subjectivity signal is calibrated.
-- **Sports** is unexpectedly high (~48–50%) in both blocks. This reflects genre convention (dramatic, evaluative commentary) rather than political framing bias — a downstream classifier should be aware of this.
-- In left-block articles, **politics** carries the highest SUBJ load (24.6%); driven by HuffPost and Guardian opinion-adjacent political pieces.
-- Right-block non-political content (sports, tech, entertainment, business) carries significantly higher evaluative language than left-block equivalents (+16.8 ppt). Right-block political SUBJ is lower (15.6%) than left-block political SUBJ (24.6%).
+Opinion (~57–62%) tops both blocks — a calibration check confirming the subjectivity signal is sensible. Sports (~48–50%) is unexpectedly high in both blocks; this reflects genre convention (evaluative commentary is the norm in sports writing), not political framing. Left-block politics carries the highest SUBJ load in that block (24.6%), driven by HuffPost and Guardian opinion-adjacent political pieces. Right-block non-political content (sports, tech, entertainment, business) is markedly more evaluative than its left-block counterpart (+16.8 ppt).
 
-### 4) Outlet-level analysis
+### 5. Outlet level — text (LLM + proxy)
 
-| Outlet | Block | n sentences | LLM SUBJ % | Proxy SUBJ % | Agreement % | κ | Proxy FN (missed SUBJ) |
+| Outlet | Block | n sentences | LLM SUBJ % | Proxy SUBJ % | Agreement % | κ | Proxy FN |
 |---|---|---:|---:|---:|---:|---:|---:|
 | foxnews | right | 1,309 | **36.5** | 26.4 | 80.6 | 0.555 | 193 |
 | washingtonexaminer | right | 651 | **31.2** | 20.4 | 84.0 | 0.589 | 87 |
@@ -481,7 +499,9 @@ Key observations:
 | npr | left | 761 | 13.7 | 8.4 | 88.2 | 0.402 | 65 |
 | washingtontimes | right | 821 | **11.9** | 5.5 | **90.4** | 0.403 | 66 |
 
-Outlet-level visual framing (VLM, article-level):
+Outlet-level variance is much larger than the block-level gap (left vs. right: +2.8 ppt LLM SUBJ). Aggregating to block level conceals outlet-specific editorial styles. HuffPost has the lowest outlet κ (0.341) — its evaluative language is lexically subtle enough to consistently fool the proxy. Washington Times (lowest LLM SUBJ, highest agreement) is consistent with a wire-report, declarative style.
+
+### 6. Outlet level — image (VLM)
 
 | Outlet | n articles | VLM SUBJ % | VLM mean conf |
 |---|---:|---:|---:|
@@ -494,10 +514,72 @@ Outlet-level visual framing (VLM, article-level):
 | washingtonexaminer | 25 | 8.0 | 0.868 |
 | npr | 22 | **9.1** | 0.900 |
 
-Descriptive patterns:
-- **Highest LLM SUBJ** (text): Fox News (36.5%) and Washington Examiner (31.2%). Both show large LLM–proxy gaps (~10 ppt), suggesting these outlets use grammatically neutral but pragmatically loaded constructions that the proxy classifier misses.
-- **Washington Times** records the lowest LLM SUBJ (11.9%) and highest agreement (90.4%) — consistent with a wire-report, declarative writing style.
-- **HuffPost** has the largest proxy blind spot: only 5.8% proxy-SUBJ vs. 18.8% LLM-SUBJ (κ = 0.341, lowest of all outlets). Its evaluative language is lexically subtle enough to fool the proxy.
-- **NPR** (text) is the most measured outlet at 13.7% SUBJ; highest VLM confidence (0.900) — visually neutral images as well.
-- **Outlet-level variance is much larger than block-level variance** (left vs. right: +2.8 ppt). Aggregating to block level obscures outlet-specific editorial style differences.
-- **VLM vs. text dissociation:** Visual framing and text framing do not co-vary reliably. NY Post and HuffPost have relatively high VLM SUBJ images despite being in opposite blocks; Fox News and Washington Examiner have unexpectedly low VLM SUBJ despite high text SUBJ. Text–image cross-table (article majority): 218 articles are OBJ-text / OBJ-image; 47 are OBJ-text / SUBJ-image; 18 are SUBJ-text / OBJ-image; only 9 are SUBJ-text / SUBJ-image (total = 292). Of the 27 articles with subjective-majority text, only 9 (33%) also have a subjective image — confirming that text and visual framing signals are largely independent in this corpus.
+NYP shows the highest VLM-SUBJ rate (35.5%), but the sample is **n = 31**. The Wilson 95 % CI for this proportion is approximately **[20 %, 53 %]** — a band that overlaps HuffPost (24.6 %) and The Guardian (23.4 %). NYP's VLM-SUBJ rate is therefore **not statistically distinguishable** from those outlets at this sample size.
+
+A plausible confound: the VLM-SUBJ criteria in `prompts/vlm_image_annotation.txt` — (i) emotionally loaded expression, (iii) demeaning or diminishing framing, (iv) dramatic or manipulative editing — map closely to tabloid cover-photo conventions regardless of editorial intent. Part of NYP's high score may be a prompt-format artefact rather than an editorial signal. This is a hypothesis to be tested with a larger sample and criteria disambiguation, not a finding from this data.
+
+Fox News and Washington Examiner have unexpectedly low VLM SUBJ (11.4 % and 8.0 %) despite ranking first and second on text subjectivity. NPR has the highest VLM confidence (0.900) and one of the lowest VLM SUBJ rates, consistent with measured wire-photo image selection throughout.
+
+### 7. Text ↔ image cross-modality (article level, n = 292)
+
+Article majority labels: LLM sentence labels ≥ 50 % SUBJ → text-SUBJ; VLM label → image-SUBJ.
+
+| | Image OBJ | Image SUBJ |
+|---|---:|---:|
+| **Text OBJ** | 218 | 47 |
+| **Text SUBJ** | 18 | 9 |
+
+- Accuracy: 0.777 — Cohen κ = 0.105 — Spearman ρ = 0.134 (p = 0.022)
+
+The correlation is **statistically non-zero** (p = 0.022) but **practically negligible** (κ = 0.105, ρ = 0.134). Only 9 of 27 text-SUBJ articles also carry a SUBJ image. Text and visual framing are largely independent signals in this corpus — consistent with copy and image being curated under separate editorial pipelines, but this data does not establish a causal direction or outlet intent.
+
+### 8. Rationale length — proxy's missed SUBJ (Mann-Whitney U)
+
+**Hypothesis:** when the proxy misses a SUBJ sentence that the LLM caught, the LLM writes a longer rationale (reflecting greater explanatory effort for harder cases).
+
+| Group | n | Median chars | IQR |
+|---|---:|---:|---|
+| Agreement-SUBJ (both agree SUBJ) | 1,012 | 198 | [170, 200] |
+| Proxy-missed SUBJ (LLM=SUBJ, proxy=OBJ) | 1,052 | 193 | [169, 200] |
+
+Mann-Whitney U = 510,328 — p = 0.089
+
+p > 0.05: the hypothesis is **not supported**. Rationale length is not a usable signal for detection difficulty. (The rationale field is also schema-capped at 200 characters, which compresses the tail and reduces sensitivity.)
+
+### Summary
+
+1. **Moderate overall agreement** — κ = 0.532, F1-SUBJ = 0.616. The proxy under-calls subjectivity; it almost never over-calls it. F1-SUBJ is the more informative headline metric given 76 % OBJ prevalence.
+2. **Directional error** — 83 % of disagreements are false negatives. The proxy reliably catches rhetorical questions, figurative language, and explicit evaluative phrases, but consistently misses single-word signals: intensifiers (`staggering`, `wildly`), loaded nouns (`slush fund`, `dregs`), and framing verbs (`slammed`, `insisted`).
+3. **Outlet variance dominates block variance** — the left/right gap (+2.8 ppt) is small relative to within-block outlet differences. Aggregating to block level is the coarser, less accurate story.
+4. **Text and image are independent** — Spearman ρ = 0.134 (p = 0.022) at article level: statistically present, practically negligible. Editorial choices for copy and images appear to follow separate logics.
+5. **Small-sample caveats matter** — outlet-level VLM SUBJ rates carry wide confidence intervals at n ≤ 35. NYP's headline number (35.5 %) is within Wilson CI [20 %, 53 %] — not distinguishable from neighbouring outlets. Rationale-length as a difficulty proxy is also ruled out (p = 0.089).
+
+---
+
+## If I had more time
+
+Ideas captured during the build window that were out of scope for the 4–6h budget. Not part of the delivered pipeline.
+
+- **Topic modeling (BERTopic)** — Replace the current URL/feed keyword rule with BERTopic run over the corpus body. The keyword rule is fast but depends on publisher section names; BERTopic would produce data-driven, outlet-agnostic topic clusters and could auto-assign articles that arrive through generic news feeds (currently labelled `uncategorized` because they carry no section signal).
+
+- **Balance the non-political bucket across blocks** — The left block has far fewer non-political articles than the right (left=9 vs right=33). Adding non-political left-leaning feeds (Guardian `/sport/`, `/culture/`, HuffPost entertainment vertical) would make political-vs-non-political comparisons within each block meaningful.
+
+- **Branded columnist articles (Fox / CyberGuy)** — Fox carries branded property columns (CyberGuy, Outkick, Tucker) where editorial voice and CTAs drown out news content. A future pass would either detect these via brand-mention density and drop them, or maintain a per-outlet curated list for masking.
+
+- **NPR show names and correspondent names as outlet signals** — NPR identity leaks through branded show names ("Up First", "Morning Edition") and named correspondents. Masking these risks false positives; a proper fix requires a curated NPR-specific entity list with line-context heuristics.
+
+- **Replace NPR with a written-news outlet** — NPR RSS feeds return radio transcripts (`HOST:/BYLINE:/SOUNDBITE:` format) rather than written news, which polluted the dataset and created significant cleaning overhead. A next iteration should substitute NPR with a purely written-news source (AP News, Reuters, Politico, or The Hill).
+
+- **Drop Daily Caller** — Like NPR, Daily Caller introduced noise: an intensely partisan editorial voice and a low news-to-opinion ratio that sets it apart from the other right-leaning outlets. Next iteration: remove both NPR and Daily Caller and replace with higher-quality, more balanced sources.
+
+- **Manual sample review** — Time pressure prevented a hands-on sanity check. At minimum: pull one sample per outlet per block, read the cleaned text and LLM/VLM annotations directly. This is the fastest way to catch systematic errors (mis-masking, label drift, noisy text) before they compound.
+
+- **Iterative stop-word list expansion** — After seeing the first frequency/TF-IDF tables, add outlet-specific boilerplate and overly common news jargon to the stop-word list and re-run. This is inherently iterative; the words to suppress cannot be identified before the first run.
+
+- **Prompt cross-validation for LLM and VLM** — Compare prompt variants on a small hold-out set: zero-shot vs. few-shot, rewording of definitions, chain-of-thought addition. Goal: measure how much of the inter-annotator inconsistency on SUBJ/framing labels comes from prompt formulation vs. genuine ambiguity.
+
+- **Proxy VLM pass** — Run a smaller, cheaper vision-language model as a first pass before the main VLM. This would surface prompt errors, masking issues, and edge cases at low cost before committing to the full Batch API run.
+
+- **PABAK** — Add Prevalence-Adjusted Bias-Adjusted Kappa alongside Cohen's κ. With 76 % OBJ prevalence, standard κ is pulled downward by class imbalance; PABAK corrects for this and gives a more reliable inter-annotator agreement figure for LLM–proxy and LLM–VLM comparisons.
+
+- **Balance topic distribution across blocks** — The topic mix differs between blocks not just in the non-political bucket but also within political topics. Block-level comparisons are cleaner when both sides share a similar topic profile; this would require feed selection or post-hoc stratified sampling.

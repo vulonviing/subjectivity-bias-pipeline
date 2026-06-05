@@ -579,3 +579,41 @@ Append-only log. See [CLAUDE.md](../CLAUDE.md) for the rule.
   2. Cells [37], [73], [78] — slash x-extent `[x0 ± 0.07]` → `[x0 ± 0.035]` (half width, all break marks narrower).
 - **Prompt / model:** Claude Opus 4.7 — two inline Turkish instructions.
 - **Outcome:** All 3 cells updated; notebook saved. Re-run required to regenerate PNGs.
+
+## Step 52 — EDA Stage 4 commentary corrections — 2026-06-05
+- **Goal:** Fix figure-text inconsistency in cell 87, add missing outlet text-vs-image commentary after cell 94, update Stage 4 Takeaway (cell 100) to address prevalence-paradox, prompt anchor bias, causal language, and VLM format sensitivity.
+- **Action:** Edited `notebooks/eda.ipynb`:
+  1. Cell 87 — replaced stale "Pozitif taraf: Neredeyse yok" with accurate positive/negative term breakdown matching `stage4_rationale_terms_diff.png` (characterization, reporting, loaded, exhortation … on missed side; question, expresses, judgment … on agreement side) + LOR asimetri caveat.
+  2. Inserted new markdown cell after cell 94 — outlet-level table + NYP hipotez framing (n=31, Wilson CI [20%, 53%]) + causal-language uyarısı.
+  3. Cell 100 items 1/5/7/9 — item 1: OBJ dominance + PABAK öneri; item 5: prompt anchor bias + Platt calibration caveat; item 7: "consistent with" yerine causal-neutral; item 9: yeni — VLM prompt-format sensitivity.
+- **Prompt / model:** Claude Opus 4.7 — "evaluate user comments and correct EDA accordingly"
+- **Outcome:** 1 hücre düzeltildi, 1 hücre eklendi, 1 hücre 3 madde + 1 yeni madde güncellendi. Kod hücresi değişikliği yok; figürler statik kaldı.
+- **Notes:** Deferred: Wilson CI'lerin tüm outlet'ler için programatik hesabı; Platt/isotonic calibration; disagreement_examples.csv FN kalitatif kodlaması; VLM prompt'a tabloid-format disclaimer.
+
+## Step 53 — Full English pass on EDA notebook — 2026-06-05
+- **Goal:** Convert all Turkish content in `notebooks/eda.ipynb` to plain B2–C1 English; preserve code logic, figures, numbers, and technical vocabulary (SUBJ/OBJ, κ, LOR, Wilson CI, etc.).
+- **Action:** Translated 12 Turkish markdown cells (cells 31, 35, 38, 49, 54, 68, 70, 74, 87, 90, 95, 97) and updated 6 print/comment strings in code cells 69 and 89. Verified zero Turkish diacritics remaining. Stage takeaway cells (26, 46, 71, 101) were already English and not touched.
+- **Prompt / model:** Claude Opus 4.7 — user request "make the EDA fully English, B2–C1 level, not overly technical"
+- **Outcome:** Notebook is now monolingual English. No code logic, figure output, or technical term changed. Re-run not required.
+- **Notes:** Outlet names, file paths, regex patterns, JSON keys, and abbreviations (SUBJ/OBJ, κ, LOR, F1, etc.) preserved as-is. Causal language and silver/reference framing kept consistent with CLAUDE.md rules.
+
+## Step 56 — README: add "If I had more time" section from TODO_IF_I_HAD_TIME.md — 2026-06-05
+- **Goal:** Surface the out-of-scope ideas in `TODO_IF_I_HAD_TIME.md` as a readable README section placed after `## Results`.
+- **Action:** Appended `## If I had more time` to `README.md`. Translated Turkish-language bullet items to English (B2–C1 level, matching the rest of the README). Preserved all 12 ideas from the source file. No content from TODO_IF_I_HAD_TIME.md was added or removed; only language and formatting were adjusted for consistency.
+- **Prompt / model:** Claude Opus 4.7 — user: "TODO_IF_I_HAD_TIME.md'yi de README'ye section olarak ekle, Results'tan sonra gelsin."
+- **Outcome:** README.md updated with new section (~35 lines). `TODO_IF_I_HAD_TIME.md` unchanged.
+- **Notes:** Turkish items translated inline; source file kept as-is for reference.
+
+## Step 55 — README: restructure Findings → Results, add methods note + missing stats — 2026-06-05
+- **Goal:** Replace the `## Findings (descriptive)` section with an exam-ready `## Results` section that (a) explains every statistical method used in the EDA notebook (Wilson CI, Cohen's κ, Spearman ρ, Mann-Whitney U, Precision/Recall/F1), (b) adds the text↔image cross-modality numbers (κ = 0.105, Spearman ρ = 0.134, p = 0.022) which were notebook-only, (c) adds the rationale-length Mann-Whitney result (U = 510,328, p = 0.089 — hypothesis not supported), and (d) adds the NYP Wilson 95 % CI caveat ([20 %, 53 %]) to the outlet VLM table.
+- **Action:** Edited `README.md`. Replaced the `## Findings (descriptive)` block (~102 lines) with `## Results` (~130 lines). Preserved all existing tables (overall agreement, examples, block × topic, outlet text + VLM). Added: `### Statistical methods` table (5 methods × 3 columns), corpus paragraph (§1), `### 7. Text ↔ image cross-modality` (new), `### 8. Rationale length — Mann-Whitney U` (new), `### Summary` bullets (9 items). NYP Wilson CI caveat added inline below VLM outlet table.
+- **Prompt / model:** Claude Opus 4.7 — user: EDA + statistical context provided verbatim (Wilson CI, Mann-Whitney, κ, Spearman ρ, P/R/F1); instruction: write Results section per PDF task requirements.
+- **Outcome:** README.md updated. All five key numbers verified against `notebooks/eda.ipynb` outputs: κ 0.532 ✓, F1 0.616 ✓, FN=1052/FP=210 ✓, Mann-Whitney p=0.089 ✓, cross-modality κ=0.105/ρ=0.134 ✓, NYP n=31 Wilson CI [20%,53%] ✓.
+- **Notes:** CLAUDE.md rules maintained throughout: no "gold", no causal claims about outlet block, subjectivity ≠ bias as lead-in admonition.
+
+## Step 54 — TODO_IF_I_HAD_TIME.md güncellemesi — 2026-06-05
+- **Goal:** Kullanıcının zamanı olsaydı yapacağı 7 yeni fikri dosyaya eklemek (zaten var olanları tekrarlamamak)
+- **Action:** TODO_IF_I_HAD_TIME.md okundu; BERTopic, NPR replacement ve non-political balance maddeleri zaten mevcut olduğu tespit edildi. Yeni olarak şu 7 madde eklendi: manuel sample review, stop word listesi genişletme, LLM/VLM prompt cross-validation, Daily Caller drop, proxy VLM, PABAK ve bloklar arası topic dağılımı dengeleme.
+- **Prompt / model:** claude-sonnet-4-6 — kullanıcı sesli liste olarak 9 madde iletti; mevcut dosyayla çakışan 2 madde atlandı
+- **Outcome:** TODO_IF_I_HAD_TIME.md güncellendi, 7 yeni madde eklendi
+- **Notes:** Daily Caller drop ve NPR drop kullanıcı tarafından birlikte belirtildi; NPR zaten ayrı bir maddede mevcuttu, Daily Caller yeni maddeye eklendi
