@@ -2,6 +2,8 @@
 
 Small end-to-end pipeline that produces a **fine-tuning-ready dataset for sentence-level media bias detection** from English news articles. Built as a PhD technical-exam deliverable (~4–6h scope).
 
+> **Note on timeline:** The git history spans 4–5 days, but this reflects daily work commitments rather than actual working time. I allocated roughly one hour per day and kept strictly within the ~6-hour total scope throughout.
+
 ## Repository layout
 ```
 media-bias-pipeline/
